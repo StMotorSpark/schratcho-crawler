@@ -31,7 +31,17 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Constitution gates derived from the project constitution (schratcho-crawler):
+
+- Lint & Format: Code in the plan MUST indicate the linters/formatters used and
+  include a plan for CI enforcement. The CI pipeline MUST validate code style.
+- Unit Tests for Business Logic: The plan MUST identify the business logic
+  units and list required unit tests. Phase 0 artifacts that touch business
+  logic MUST include failing tests before implementation.
+- Dependency Justification: Any new runtime dependency required by the plan
+  MUST include justification and alternatives considered.
+- Security & Secrets: Plans that touch data handling MUST include a security
+  impact note and list of secrets/storage requirements.
 
 ## Project Structure
 

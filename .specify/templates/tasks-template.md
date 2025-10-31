@@ -159,6 +159,13 @@ Examples of foundational tasks (adjust based on your project):
 
 ---
 
+## Constitution Check (tasks guidance)
+
+Tasks that implement business logic MUST include unit test tasks. Tasks that
+introduce new runtime dependencies MUST include a justification task and a
+security/review task when secrets or data handling are affected.
+
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

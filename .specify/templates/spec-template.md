@@ -113,3 +113,13 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+## Constitution Check
+
+Constitution-derived checks (apply to this feature spec):
+
+- Unit tests for business logic MUST be enumerated and have CI validation steps.
+- Tooling and style: list linters/formatters and how CI will enforce them.
+- Dependency justification: call out new runtime deps and alternatives considered.
+- Security impact: if data handling changes, include a short security impact
+  statement and secrets/credential handling plan.
