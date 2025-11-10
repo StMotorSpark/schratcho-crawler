@@ -80,6 +80,9 @@ npm run build
 
 # Preview production build
 npm run preview
+
+# Run with local network access
+npm run build -- --host
 ```
 
 ### Linting
