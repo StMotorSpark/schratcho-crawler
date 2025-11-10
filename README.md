@@ -4,20 +4,23 @@ A web and mobile game combining scratch-off tickets with rogue-like progression 
 
 ## Current Status
 
-This project is currently in the **demo phase**. The initial scratch-off ticket demo has been implemented to test core mechanics and interactions.
+This project is currently in the **demo phase**. The scratch-off ticket demo has been enhanced with improved styling, multiple scratch areas, and sound effects.
 
 ## Demo: Scratch-Off Ticket
 
-The current demo showcases two different technical approaches for implementing the scratch-off effect:
+The current demo showcases an interactive scratch-off ticket experience using CSS Masking:
 
 ### Features
 
-- **Dual Implementation**: Compare Canvas API vs CSS Masking approaches
+- **CSS Masking Implementation**: Smooth, performant scratch-off effect using CSS masking
+- **Multiple Scratch Areas**: Three separate areas to scratch, all must be revealed to win
+- **Sound Effects**: Realistic scratching sounds and celebratory win sound
 - **Random Prizes**: 10 different prize types with unique emojis and values
 - **Interactive Scratching**: Mouse and touch support for scratching
-- **Completion Detection**: Automatically detects when enough of the ticket is revealed
+- **Completion Detection**: Automatically detects when all areas are revealed
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **New Ticket Button**: Generate new tickets without page refresh
+- **New Ticket Button**: Generate new tickets anytime without page refresh
+- **Enhanced Styling**: Game-themed design with vibrant colors and animations
 
 ### Available Prizes
 
@@ -38,8 +41,8 @@ The current demo showcases two different technical approaches for implementing t
 - **React** - UI framework
 - **TypeScript** - Type safety
 - **Vite** - Build tool and dev server
-- **Canvas API** - Hardware-accelerated rendering
 - **CSS Masking** - CSS-based reveal effects
+- **Web Audio API** - Sound effects generation
 
 ### Future: Mobile Version
 - React Native
@@ -92,10 +95,10 @@ npm run lint
 schratcho-crawler/
 ├── src/
 │   ├── components/
-│   │   ├── ScratchTicketCanvas.tsx   # Canvas API implementation
-│   │   └── ScratchTicketCSS.tsx      # CSS Masking implementation
+│   │   └── ScratchTicketCSS.tsx      # CSS Masking scratch-off implementation
 │   ├── utils/
-│   │   └── prizes.ts                 # Prize definitions and randomization
+│   │   ├── prizes.ts                 # Prize definitions and randomization
+│   │   └── sounds.ts                 # Sound effects using Web Audio API
 │   ├── App.tsx                       # Main application component
 │   ├── App.css                       # Application styles
 │   ├── main.tsx                      # Application entry point
@@ -109,32 +112,32 @@ schratcho-crawler/
 
 ## Implementation Details
 
-### Canvas API Approach
-
-The Canvas implementation uses the HTML5 Canvas API to create an interactive scratch-off effect:
-
-- Draws a textured silver surface with "SCRATCH HERE" text
-- Uses `destination-out` composite operation to erase scratched areas
-- Monitors pixel transparency to calculate reveal percentage
-- Optimized with device pixel ratio for high-DPI displays
-
 ### CSS Masking Approach
 
-The CSS Masking implementation uses native CSS masking features:
+The CSS Masking implementation uses native CSS masking features with multiple scratch areas:
 
-- Creates a dynamic mask using a hidden canvas
-- Updates `mask-image` data URL on each scratch action
-- Uses diagonal stripe pattern for visual appeal
-- Leverages hardware-accelerated CSS rendering
+- **Three Independent Areas**: Each area has its own scratch mask that must be revealed
+- **Dynamic Masking**: Creates separate canvas masks for each area, updated on each scratch action
+- **Visual Design**: Game-themed styling with vibrant gradients and borders
+- **Hardware Acceleration**: Leverages GPU-accelerated CSS rendering for smooth performance
+
+### Sound Effects
+
+The Web Audio API generates realistic sound effects:
+
+- **Scratch Sound**: Short burst of noise that plays during scratching (throttled to avoid overwhelming)
+- **Win Sound**: Celebratory chord progression (C-E-G major chord) that plays when all areas are revealed
+- **Graceful Degradation**: Sounds fail silently if Web Audio API is not available
 
 ### Performance
 
-Both implementations are optimized for smooth performance:
+The implementation is optimized for smooth performance:
 
 - Target: 60fps during interaction
 - Pixel checking: Every 10th pixel for reveal calculation
 - Touch events: `preventDefault()` to avoid scroll interference
-- Device pixel ratio: Adjusted for crisp rendering on high-DPI screens
+- Sound throttling: Scratch sounds limited to every 50ms
+- Efficient state management: React state updates batched for performance
 
 ## Future Development
 
