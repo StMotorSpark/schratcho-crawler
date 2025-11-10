@@ -28,41 +28,7 @@
   margin-bottom: 30px;
 }
 
-.controls {
-  margin-bottom: 30px;
-}
 
-.implementation-selector {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.impl-button {
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: 2px solid #667eea;
-  background: white;
-  color: #667eea;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.impl-button:hover {
-  background: #667eea;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.impl-button.active {
-  background: #667eea;
-  color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
 
 .ticket-wrapper {
   margin: 30px 0;
@@ -70,55 +36,64 @@
   justify-content: center;
 }
 
-/* Canvas Implementation Styles */
-.scratch-ticket-canvas {
-  position: relative;
-  width: 400px;
-  height: 300px;
-  max-width: 100%;
-}
-
-.ticket-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.scratch-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  border-radius: 15px;
-  touch-action: none;
-}
-
 /* CSS Implementation Styles */
 .scratch-ticket-css {
   position: relative;
   width: 400px;
-  height: 300px;
   max-width: 100%;
 }
 
 .ticket-container {
   position: relative;
   width: 100%;
-  height: 100%;
   cursor: pointer;
   touch-action: none;
-  border-radius: 15px;
+  border-radius: 20px;
   overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.ticket-content {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border: 4px solid #e94560;
+  border-radius: 20px;
+}
+
+.ticket-header {
+  background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
+  padding: 15px;
+  text-align: center;
+  border-bottom: 3px solid #ffd700;
+}
+
+.ticket-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
+}
+
+.scratch-areas {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #e94560;
+}
+
+.scratch-area {
+  position: relative;
+  height: 100px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.area-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .scratch-overlay {
@@ -127,9 +102,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: #c0c0c0;
+  background: linear-gradient(135deg, #c0c0c0 0%, #e0e0e0 50%, #c0c0c0 100%);
   z-index: 1;
-  border-radius: 15px;
 }
 
 .overlay-pattern {
@@ -138,9 +112,9 @@
   background-image: repeating-linear-gradient(
     45deg,
     transparent,
-    transparent 10px,
-    rgba(160, 160, 160, 0.3) 10px,
-    rgba(160, 160, 160, 0.3) 20px
+    transparent 8px,
+    rgba(160, 160, 160, 0.4) 8px,
+    rgba(160, 160, 160, 0.4) 16px
   );
   display: flex;
   align-items: center;
@@ -148,36 +122,39 @@
 }
 
 .overlay-text {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
   color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 3px;
 }
 
 /* Prize Display */
 .prize-display {
   text-align: center;
   color: white;
-  padding: 20px;
+  padding: 10px;
 }
 
 .prize-emoji {
-  font-size: 4rem;
-  margin-bottom: 15px;
+  font-size: 2.5rem;
+  margin-bottom: 5px;
   animation: bounce 0.6s ease-in-out;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
 }
 
 .prize-name {
-  font-size: 1.8rem;
+  font-size: 1.2rem;
   font-weight: bold;
-  margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 5px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .prize-value {
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  color: #ffd700;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* Reveal Message */
@@ -204,46 +181,49 @@
 /* New Ticket Button */
 .new-ticket-button {
   display: block;
-  margin: 20px auto;
-  padding: 15px 40px;
-  font-size: 1.2rem;
+  margin: 30px auto;
+  padding: 18px 50px;
+  font-size: 1.3rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
   color: white;
   border: none;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+  box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
 }
 
 .new-ticket-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(233, 69, 96, 0.5);
+  background: linear-gradient(135deg, #ff6b9d 0%, #e94560 100%);
 }
 
 .new-ticket-button:active {
   transform: translateY(0);
 }
 
-/* Info Section */
-.info {
-  margin-top: 30px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 10px;
+/* Completion Badge */
+.completion-badge {
+  margin-top: 20px;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border-radius: 15px;
   text-align: center;
+  animation: slideIn 0.5s ease-out;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
 }
 
-.info p {
-  margin: 10px 0;
-  color: #666;
+.completion-badge p {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
 }
 
-.hint {
-  font-style: italic;
-  font-size: 0.95rem;
-}
+
 
 /* Animations */
 @keyframes bounce {
@@ -280,27 +260,32 @@
     font-size: 1rem;
   }
 
-  .scratch-ticket-canvas,
   .scratch-ticket-css {
     width: 100%;
-    height: 250px;
+  }
+
+  .scratch-area {
+    height: 90px;
+  }
+
+  .ticket-title {
+    font-size: 1.3rem;
   }
 
   .prize-emoji {
-    font-size: 3rem;
+    font-size: 2rem;
   }
 
   .prize-name {
-    font-size: 1.4rem;
+    font-size: 1rem;
   }
 
   .prize-value {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
   }
 
-  .impl-button {
-    font-size: 0.9rem;
-    padding: 10px 20px;
+  .overlay-text {
+    font-size: 16px;
   }
 }
 
@@ -321,25 +306,38 @@
     font-size: 0.9rem;
   }
 
-  .scratch-ticket-canvas,
-  .scratch-ticket-css {
-    height: 200px;
+  .scratch-area {
+    height: 80px;
+  }
+
+  .ticket-title {
+    font-size: 1.1rem;
+    padding: 12px;
   }
 
   .prize-emoji {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
   }
 
   .prize-name {
-    font-size: 1.2rem;
+    font-size: 0.9rem;
   }
 
   .prize-value {
-    font-size: 1rem;
+    font-size: 0.85rem;
   }
 
   .new-ticket-button {
-    padding: 12px 30px;
-    font-size: 1rem;
+    padding: 15px 35px;
+    font-size: 1.1rem;
+  }
+
+  .completion-badge p {
+    font-size: 1.1rem;
+  }
+
+  .overlay-text {
+    font-size: 14px;
+    letter-spacing: 2px;
   }
 }
