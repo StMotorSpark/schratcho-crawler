@@ -175,6 +175,9 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Initialize audio context on first user interaction (iOS requirement)
+    soundManager.initialize();
+    
     setIsScratching(true);
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
@@ -204,13 +207,17 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
 
   const handleTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
+    
+    // Initialize audio context on first user interaction (iOS requirement)
+    soundManager.initialize();
+    
     setIsScratching(true);
     const touch = e.touches[0];
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
       setCursorPosition({ x: touch.clientX - rect.left, y: touch.clientY - rect.top });
     }
-    // Trigger haptic feedback on mobile
+    // Trigger haptic feedback on mobile (Note: Not supported on iOS)
     if (navigator.vibrate) {
       navigator.vibrate(10);
     }

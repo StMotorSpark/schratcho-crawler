@@ -1,6 +1,28 @@
 // Sound effects using Web Audio API
 class SoundManager {
   private audioContext: AudioContext | null = null;
+  private isInitialized = false;
+
+  /**
+   * Initialize the audio context. Must be called from a user gesture on iOS.
+   * This method is idempotent and safe to call multiple times.
+   */
+  async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+
+    try {
+      const ctx = this.getAudioContext();
+      
+      // iOS requires explicit resume() call after user interaction
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+      
+      this.isInitialized = true;
+    } catch (error) {
+      console.warn('Could not initialize audio context:', error);
+    }
+  }
 
   private getAudioContext(): AudioContext {
     if (!this.audioContext) {
@@ -9,10 +31,31 @@ class SoundManager {
     return this.audioContext;
   }
 
+  /**
+   * Check if audio is available and ready
+   */
+  isAudioAvailable(): boolean {
+    try {
+      const ctx = this.getAudioContext();
+      return ctx.state === 'running';
+    } catch {
+      return false;
+    }
+  }
+
   // Play scratch sound effect with variations
   playScratch() {
     try {
       const ctx = this.getAudioContext();
+      
+      // Ensure audio context is running (iOS requirement)
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {
+          // Silently fail if resume doesn't work
+        });
+        return;
+      }
+      
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
 
@@ -45,6 +88,14 @@ class SoundManager {
   playWin() {
     try {
       const ctx = this.getAudioContext();
+      
+      // Ensure audio context is running (iOS requirement)
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {
+          // Silently fail if resume doesn't work
+        });
+        return;
+      }
       
       // Create a celebratory chord progression
       const notes = [523.25, 659.25, 783.99]; // C, E, G (major chord)
