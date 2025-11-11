@@ -9,7 +9,7 @@ class SoundManager {
     return this.audioContext;
   }
 
-  // Play scratch sound effect
+  // Play scratch sound effect with variations
   playScratch() {
     try {
       const ctx = this.getAudioContext();
@@ -19,13 +19,18 @@ class SoundManager {
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
 
-      // Create a scratching noise using white noise
+      // Create a scratching noise with slight random variations
       oscillator.type = 'square';
-      oscillator.frequency.setValueAtTime(100, ctx.currentTime);
+      // Vary the frequency slightly (80-120 Hz) for variation
+      const frequency = 80 + Math.random() * 40;
+      oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+      
+      // Vary the volume slightly for variation (0.015-0.025)
+      const volume = 0.015 + Math.random() * 0.01;
       
       // Quick fade in and out
       gainNode.gain.setValueAtTime(0, ctx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.02, ctx.currentTime + 0.01);
+      gainNode.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.01);
       gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.05);
 
       oscillator.start(ctx.currentTime);

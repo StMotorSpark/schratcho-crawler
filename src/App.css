@@ -43,6 +43,26 @@
   max-width: 100%;
 }
 
+/* Scratch Token (Cursor) */
+.scratch-token {
+  position: absolute;
+  font-size: 2rem;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+  animation: rotate 0.5s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
 .ticket-container {
   position: relative;
   width: 100%;
@@ -157,6 +177,70 @@
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
+/* Win Animation */
+.win-animation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 999;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, #ffd700, #ff6b9d, #667eea, #38ef7d);
+  animation: confetti-fall 2s ease-out forwards;
+  opacity: 1;
+}
+
+.confetti:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+  background: #ffd700;
+}
+
+.confetti:nth-child(2) {
+  left: 30%;
+  animation-delay: 0.1s;
+  background: #ff6b9d;
+}
+
+.confetti:nth-child(3) {
+  left: 50%;
+  animation-delay: 0.2s;
+  background: #667eea;
+}
+
+.confetti:nth-child(4) {
+  left: 70%;
+  animation-delay: 0.15s;
+  background: #38ef7d;
+}
+
+.confetti:nth-child(5) {
+  left: 90%;
+  animation-delay: 0.05s;
+  background: #e94560;
+}
+
+@keyframes confetti-fall {
+  0% {
+    top: -10%;
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    top: 110%;
+    transform: rotate(720deg);
+    opacity: 0;
+  }
+}
+
 /* Reveal Message */
 .reveal-message {
   margin-top: 20px;
@@ -165,7 +249,7 @@
   border-radius: 10px;
   text-align: center;
   color: white;
-  animation: slideIn 0.5s ease-out;
+  animation: slideIn 0.5s ease-out, pulse 1s ease-in-out 0.5s;
 }
 
 .reveal-message p {
@@ -176,6 +260,15 @@
 
 .reveal-message p:first-child {
   font-size: 1.5rem;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 /* New Ticket Button */
