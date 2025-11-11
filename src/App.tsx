@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ScratchTicketCSS from './components/ScratchTicketCSS';
+import Settings from './components/Settings';
 import { getRandomPrize, type Prize } from './utils/prizes';
 import './App.css';
 
@@ -7,6 +8,7 @@ function App() {
   const [prize, setPrize] = useState<Prize>(getRandomPrize());
   const [isCompleted, setIsCompleted] = useState(false);
   const [key, setKey] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
 
   const handleNewTicket = () => {
     setPrize(getRandomPrize());
@@ -21,7 +23,16 @@ function App() {
   return (
     <div className="app">
       <div className="container">
-        <h1 className="title">🎮 Schratcho Crawler</h1>
+        <div className="header-section">
+          <h1 className="title">🎮 Schratcho Crawler</h1>
+          <button 
+            className="settings-button" 
+            onClick={() => setShowSettings(true)}
+            aria-label="Open settings"
+          >
+            ⚙️
+          </button>
+        </div>
         <p className="subtitle">Scratch to reveal your prize!</p>
 
         <div className="ticket-wrapper">
@@ -38,6 +49,8 @@ function App() {
           </div>
         )}
       </div>
+
+      {showSettings && <Settings onClose={() => setShowSettings(false)} />}
     </div>
   );
 }
