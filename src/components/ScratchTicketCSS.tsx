@@ -16,10 +16,14 @@ interface ScratchArea {
 
 export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSSProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scratchAreasRef = useRef<HTMLDivElement>(null);
   const [isScratching, setIsScratching] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
   const revealedRef = useRef(false);
   const lastScratchTime = useRef(0);
+  const animationFrameRef = useRef<number | null>(null);
+  const pendingUpdateRef = useRef<boolean>(false);
   
   // Create three scratch areas
   const [scratchAreas, setScratchAreas] = useState<ScratchArea[]>([
@@ -53,6 +57,13 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
 
     setScratchAreas(newAreas);
     revealedRef.current = false;
+
+    // Cleanup animation frame on unmount
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, [prize]);
 
   const checkRevealPercentage = (areaId: number, canvas: HTMLCanvasElement) => {
@@ -65,9 +76,9 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
     const pixels = imageData.data;
     let transparentPixels = 0;
 
-    // Check every 10th pixel for performance
-    for (let i = 0; i < pixels.length; i += 40) {
-      // Check red channel (they're all the same in grayscale)
+    // Check every 10th pixel for performance (checking alpha channel)
+    for (let i = 3; i < pixels.length; i += 40) {
+      // Check alpha channel - pixels are RGBA, so alpha is every 4th value
       if (pixels[i] < 128) {
         transparentPixels++;
       }
@@ -76,8 +87,8 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
     const totalChecked = pixels.length / 40;
     const percentage = (transparentPixels / totalChecked) * 100;
 
-    // Mark area as revealed if more than 60% scratched
-    if (percentage > 60) {
+    // Mark area as revealed if more than 50% scratched (lowered threshold)
+    if (percentage > 50) {
       setScratchAreas((prev) =>
         prev.map((area) =>
           area.id === areaId ? { ...area, isRevealed: true } : area
@@ -87,7 +98,7 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
 
     // Check if all areas are revealed
     const allRevealed = scratchAreas.every((area) => {
-      if (area.id === areaId && percentage > 60) return true;
+      if (area.id === areaId && percentage > 50) return true;
       return area.isRevealed;
     });
 
@@ -100,10 +111,10 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
   };
 
   const scratch = (x: number, y: number) => {
-    const container = containerRef.current;
-    if (!container) return;
+    const scratchAreasElement = scratchAreasRef.current;
+    if (!scratchAreasElement) return;
 
-    const rect = container.getBoundingClientRect();
+    const rect = scratchAreasElement.getBoundingClientRect();
     const relativeY = y - rect.top;
     const relativeX = x - rect.left;
 
@@ -135,13 +146,23 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
     );
     ctx.fill();
 
-    // Update mask image for this area
-    const newMaskImage = area.maskCanvas.toDataURL();
-    setScratchAreas((prev) =>
-      prev.map((a) =>
-        a.id === area.id ? { ...a, maskImage: newMaskImage } : a
-      )
-    );
+    // Update mask image for this area using requestAnimationFrame to prevent flickering
+    if (!pendingUpdateRef.current) {
+      pendingUpdateRef.current = true;
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      animationFrameRef.current = requestAnimationFrame(() => {
+        const newMaskImage = area.maskCanvas!.toDataURL();
+        setScratchAreas((prev) =>
+          prev.map((a) =>
+            a.id === area.id ? { ...a, maskImage: newMaskImage } : a
+          )
+        );
+        pendingUpdateRef.current = false;
+        animationFrameRef.current = null;
+      });
+    }
 
     // Play scratch sound (throttled to avoid too many sounds)
     const now = Date.now();
@@ -155,10 +176,18 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsScratching(true);
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setCursorPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
     scratch(e.clientX, e.clientY);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setCursorPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
     if (isScratching) {
       scratch(e.clientX, e.clientY);
     }
@@ -168,10 +197,23 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
     setIsScratching(false);
   };
 
+  const handleMouseLeave = () => {
+    setIsScratching(false);
+    setCursorPosition(null);
+  };
+
   const handleTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
     setIsScratching(true);
     const touch = e.touches[0];
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setCursorPosition({ x: touch.clientX - rect.left, y: touch.clientY - rect.top });
+    }
+    // Trigger haptic feedback on mobile
+    if (navigator.vibrate) {
+      navigator.vibrate(10);
+    }
     scratch(touch.clientX, touch.clientY);
   };
 
@@ -179,6 +221,15 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
     e.preventDefault();
     if (isScratching) {
       const touch = e.touches[0];
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) {
+        setCursorPosition({ x: touch.clientX - rect.left, y: touch.clientY - rect.top });
+      }
+      // Trigger haptic feedback on mobile (throttled)
+      const now = Date.now();
+      if (now - lastScratchTime.current > 100 && navigator.vibrate) {
+        navigator.vibrate(5);
+      }
       scratch(touch.clientX, touch.clientY);
     }
   };
@@ -186,6 +237,7 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
   const handleTouchEnd = (e: React.TouchEvent) => {
     e.preventDefault();
     setIsScratching(false);
+    setCursorPosition(null);
   };
 
   return (
@@ -196,7 +248,7 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -205,7 +257,7 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
           <div className="ticket-header">
             <h2 className="ticket-title">🎟️ SCRATCH TICKET</h2>
           </div>
-          <div className="scratch-areas">
+          <div ref={scratchAreasRef} className="scratch-areas">
             {scratchAreas.map((area, index) => (
               <div key={area.id} className="scratch-area">
                 <div className="area-content">
@@ -233,11 +285,31 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
           </div>
         </div>
       </div>
-      {isRevealed && (
-        <div className="reveal-message">
-          <p>🎉 Congratulations! 🎉</p>
-          <p>You won: {prize.name}</p>
+      {cursorPosition && isScratching && (
+        <div
+          className="scratch-token"
+          style={{
+            left: `${cursorPosition.x}px`,
+            top: `${cursorPosition.y}px`,
+          }}
+        >
+          🪙
         </div>
+      )}
+      {isRevealed && (
+        <>
+          <div className="win-animation">
+            <div className="confetti"></div>
+            <div className="confetti"></div>
+            <div className="confetti"></div>
+            <div className="confetti"></div>
+            <div className="confetti"></div>
+          </div>
+          <div className="reveal-message">
+            <p>🎉 Congratulations! 🎉</p>
+            <p>You won: {prize.name}</p>
+          </div>
+        </>
       )}
     </div>
   );
