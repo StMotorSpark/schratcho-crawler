@@ -94,6 +94,32 @@ npm run build -- --host
 npm run lint
 ```
 
+### Deployment
+
+#### Manual Deployment to GitHub Pages
+
+The project includes a manual deployment workflow that allows you to deploy any branch or commit to GitHub Pages for testing and preview purposes.
+
+**To deploy:**
+
+1. Go to the [Actions tab](https://github.com/StMotorSpark/schratcho-crawler/actions) in the GitHub repository
+2. Select the "Manual Deploy to GitHub Pages" workflow from the left sidebar
+3. Click the "Run workflow" button
+4. Enter the branch name or commit SHA you want to deploy (default is `main`)
+5. Click "Run workflow" to start the deployment
+
+**After deployment:**
+
+- The workflow will build the project and deploy it to GitHub Pages
+- The deployed site will be available at: `https://stmotorspark.github.io/schratcho-crawler/`
+- Each deployment replaces the previous one (GitHub Pages only maintains one active deployment)
+- The deployment URL will be shown in the workflow run output
+
+**Requirements:**
+
+- GitHub Pages must be enabled for the repository (configured to deploy from GitHub Actions)
+- The workflow requires `contents: read`, `pages: write`, and `id-token: write` permissions
+
 ## Project Structure
 
 ```
