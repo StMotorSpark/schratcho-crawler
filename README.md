@@ -14,13 +14,15 @@ The current demo showcases an interactive scratch-off ticket experience using CS
 
 - **CSS Masking Implementation**: Smooth, performant scratch-off effect using CSS masking
 - **Multiple Scratch Areas**: Three separate areas to scratch, all must be revealed to win
-- **Sound Effects**: Realistic scratching sounds and celebratory win sound
+- **Sound Effects**: Realistic scratching sounds and celebratory win sound with iOS support
 - **Random Prizes**: 10 different prize types with unique emojis and values
 - **Interactive Scratching**: Mouse and touch support for scratching
 - **Completion Detection**: Automatically detects when all areas are revealed
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 - **New Ticket Button**: Generate new tickets anytime without page refresh
 - **Enhanced Styling**: Game-themed design with vibrant colors and animations
+- **Settings Menu**: View browser capabilities and game information
+- **Capability Detection**: Automatic detection of haptic and audio support
 
 ### Available Prizes
 
@@ -98,14 +100,18 @@ npm run lint
 schratcho-crawler/
 ├── src/
 │   ├── components/
-│   │   └── ScratchTicketCSS.tsx      # CSS Masking scratch-off implementation
+│   │   ├── ScratchTicketCSS.tsx      # CSS Masking scratch-off implementation
+│   │   ├── Settings.tsx              # Settings modal component
+│   │   └── Settings.css              # Settings modal styles
 │   ├── utils/
 │   │   ├── prizes.ts                 # Prize definitions and randomization
-│   │   └── sounds.ts                 # Sound effects using Web Audio API
+│   │   ├── sounds.ts                 # Sound effects using Web Audio API
+│   │   └── capabilities.ts           # Browser capability detection
 │   ├── App.tsx                       # Main application component
 │   ├── App.css                       # Application styles
 │   ├── main.tsx                      # Application entry point
 │   └── index.css                     # Global styles
+├── kickstart-prompts/                # Project planning and issue documentation
 ├── index.html                        # HTML entry point
 ├── package.json                      # Project configuration
 ├── tsconfig.json                     # TypeScript configuration
@@ -130,7 +136,17 @@ The Web Audio API generates realistic sound effects:
 
 - **Scratch Sound**: Short burst of noise that plays during scratching (throttled to avoid overwhelming)
 - **Win Sound**: Celebratory chord progression (C-E-G major chord) that plays when all areas are revealed
+- **iOS Compatibility**: AudioContext automatically resumes on user interaction (required for iOS)
 - **Graceful Degradation**: Sounds fail silently if Web Audio API is not available
+
+### Settings Menu
+
+The settings menu provides browser capability information:
+
+- **Haptic Feedback Detection**: Shows if Vibration API is supported (note: not available on iOS)
+- **Sound Effects Detection**: Shows if Web Audio API is available
+- **User Guidance**: Provides helpful notes about iOS limitations and requirements
+- **Responsive Modal**: Game-themed design that works on all screen sizes
 
 ### Performance
 
