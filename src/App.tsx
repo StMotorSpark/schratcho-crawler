@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ScratchTicketCSS from './components/ScratchTicketCSS';
 import Settings from './components/Settings';
 import { getRandomPrize, type Prize } from './utils/prizes';
+import { getTicketLayout } from './utils/ticketLayouts';
 import './App.css';
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [key, setKey] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
+  const [currentLayout] = useState(() => getTicketLayout('classic'));
 
   const handleNewTicket = () => {
     setPrize(getRandomPrize());
@@ -36,7 +38,7 @@ function App() {
         <p className="subtitle">Scratch to reveal your prize!</p>
 
         <div className="ticket-wrapper">
-          <ScratchTicketCSS key={key} prize={prize} onComplete={handleComplete} />
+          <ScratchTicketCSS key={key} prize={prize} onComplete={handleComplete} layout={currentLayout} />
         </div>
 
         <button className="new-ticket-button" onClick={handleNewTicket}>
