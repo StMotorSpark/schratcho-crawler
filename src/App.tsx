@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ScratchTicketCSS from './components/ScratchTicketCSS';
 import Settings from './components/Settings';
 import { getRandomPrize, type Prize } from './utils/prizes';
-import { getTicketLayout } from './utils/ticketLayouts';
+import { getTicketLayout, TICKET_LAYOUTS } from './utils/ticketLayouts';
 import './App.css';
 
 function App() {
@@ -10,7 +10,8 @@ function App() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [key, setKey] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
-  const [currentLayout] = useState(() => getTicketLayout('classic'));
+  const [layoutId, setLayoutId] = useState('classic');
+  const currentLayout = getTicketLayout(layoutId);
 
   const handleNewTicket = () => {
     setPrize(getRandomPrize());
@@ -36,6 +37,26 @@ function App() {
           </button>
         </div>
         <p className="subtitle">Scratch to reveal your prize!</p>
+
+        <div className="layout-selector">
+          <label htmlFor="layout-select">Ticket Layout: </label>
+          <select 
+            id="layout-select"
+            value={layoutId} 
+            onChange={(e) => {
+              setLayoutId(e.target.value);
+              setKey((prev) => prev + 1);
+              setIsCompleted(false);
+              setPrize(getRandomPrize());
+            }}
+          >
+            {Object.keys(TICKET_LAYOUTS).map((id) => (
+              <option key={id} value={id}>
+                {TICKET_LAYOUTS[id].name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="ticket-wrapper">
           <ScratchTicketCSS key={key} prize={prize} onComplete={handleComplete} layout={currentLayout} />

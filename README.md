@@ -12,17 +12,28 @@ The current demo showcases an interactive scratch-off ticket experience using CS
 
 ### Features
 
+- **Dynamic Ticket Layouts**: Flexible system for defining custom ticket layouts via configuration
+- **Multiple Layout Types**: Choose from Classic (3 horizontal), Grid (3x3), or Single Area layouts
 - **CSS Masking Implementation**: Smooth, performant scratch-off effect using CSS masking
-- **Multiple Scratch Areas**: Three separate areas to scratch, all must be revealed to win
+- **Configurable Scratch Areas**: Position, size, and reveal thresholds are fully configurable
+- **Prize Reveal Mechanics**: Support for different reveal strategies (reveal-all, match-three, progressive)
+- **Win Conditions**: Configurable win conditions based on ticket type
 - **Sound Effects**: Realistic scratching sounds and celebratory win sound with iOS support
 - **Random Prizes**: 10 different prize types with unique emojis and values
 - **Interactive Scratching**: Mouse and touch support for scratching
-- **Completion Detection**: Automatically detects when all areas are revealed
+- **Completion Detection**: Automatically detects when win conditions are met
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Layout Selector**: Switch between different ticket layouts in real-time
 - **New Ticket Button**: Generate new tickets anytime without page refresh
 - **Enhanced Styling**: Game-themed design with vibrant colors and animations
 - **Settings Menu**: View browser capabilities and game information
 - **Capability Detection**: Automatic detection of haptic and audio support
+
+### Available Ticket Layouts
+
+- **Classic Ticket**: Three horizontal scratch areas - reveal all to win (original demo layout)
+- **Grid Ticket**: 3x3 grid of areas for match-style games
+- **Single Area Ticket**: One large scratch area covering the entire ticket
 
 ### Available Prizes
 
@@ -130,6 +141,7 @@ schratcho-crawler/
 │   │   ├── Settings.tsx              # Settings modal component
 │   │   └── Settings.css              # Settings modal styles
 │   ├── utils/
+│   │   ├── ticketLayouts.ts          # Ticket layout configuration system
 │   │   ├── prizes.ts                 # Prize definitions and randomization
 │   │   ├── sounds.ts                 # Sound effects using Web Audio API
 │   │   └── capabilities.ts           # Browser capability detection
@@ -138,6 +150,7 @@ schratcho-crawler/
 │   ├── main.tsx                      # Application entry point
 │   └── index.css                     # Global styles
 ├── kickstart-prompts/                # Project planning and issue documentation
+├── TICKET_LAYOUTS.md                 # Guide for creating custom ticket layouts
 ├── index.html                        # HTML entry point
 ├── package.json                      # Project configuration
 ├── tsconfig.json                     # TypeScript configuration
@@ -147,11 +160,24 @@ schratcho-crawler/
 
 ## Implementation Details
 
+### Dynamic Ticket Layout System
+
+The ticket layout system provides a flexible architecture for defining different ticket types:
+
+- **Configuration-Based**: Ticket layouts defined via TypeScript objects with full type safety
+- **Dynamic Positioning**: Scratch areas positioned using percentage-based coordinates
+- **Multiple Reveal Mechanics**: Support for reveal-all, match-three, progressive, and more
+- **Flexible Win Conditions**: Configurable conditions for what constitutes a winning ticket
+- **Extensible Design**: Easy to add new layouts, mechanics, and win conditions
+
+See [TICKET_LAYOUTS.md](./TICKET_LAYOUTS.md) for a complete guide on creating custom ticket layouts.
+
 ### CSS Masking Approach
 
-The CSS Masking implementation uses native CSS masking features with multiple scratch areas:
+The CSS Masking implementation uses native CSS masking features with configurable scratch areas:
 
-- **Three Independent Areas**: Each area has its own scratch mask that must be revealed
+- **Dynamic Area Count**: Support for any number of scratch areas (1-9+ tested)
+- **Absolute Positioning**: Areas positioned dynamically based on layout configuration
 - **Dynamic Masking**: Creates separate canvas masks for each area, updated on each scratch action
 - **Visual Design**: Game-themed styling with vibrant gradients and borders
 - **Hardware Acceleration**: Leverages GPU-accelerated CSS rendering for smooth performance
