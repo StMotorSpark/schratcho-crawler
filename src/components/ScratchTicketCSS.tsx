@@ -1,20 +1,32 @@
 import { useRef, useState, useEffect } from 'react';
 import type { Prize } from '../utils/prizes';
 import { soundManager } from '../utils/sounds';
+import type { TicketLayout } from '../utils/ticketLayouts';
+import { evaluateWinCondition, getPrizeDisplayForArea } from '../utils/ticketLayouts';
 
 interface ScratchTicketCSSProps {
   prize: Prize;
   onComplete: () => void;
+  layout: TicketLayout;
 }
 
 interface ScratchArea {
-  id: number;
+  id: string;
   maskCanvas: HTMLCanvasElement | null;
   maskImage: string;
   isRevealed: boolean;
+  config: {
+    topPercent: number;
+    leftPercent: number;
+    widthPercent: number;
+    heightPercent: number;
+    canvasWidth: number;
+    canvasHeight: number;
+    revealThreshold: number;
+  };
 }
 
-export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSSProps) {
+export default function ScratchTicketCSS({ prize, onComplete, layout }: ScratchTicketCSSProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scratchAreasRef = useRef<HTMLDivElement>(null);
   const [isScratching, setIsScratching] = useState(false);
@@ -25,33 +37,70 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
   const animationFrameRef = useRef<number | null>(null);
   const pendingUpdateRef = useRef<boolean>(false);
   
-  // Create three scratch areas
-  const [scratchAreas, setScratchAreas] = useState<ScratchArea[]>([
-    { id: 1, maskCanvas: null, maskImage: '', isRevealed: false },
-    { id: 2, maskCanvas: null, maskImage: '', isRevealed: false },
-    { id: 3, maskCanvas: null, maskImage: '', isRevealed: false },
-  ]);
+  // Create scratch areas from layout configuration
+  const [scratchAreas, setScratchAreas] = useState<ScratchArea[]>(
+    layout.scratchAreas.map((areaConfig) => ({
+      id: areaConfig.id,
+      maskCanvas: null,
+      maskImage: '',
+      isRevealed: false,
+      config: {
+        topPercent: areaConfig.topPercent,
+        leftPercent: areaConfig.leftPercent,
+        widthPercent: areaConfig.widthPercent,
+        heightPercent: areaConfig.heightPercent,
+        canvasWidth: areaConfig.canvasWidth,
+        canvasHeight: areaConfig.canvasHeight,
+        revealThreshold: areaConfig.revealThreshold,
+      },
+    }))
+  );
 
   useEffect(() => {
-    // Initialize all scratch areas
-    const newAreas = scratchAreas.map((area) => {
+    // Initialize all scratch areas from layout configuration
+    const newAreas = layout.scratchAreas.map((areaConfig) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) return area;
+      if (!ctx) {
+        return {
+          id: areaConfig.id,
+          maskCanvas: null,
+          maskImage: '',
+          isRevealed: false,
+          config: {
+            topPercent: areaConfig.topPercent,
+            leftPercent: areaConfig.leftPercent,
+            widthPercent: areaConfig.widthPercent,
+            heightPercent: areaConfig.heightPercent,
+            canvasWidth: areaConfig.canvasWidth,
+            canvasHeight: areaConfig.canvasHeight,
+            revealThreshold: areaConfig.revealThreshold,
+          },
+        };
+      }
 
-      // Set canvas size for each area (smaller height since we have 3 areas)
-      canvas.width = 400;
-      canvas.height = 90;
+      // Set canvas size from configuration
+      canvas.width = areaConfig.canvasWidth;
+      canvas.height = areaConfig.canvasHeight;
 
       // Fill with white (opaque mask)
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       return {
-        ...area,
+        id: areaConfig.id,
         maskCanvas: canvas,
         maskImage: canvas.toDataURL(),
         isRevealed: false,
+        config: {
+          topPercent: areaConfig.topPercent,
+          leftPercent: areaConfig.leftPercent,
+          widthPercent: areaConfig.widthPercent,
+          heightPercent: areaConfig.heightPercent,
+          canvasWidth: areaConfig.canvasWidth,
+          canvasHeight: areaConfig.canvasHeight,
+          revealThreshold: areaConfig.revealThreshold,
+        },
       };
     });
 
@@ -64,9 +113,9 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [prize]);
+  }, [prize, layout]);
 
-  const checkRevealPercentage = (areaId: number, canvas: HTMLCanvasElement) => {
+  const checkRevealPercentage = (areaId: string, canvas: HTMLCanvasElement, threshold: number) => {
     if (revealedRef.current) return;
 
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -87,8 +136,8 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
     const totalChecked = pixels.length / 40;
     const percentage = (transparentPixels / totalChecked) * 100;
 
-    // Mark area as revealed if more than 50% scratched (lowered threshold)
-    if (percentage > 50) {
+    // Mark area as revealed if threshold is exceeded
+    if (percentage > threshold) {
       setScratchAreas((prev) =>
         prev.map((area) =>
           area.id === areaId ? { ...area, isRevealed: true } : area
@@ -96,13 +145,20 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
       );
     }
 
-    // Check if all areas are revealed
-    const allRevealed = scratchAreas.every((area) => {
-      if (area.id === areaId && percentage > 50) return true;
-      return area.isRevealed;
+    // Build set of revealed areas for win condition evaluation
+    const revealedAreaIds = new Set<string>();
+    scratchAreas.forEach((area) => {
+      if (area.id === areaId && percentage > threshold) {
+        revealedAreaIds.add(area.id);
+      } else if (area.isRevealed) {
+        revealedAreaIds.add(area.id);
+      }
     });
 
-    if (allRevealed && !revealedRef.current) {
+    // Evaluate win condition using layout configuration
+    const isWinner = evaluateWinCondition(layout, revealedAreaIds);
+
+    if (isWinner && !revealedRef.current) {
       revealedRef.current = true;
       setIsRevealed(true);
       soundManager.playWin();
@@ -118,27 +174,43 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
     const relativeY = y - rect.top;
     const relativeX = x - rect.left;
 
-    // Determine which scratch area was scratched based on Y position
-    const areaHeight = rect.height / 3;
-    const areaIndex = Math.floor(relativeY / areaHeight);
+    // Determine which scratch area was scratched based on position
+    let targetArea: ScratchArea | null = null;
+    let areaRect: { top: number; left: number; width: number; height: number } | null = null;
 
-    if (areaIndex < 0 || areaIndex >= scratchAreas.length) return;
+    for (const area of scratchAreas) {
+      const areaTop = rect.height * area.config.topPercent;
+      const areaLeft = rect.width * area.config.leftPercent;
+      const areaWidth = rect.width * area.config.widthPercent;
+      const areaHeight = rect.height * area.config.heightPercent;
 
-    const area = scratchAreas[areaIndex];
-    if (!area.maskCanvas) return;
+      if (
+        relativeY >= areaTop &&
+        relativeY <= areaTop + areaHeight &&
+        relativeX >= areaLeft &&
+        relativeX <= areaLeft + areaWidth
+      ) {
+        targetArea = area;
+        areaRect = { top: areaTop, left: areaLeft, width: areaWidth, height: areaHeight };
+        break;
+      }
+    }
 
-    const ctx = area.maskCanvas.getContext('2d', { willReadFrequently: true });
+    if (!targetArea || !areaRect || !targetArea.maskCanvas) return;
+
+    const ctx = targetArea.maskCanvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    const scaleX = area.maskCanvas.width / rect.width;
-    const scaleY = area.maskCanvas.height / areaHeight;
-    const localY = relativeY - areaIndex * areaHeight;
+    const scaleX = targetArea.maskCanvas.width / areaRect.width;
+    const scaleY = targetArea.maskCanvas.height / areaRect.height;
+    const localY = relativeY - areaRect.top;
+    const localX = relativeX - areaRect.left;
 
     // Draw black circle (transparent in mask)
     ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
     ctx.arc(
-      relativeX * scaleX,
+      localX * scaleX,
       localY * scaleY,
       25,
       0,
@@ -153,10 +225,10 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
         cancelAnimationFrame(animationFrameRef.current);
       }
       animationFrameRef.current = requestAnimationFrame(() => {
-        const newMaskImage = area.maskCanvas!.toDataURL();
+        const newMaskImage = targetArea!.maskCanvas!.toDataURL();
         setScratchAreas((prev) =>
           prev.map((a) =>
-            a.id === area.id ? { ...a, maskImage: newMaskImage } : a
+            a.id === targetArea!.id ? { ...a, maskImage: newMaskImage } : a
           )
         );
         pendingUpdateRef.current = false;
@@ -171,7 +243,7 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
       lastScratchTime.current = now;
     }
 
-    checkRevealPercentage(area.id, area.maskCanvas);
+    checkRevealPercentage(targetArea.id, targetArea.maskCanvas, targetArea.config.revealThreshold);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -265,30 +337,43 @@ export default function ScratchTicketCSS({ prize, onComplete }: ScratchTicketCSS
             <h2 className="ticket-title">🎟️ SCRATCH TICKET</h2>
           </div>
           <div ref={scratchAreasRef} className="scratch-areas">
-            {scratchAreas.map((area, index) => (
-              <div key={area.id} className="scratch-area">
-                <div className="area-content">
-                  <div className="prize-display">
-                    <div className="prize-emoji">{prize.emoji}</div>
-                    <div className="prize-name">{prize.name}</div>
-                    {index === 1 && <div className="prize-value">{prize.value}</div>}
-                  </div>
-                </div>
+            {scratchAreas.map((area, index) => {
+              const prizeDisplay = getPrizeDisplayForArea(layout, index, prize);
+              return (
                 <div
-                  className="scratch-overlay"
+                  key={area.id}
+                  className="scratch-area"
                   style={{
-                    maskImage: `url(${area.maskImage})`,
-                    WebkitMaskImage: `url(${area.maskImage})`,
-                    maskSize: 'cover',
-                    WebkitMaskSize: 'cover',
+                    position: 'absolute',
+                    top: `${area.config.topPercent * 100}%`,
+                    left: `${area.config.leftPercent * 100}%`,
+                    width: `${area.config.widthPercent * 100}%`,
+                    height: `${area.config.heightPercent * 100}%`,
                   }}
                 >
-                  <div className="overlay-pattern">
-                    <span className="overlay-text">SCRATCH</span>
+                  <div className="area-content">
+                    <div className="prize-display">
+                      {prizeDisplay.emoji && <div className="prize-emoji">{prizeDisplay.emoji}</div>}
+                      {prizeDisplay.name && <div className="prize-name">{prizeDisplay.name}</div>}
+                      {prizeDisplay.value && <div className="prize-value">{prizeDisplay.value}</div>}
+                    </div>
+                  </div>
+                  <div
+                    className="scratch-overlay"
+                    style={{
+                      maskImage: `url(${area.maskImage})`,
+                      WebkitMaskImage: `url(${area.maskImage})`,
+                      maskSize: 'cover',
+                      WebkitMaskSize: 'cover',
+                    }}
+                  >
+                    <div className="overlay-pattern">
+                      <span className="overlay-text">SCRATCH</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
