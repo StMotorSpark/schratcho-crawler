@@ -12,6 +12,8 @@ The current demo showcases an interactive scratch-off ticket experience using CS
 
 ### Features
 
+- **Dynamic Scratcher Types**: Choose from multiple scratcher tools with different graphics and behaviors
+- **Scratcher Selector**: Select your preferred scratcher before scratching (Gold Coin, Magic Brush, Finger, Golden Key, Mega Eraser, Fire Sword)
 - **Dynamic Ticket Layouts**: Flexible system for defining custom ticket layouts via configuration
 - **Multiple Layout Types**: Choose from Classic (3 horizontal), Grid (3x3), or Single Area layouts
 - **CSS Masking Implementation**: Smooth, performant scratch-off effect using CSS masking
@@ -34,6 +36,17 @@ The current demo showcases an interactive scratch-off ticket experience using CS
 - **Classic Ticket**: Three horizontal scratch areas - reveal all to win (original demo layout)
 - **Grid Ticket**: 3x3 grid of areas for match-style games
 - **Single Area Ticket**: One large scratch area covering the entire ticket
+
+### Available Scratcher Types
+
+- **🪙 Gold Coin**: Classic scratcher with medium scratch radius (25px)
+- **🖌️ Magic Brush**: Wide brush for faster scratching (35px radius)
+- **👆 Finger**: Precise finger scratching (20px radius)
+- **🔑 Golden Key**: Small key for strategic scratching (15px radius)
+- **🧽 Mega Eraser**: Massive eraser for quick reveals (50px radius)
+- **⚔️ Fire Sword**: Game-themed sword with medium-large radius (30px)
+
+Each scratcher has unique visual styles with different gradient overlays for a varied gameplay experience.
 
 ### Available Prizes
 
@@ -142,6 +155,7 @@ schratcho-crawler/
 │   │   └── Settings.css              # Settings modal styles
 │   ├── utils/
 │   │   ├── ticketLayouts.ts          # Ticket layout configuration system
+│   │   ├── scratchers.ts             # Scratcher type configuration system
 │   │   ├── prizes.ts                 # Prize definitions and randomization
 │   │   ├── sounds.ts                 # Sound effects using Web Audio API
 │   │   └── capabilities.ts           # Browser capability detection
@@ -151,6 +165,7 @@ schratcho-crawler/
 │   └── index.css                     # Global styles
 ├── kickstart-prompts/                # Project planning and issue documentation
 ├── TICKET_LAYOUTS.md                 # Guide for creating custom ticket layouts
+├── SCRATCHERS.md                     # Guide for creating custom scratchers
 ├── index.html                        # HTML entry point
 ├── package.json                      # Project configuration
 ├── tsconfig.json                     # TypeScript configuration
@@ -159,6 +174,18 @@ schratcho-crawler/
 ```
 
 ## Implementation Details
+
+### Dynamic Scratcher System
+
+The scratcher system provides customizable tools for scratching tickets:
+
+- **Configuration-Based**: Scratchers defined via TypeScript objects with full type safety
+- **Visual Customization**: Each scratcher has unique symbols, colors, and gradients
+- **Behavior Customization**: Configurable scratch radius for different gameplay styles
+- **Extensible Design**: Easy to add new scratcher types with unique properties
+- **Real-time Selection**: Players can switch scratchers without restarting tickets
+
+See [SCRATCHERS.md](./SCRATCHERS.md) for a complete guide on creating custom scratchers.
 
 ### Dynamic Ticket Layout System
 

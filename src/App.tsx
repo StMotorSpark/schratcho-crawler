@@ -3,6 +3,7 @@ import ScratchTicketCSS from './components/ScratchTicketCSS';
 import Settings from './components/Settings';
 import { getRandomPrize, type Prize } from './utils/prizes';
 import { getTicketLayout, TICKET_LAYOUTS } from './utils/ticketLayouts';
+import { getScratcher, SCRATCHER_TYPES } from './utils/scratchers';
 import './App.css';
 
 function App() {
@@ -11,7 +12,9 @@ function App() {
   const [key, setKey] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [layoutId, setLayoutId] = useState('classic');
+  const [scratcherId, setScratcherId] = useState('coin');
   const currentLayout = getTicketLayout(layoutId);
+  const currentScratcher = getScratcher(scratcherId);
 
   const handleNewTicket = () => {
     setPrize(getRandomPrize());
@@ -58,8 +61,25 @@ function App() {
           </select>
         </div>
 
+        <div className="layout-selector">
+          <label htmlFor="scratcher-select">Scratcher: </label>
+          <select 
+            id="scratcher-select"
+            value={scratcherId} 
+            onChange={(e) => {
+              setScratcherId(e.target.value);
+            }}
+          >
+            {Object.keys(SCRATCHER_TYPES).map((id) => (
+              <option key={id} value={id}>
+                {SCRATCHER_TYPES[id].symbol} {SCRATCHER_TYPES[id].name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="ticket-wrapper">
-          <ScratchTicketCSS key={key} prize={prize} onComplete={handleComplete} layout={currentLayout} />
+          <ScratchTicketCSS key={key} prize={prize} onComplete={handleComplete} layout={currentLayout} scratcher={currentScratcher} />
         </div>
 
         <button className="new-ticket-button" onClick={handleNewTicket}>

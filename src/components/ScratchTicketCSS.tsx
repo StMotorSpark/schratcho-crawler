@@ -3,11 +3,13 @@ import type { Prize } from '../utils/prizes';
 import { soundManager } from '../utils/sounds';
 import type { TicketLayout } from '../utils/ticketLayouts';
 import { evaluateWinCondition, getPrizeDisplayForArea } from '../utils/ticketLayouts';
+import type { Scratcher } from '../utils/scratchers';
 
 interface ScratchTicketCSSProps {
   prize: Prize;
   onComplete: () => void;
   layout: TicketLayout;
+  scratcher: Scratcher;
 }
 
 interface ScratchArea {
@@ -26,7 +28,7 @@ interface ScratchArea {
   };
 }
 
-export default function ScratchTicketCSS({ prize, onComplete, layout }: ScratchTicketCSSProps) {
+export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher }: ScratchTicketCSSProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scratchAreasRef = useRef<HTMLDivElement>(null);
   const [isScratching, setIsScratching] = useState(false);
@@ -206,13 +208,13 @@ export default function ScratchTicketCSS({ prize, onComplete, layout }: ScratchT
     const localY = relativeY - areaRect.top;
     const localX = relativeX - areaRect.left;
 
-    // Draw black circle (transparent in mask)
+    // Draw black circle (transparent in mask) using scratcher radius
     ctx.globalCompositeOperation = 'destination-out';
     ctx.beginPath();
     ctx.arc(
       localX * scaleX,
       localY * scaleY,
-      25,
+      scratcher.scratchRadius,
       0,
       Math.PI * 2
     );
@@ -365,10 +367,11 @@ export default function ScratchTicketCSS({ prize, onComplete, layout }: ScratchT
                       WebkitMaskImage: `url(${area.maskImage})`,
                       maskSize: 'cover',
                       WebkitMaskSize: 'cover',
+                      background: scratcher.style?.overlayColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     }}
                   >
                     <div className="overlay-pattern">
-                      <span className="overlay-text">SCRATCH</span>
+                      <span className="overlay-text">{scratcher.style?.overlayPattern || 'SCRATCH'}</span>
                     </div>
                   </div>
                 </div>
@@ -385,7 +388,7 @@ export default function ScratchTicketCSS({ prize, onComplete, layout }: ScratchT
             top: `${cursorPosition.y}px`,
           }}
         >
-          🪙
+          {scratcher.symbol}
         </div>
       )}
       {isRevealed && (
