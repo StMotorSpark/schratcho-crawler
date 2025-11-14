@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import ScratchTicketCSS from './components/ScratchTicketCSS';
 import Settings from './components/Settings';
-import { getRandomPrize, type Prize } from './utils/prizes';
-import { getTicketLayout, TICKET_LAYOUTS } from './utils/ticketLayouts';
-import { getScratcher, SCRATCHER_TYPES } from './utils/scratchers';
+import { getRandomPrize, type Prize } from '../core/mechanics/prizes';
+import { getTicketLayout, TICKET_LAYOUTS } from '../core/mechanics/ticketLayouts';
+import { getScratcher, SCRATCHER_TYPES } from '../core/mechanics/scratchers';
 import './App.css';
 
 function App() {

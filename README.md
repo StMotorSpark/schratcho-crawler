@@ -146,32 +146,53 @@ The project includes a manual deployment workflow that allows you to deploy any 
 
 ## Project Structure
 
+The project is now organized to support both web and mobile development with shared core logic:
+
 ```
 schratcho-crawler/
-├── src/
+├── core/                             # Shared game logic (web + mobile)
+│   ├── mechanics/                    # Platform-agnostic game mechanics
+│   │   ├── prizes.ts                 # Prize definitions and randomization
+│   │   ├── ticketLayouts.ts          # Ticket layout configuration system
+│   │   ├── scratchers.ts             # Scratcher type configuration system
+│   │   ├── sounds.ts                 # Sound effects using Web Audio API
+│   │   └── capabilities.ts           # Browser/device capability detection
+│   ├── game-logic/                   # Game-specific logic (future)
+│   └── README.md                     # Core documentation
+├── web/                              # React web application
 │   ├── components/
 │   │   ├── ScratchTicketCSS.tsx      # CSS Masking scratch-off implementation
 │   │   ├── Settings.tsx              # Settings modal component
 │   │   └── Settings.css              # Settings modal styles
-│   ├── utils/
-│   │   ├── ticketLayouts.ts          # Ticket layout configuration system
-│   │   ├── scratchers.ts             # Scratcher type configuration system
-│   │   ├── prizes.ts                 # Prize definitions and randomization
-│   │   ├── sounds.ts                 # Sound effects using Web Audio API
-│   │   └── capabilities.ts           # Browser capability detection
 │   ├── App.tsx                       # Main application component
 │   ├── App.css                       # Application styles
 │   ├── main.tsx                      # Application entry point
-│   └── index.css                     # Global styles
+│   ├── index.css                     # Global styles
+│   └── README.md                     # Web app documentation
+├── mobile/                           # React Native app (placeholder)
+│   ├── app/                          # Main app screens (future)
+│   ├── components/                   # React Native UI components
+│   │   └── ExampleTicketComponent.tsx # Example showing shared code usage
+│   ├── package.json                  # Mobile dependencies (placeholder)
+│   └── README.md                     # Mobile app documentation
 ├── kickstart-prompts/                # Project planning and issue documentation
 ├── TICKET_LAYOUTS.md                 # Guide for creating custom ticket layouts
 ├── SCRATCHERS.md                     # Guide for creating custom scratchers
+├── IOS_COMPATIBILITY.md              # iOS-specific considerations
 ├── index.html                        # HTML entry point
 ├── package.json                      # Project configuration
 ├── tsconfig.json                     # TypeScript configuration
 ├── vite.config.ts                    # Vite configuration
 └── README.md                         # This file
 ```
+
+### Key Directories
+
+- **`/core`** - Shared code used by both web and mobile apps
+  - **`/core/mechanics`** - Game mechanics (prizes, tickets, scratchers, sounds)
+  - **`/core/game-logic`** - Future game-specific logic (progression, combat, etc.)
+- **`/web`** - React web application (Vite + TypeScript)
+- **`/mobile`** - React Native mobile app structure (placeholder for future development)
 
 ## Implementation Details
 
@@ -237,6 +258,45 @@ The implementation is optimized for smooth performance:
 - Sound throttling: Scratch sounds limited to every 50ms
 - Efficient state management: React state updates batched for performance
 
+## Shared Core Architecture
+
+The project uses a shared core architecture that enables code reuse between web and mobile platforms:
+
+### Benefits
+
+1. **Code Reusability** - Game mechanics written once, used everywhere
+2. **Consistency** - Identical behavior across platforms
+3. **Maintainability** - Bug fixes apply to all platforms
+4. **Type Safety** - Shared TypeScript types across platforms
+5. **Independent Testing** - Test logic without UI dependencies
+
+### How It Works
+
+Both the web and mobile apps import from `/core/mechanics`:
+
+```typescript
+// In web/App.tsx or mobile components
+import { getRandomPrize, type Prize } from '../core/mechanics/prizes';
+import { getTicketLayout, TICKET_LAYOUTS } from '../core/mechanics/ticketLayouts';
+import { getScratcher, SCRATCHER_TYPES } from '../core/mechanics/scratchers';
+
+// Use the shared logic
+const prize = getRandomPrize();        // Works on both web and mobile
+const layout = getTicketLayout('classic');  // Same across platforms
+const scratcher = getScratcher('coin');     // Consistent behavior
+```
+
+### Adding New Features
+
+When adding features:
+
+1. **Shared Logic** - Put in `/core/mechanics` or `/core/game-logic`
+2. **Platform-Specific UI** - Put in `/web` or `/mobile`
+3. **Use TypeScript** - For type safety across the codebase
+4. **Document** - Add to relevant README files
+
+See `/core/README.md` for detailed information on the shared architecture.
+
 ## Future Development
 
 ### Phase 2: Rogue-Like Progression
@@ -252,9 +312,22 @@ The implementation is optimized for smooth performance:
 - Risk/reward mechanics
 
 ### Mobile Version
-- React Native implementation
-- Touch-optimized UI
-- Mobile-specific performance optimizations
+
+The mobile app structure is in place and ready for React Native development:
+
+- **Shared Mechanics** - Imports game logic from `/core/mechanics`
+- **Example Components** - Template showing how to use shared code
+- **React Native Ready** - Structure prepared for Expo or React Native CLI
+- **Touch-optimized UI** - Mobile-specific components (to be implemented)
+- **Platform APIs** - Native haptics, storage, and device features
+
+To start mobile development:
+1. Set up React Native in `/mobile` directory
+2. Import mechanics from `/core/mechanics`
+3. Build mobile-specific UI components
+4. Test on iOS and Android devices
+
+See `/mobile/README.md` for details on mobile setup and development.
 
 ## License
 

@@ -1,0 +1,37 @@
+{
+  "name": "schratcho-crawler-mobile",
+  "version": "1.0.0",
+  "description": "React Native mobile app for Schratcho Crawler (placeholder)",
+  "main": "index.js",
+  "scripts": {
+    "start": "echo 'React Native not yet configured. Run: npx create-expo-app or npx react-native init' && exit 1",
+    "android": "echo 'React Native not yet configured' && exit 1",
+    "ios": "echo 'React Native not yet configured' && exit 1",
+    "test": "echo 'Tests not yet configured' && exit 1"
+  },
+  "keywords": [
+    "react-native",
+    "game",
+    "scratch-off",
+    "mobile"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "__comment": "React Native dependencies will be added when setting up the mobile project",
+    "__react-native": "^0.73.0 (to be installed)",
+    "__react": "^18.2.0 (to be installed)"
+  },
+  "devDependencies": {
+    "__comment": "Development dependencies will be added during React Native setup",
+    "__typescript": "^5.0.0 (to be installed)"
+  },
+  "note": [
+    "This is a placeholder package.json for the future React Native implementation.",
+    "To set up React Native, choose one of:",
+    "  1. Expo: npx create-expo-app .",
+    "  2. React Native CLI: npx react-native init SchratschoCrawlerMobile",
+    "",
+    "After setup, the mobile app will import shared code from ../core/mechanics"
+  ]
+}

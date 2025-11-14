@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { detectCapabilities, getCapabilityStatus, type BrowserCapabilities } from '../utils/capabilities';
+import { detectCapabilities, getCapabilityStatus, type BrowserCapabilities } from '../../core/mechanics/capabilities';
 import './Settings.css';
 
 interface SettingsProps {
