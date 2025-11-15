@@ -1,9 +1,9 @@
 import { useRef, useState, useEffect } from 'react';
-import type { Prize } from '../utils/prizes';
-import { soundManager } from '../utils/sounds';
-import type { TicketLayout } from '../utils/ticketLayouts';
-import { evaluateWinCondition, getPrizeDisplayForArea } from '../utils/ticketLayouts';
-import type { Scratcher } from '../utils/scratchers';
+import type { Prize } from '../../core/mechanics/prizes';
+import { soundManager } from '../../core/mechanics/sounds';
+import type { TicketLayout } from '../../core/mechanics/ticketLayouts';
+import { evaluateWinCondition, getPrizeDisplayForArea } from '../../core/mechanics/ticketLayouts';
+import type { Scratcher } from '../../core/mechanics/scratchers';
 
 interface ScratchTicketCSSProps {
   prize: Prize;
