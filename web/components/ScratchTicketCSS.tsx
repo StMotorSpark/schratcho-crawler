@@ -321,11 +321,15 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
     setCursorPosition(null);
   };
 
+  // Calculate aspect ratio and height for the ticket
+  const aspectRatio = layout.ticketHeight / layout.ticketWidth;
+  const hasBackgroundImage = !!layout.backgroundImage;
+
   return (
     <div className="scratch-ticket-css">
       <div
         ref={containerRef}
-        className="ticket-container"
+        className={`ticket-container ${hasBackgroundImage ? 'with-background' : ''}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -334,11 +338,32 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="ticket-content">
-          <div className="ticket-header">
-            <h2 className="ticket-title">🎟️ SCRATCH TICKET</h2>
-          </div>
-          <div ref={scratchAreasRef} className="scratch-areas">
+        <div 
+          className="ticket-content"
+          style={hasBackgroundImage ? {
+            background: 'none',
+            border: 'none',
+            borderRadius: '20px',
+            overflow: 'hidden',
+          } : undefined}
+        >
+          {!hasBackgroundImage && (
+            <div className="ticket-header">
+              <h2 className="ticket-title">🎟️ SCRATCH TICKET</h2>
+            </div>
+          )}
+          <div 
+            ref={scratchAreasRef} 
+            className="scratch-areas"
+            style={{
+              height: hasBackgroundImage ? `${aspectRatio * 100}%` : '300px',
+              paddingBottom: hasBackgroundImage ? `${aspectRatio * 100}%` : '0',
+              backgroundImage: hasBackgroundImage ? `url(${layout.backgroundImage})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              position: 'relative',
+            }}
+          >
             {scratchAreas.map((area, index) => {
               const prizeDisplay = getPrizeDisplayForArea(layout, index, prize);
               return (

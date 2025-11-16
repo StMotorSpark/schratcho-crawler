@@ -170,10 +170,27 @@
   background: #e94560;
 }
 
+/* Background image support */
+.ticket-container.with-background .ticket-content {
+  background: none !important;
+  border: none !important;
+}
+
+.ticket-container.with-background .scratch-areas {
+  height: 0;
+  padding-bottom: 150%; /* Default 2:3 aspect ratio */
+  background: transparent;
+}
+
 .scratch-area {
   position: absolute;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
   box-sizing: border-box;
+}
+
+/* Default background for areas without background image */
+.ticket-container:not(.with-background) .scratch-area {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .area-content {
