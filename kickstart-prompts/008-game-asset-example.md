@@ -25,7 +25,63 @@ With recent changes, we now have a structured project that separates core mechan
     - Include details on how to add new ticket layouts in the future.
 
 # Definition of Done
-- [ ] "Goblin Gold" ticket layout implemented in core game logic
-- [ ] Ticket integrated and functional in the web app
-- [ ] Sound effects added and functioning correctly
-- [ ] Documentation updated with implementation details
+- [x] "Goblin Gold" ticket layout implemented in core game logic
+- [x] Ticket integrated and functional in the web app
+- [x] Sound effects added and functioning correctly (using existing sound mechanics)
+- [x] Documentation updated with implementation details
+
+# Implementation Summary
+
+## Goblin Gold Ticket Implementation
+
+The Goblin Gold ticket has been successfully implemented as a working example of how game assets and logic integrate with core mechanics.
+
+### Key Implementation Details
+
+**Ticket Layout Configuration** (`core/game-logic/tickets/basic-goblinGold/goblinGoldLayout.ts`)
+- Created a `TicketLayout` configuration with 10 scratch areas
+- Areas are positioned to align with the yellow/golden squares in the ticket artwork
+- Configured as a 2x5 grid (2 rows, 5 columns)
+- Uses `match-three` reveal mechanic with `match-symbols` win condition
+- Background image: `basic-goblinGold-ticketAsset.png` (1024 x 1536 pixels)
+
+**Scratch Area Positioning**
+- Calculated positions based on the 1024x1536 pixel artwork
+- Row 1: Areas at ~44.47% from top
+- Row 2: Areas at ~58.46% from top
+- Each area: 127px wide × 130px tall (~12.7% × 8.46% of ticket)
+- Horizontal spacing maintains proper alignment with artwork
+
+**Integration Points**
+1. Added `backgroundImage` property to `TicketLayout` interface in `core/mechanics/ticketLayouts.ts`
+2. Registered Goblin Gold ticket in `TICKET_LAYOUTS` registry
+3. Updated `ScratchTicketCSS` component to support background images
+4. Added CSS styles for tickets with background artwork
+5. Maintains proper aspect ratio (2:3) for the ticket display
+
+**Sound Effects**
+- Uses existing `soundManager` from `core/mechanics/sounds.ts`
+- Scratch sounds play during scratching interaction
+- Win sound plays when match condition is met
+- No ticket-specific sound implementation needed (as per requirements)
+
+### How It Works
+
+1. **Selection**: User selects "Goblin Gold" from the ticket layout dropdown
+2. **Display**: Component renders the goblin artwork as background with 10 scratch areas overlaid on the golden squares
+3. **Interaction**: User scratches areas to reveal prize symbols
+4. **Win Condition**: When three matching symbols are revealed, the player wins
+5. **Feedback**: Sound effects enhance the gameplay experience
+
+### Adding Future Tickets
+
+To add new tickets following this pattern:
+
+1. Create artwork with clearly defined scratch areas (recommended: use contrasting colors)
+2. Measure scratch area positions in pixels and convert to percentages
+3. Create a `TicketLayout` configuration in `core/game-logic/tickets/[ticket-name]/`
+4. Set appropriate `revealMechanic` and `winCondition` for gameplay style
+5. Add `backgroundImage` path to the configuration
+6. Register in `TICKET_LAYOUTS` in `core/mechanics/ticketLayouts.ts`
+
+The ticket will automatically appear in the dropdown and work with all existing scratchers.
