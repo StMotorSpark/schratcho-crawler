@@ -15,7 +15,7 @@ export const GOBLIN_GOLD_TICKET: TicketLayout = {
   id: 'goblin-gold',
   name: 'Goblin Gold',
   description: 'Fantasy-themed ticket with 10 scratch areas - match three symbols to win',
-  backgroundImage: '/core/game-logic/tickets/basic-goblinGold/basic-goblinGold-ticketAsset.png',
+  backgroundImage: '/assets/tickets/goblin-gold/basic-goblinGold-ticketAsset.png',
   scratchAreas: [
     // Row 1 - 5 areas
     {
