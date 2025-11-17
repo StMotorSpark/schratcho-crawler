@@ -6,6 +6,7 @@
  */
 
 import type { Prize } from './prizes';
+import { GOBLIN_GOLD_TICKET } from '../game-logic/tickets/basic-goblinGold/goblinGoldLayout';
 
 /**
  * Defines the position and size of a scratch area on the ticket
@@ -68,6 +69,8 @@ export interface TicketLayout {
   ticketWidth: number;
   /** Ticket height in pixels (for absolute positioning) */
   ticketHeight: number;
+  /** Optional background image path for the ticket */
+  backgroundImage?: string;
 }
 
 /**
@@ -256,6 +259,7 @@ export const TICKET_LAYOUTS: Record<string, TicketLayout> = {
   classic: CLASSIC_TICKET,
   grid: GRID_TICKET,
   single: SINGLE_AREA_TICKET,
+  'goblin-gold': GOBLIN_GOLD_TICKET,
 };
 
 /**

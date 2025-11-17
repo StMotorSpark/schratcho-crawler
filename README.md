@@ -36,6 +36,7 @@ The current demo showcases an interactive scratch-off ticket experience using CS
 - **Classic Ticket**: Three horizontal scratch areas - reveal all to win (original demo layout)
 - **Grid Ticket**: 3x3 grid of areas for match-style games
 - **Single Area Ticket**: One large scratch area covering the entire ticket
+- **Goblin Gold**: Fantasy-themed ticket with custom artwork featuring a goblin treasure hunter and 10 scratch areas arranged in a 2x5 grid for match-three gameplay
 
 ### Available Scratcher Types
 
