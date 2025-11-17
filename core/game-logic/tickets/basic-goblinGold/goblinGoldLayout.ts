@@ -6,6 +6,7 @@
  */
 
 import type { TicketLayout } from '../../../mechanics/ticketLayouts';
+import goblinGoldAsset from './basic-goblinGold-ticketAsset.png';
 
 /**
  * Goblin Gold ticket layout - 10 areas in 2x5 grid for match-3 gameplay
@@ -15,7 +16,7 @@ export const GOBLIN_GOLD_TICKET: TicketLayout = {
   id: 'goblin-gold',
   name: 'Goblin Gold',
   description: 'Fantasy-themed ticket with 10 scratch areas - match three symbols to win',
-  backgroundImage: '/assets/tickets/goblin-gold/basic-goblinGold-ticketAsset.png',
+  backgroundImage: goblinGoldAsset,
   scratchAreas: [
     // Row 1 - 5 areas
     {
