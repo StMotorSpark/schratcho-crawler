@@ -145,6 +145,27 @@ The project includes a manual deployment workflow that allows you to deploy any 
 - GitHub Pages must be enabled for the repository (configured to deploy from GitHub Actions)
 - The workflow requires `contents: read`, `pages: write`, and `id-token: write` permissions
 
+## Developer Tools
+
+### Ticket Layout Designer
+
+A visual GUI tool for designing custom scratch-off ticket layouts without writing code:
+
+```bash
+cd tools/layout-designer
+npm install
+npm run dev
+```
+
+**Features:**
+- Visual drag-and-drop layout design
+- Image upload for ticket backgrounds
+- Interactive scratch area editor
+- TypeScript/JSON code generation
+- No deployment needed - runs locally
+
+📖 **Full Documentation**: See [LAYOUT_DESIGNER.md](LAYOUT_DESIGNER.md)
+
 ## Project Structure
 
 The project is now organized to support both web and mobile development with shared core logic:
@@ -176,7 +197,13 @@ schratcho-crawler/
 │   │   └── ExampleTicketComponent.tsx # Example showing shared code usage
 │   ├── package.json                  # Mobile dependencies (placeholder)
 │   └── README.md                     # Mobile app documentation
+├── tools/                            # Development tools
+│   └── layout-designer/              # Ticket Layout Designer GUI tool
+│       ├── src/                      # Tool source code
+│       ├── package.json              # Tool dependencies
+│       └── README.md                 # Tool documentation
 ├── kickstart-prompts/                # Project planning and issue documentation
+├── LAYOUT_DESIGNER.md                # Ticket Layout Designer guide
 ├── TICKET_LAYOUTS.md                 # Guide for creating custom ticket layouts
 ├── SCRATCHERS.md                     # Guide for creating custom scratchers
 ├── IOS_COMPATIBILITY.md              # iOS-specific considerations
