@@ -33,15 +33,31 @@ function App() {
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageCache = useRef<HTMLImageElement | null>(null);
 
   // Canvas dimensions for display
   const CANVAS_DISPLAY_WIDTH = 600;
   const CANVAS_DISPLAY_HEIGHT = Math.floor((ticketHeight / ticketWidth) * CANVAS_DISPLAY_WIDTH);
 
+  // Cache background image to prevent flashing during drag
+  useEffect(() => {
+    if (backgroundImage) {
+      const img = new Image();
+      img.onload = () => {
+        imageCache.current = img;
+        redrawCanvas();
+      };
+      img.src = backgroundImage;
+    } else {
+      imageCache.current = null;
+      redrawCanvas();
+    }
+  }, [backgroundImage]);
+
   // Redraw canvas when state changes
   useEffect(() => {
     redrawCanvas();
-  }, [backgroundImage, scratchAreas, selectedAreaIndex, drawingRect, ticketWidth, ticketHeight]);
+  }, [scratchAreas, selectedAreaIndex, drawingRect, ticketWidth, ticketHeight]);
 
   // Auto-hide toast after 3 seconds
   useEffect(() => {
@@ -62,13 +78,14 @@ function App() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw background image or placeholder
-    if (backgroundImage) {
-      const img = new Image();
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        drawScratchAreas(ctx);
-      };
-      img.src = backgroundImage;
+    if (backgroundImage && imageCache.current) {
+      // Use cached image for immediate drawing (no flashing)
+      ctx.drawImage(imageCache.current, 0, 0, canvas.width, canvas.height);
+      drawScratchAreas(ctx);
+    } else if (backgroundImage) {
+      // First load - will be cached by useEffect
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     } else {
       // Draw placeholder background
       ctx.fillStyle = '#f0f0f0';
