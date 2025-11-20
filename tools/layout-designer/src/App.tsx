@@ -28,6 +28,9 @@ function App() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawingRect, setDrawingRect] = useState<DrawingRect | null>(null);
   
+  // Toast notification state
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +42,14 @@ function App() {
   useEffect(() => {
     redrawCanvas();
   }, [backgroundImage, scratchAreas, selectedAreaIndex, drawingRect, ticketWidth, ticketHeight]);
+
+  // Auto-hide toast after 3 seconds
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   const redrawCanvas = () => {
     const canvas = canvasRef.current;
@@ -275,8 +286,9 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
   };
 
   const handleCopyToClipboard = (code: string) => {
-    navigator.clipboard.writeText(code);
-    alert('Code copied to clipboard!');
+    navigator.clipboard.writeText(code)
+      .then(() => setToastMessage('✓ Code copied to clipboard!'))
+      .catch(() => setToastMessage('✗ Failed to copy to clipboard'));
   };
 
   const handleDownload = (code: string, filename: string) => {
@@ -480,6 +492,12 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
           </section>
         </div>
       </div>
+
+      {toastMessage && (
+        <div className="toast">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
