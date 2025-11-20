@@ -7,6 +7,7 @@
 
 import type { Prize } from './prizes';
 import { GOBLIN_GOLD_TICKET } from '../game-logic/tickets/basic-goblinGold/goblinGoldLayout';
+import { TEST_TWO_COLUMN_TICKET } from '../game-logic/tickets/test-two-column';
 
 /**
  * Defines the position and size of a scratch area on the ticket
@@ -260,6 +261,7 @@ export const TICKET_LAYOUTS: Record<string, TicketLayout> = {
   grid: GRID_TICKET,
   single: SINGLE_AREA_TICKET,
   'goblin-gold': GOBLIN_GOLD_TICKET,
+  'test-two-column': TEST_TWO_COLUMN_TICKET,
 };
 
 /**
