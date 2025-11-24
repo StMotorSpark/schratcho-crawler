@@ -354,12 +354,12 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
         if (file.name.endsWith('.json')) {
           layout = JSON.parse(content);
         } else {
-          // Try to extract JSON from TypeScript file
-          const match = content.match(/=\s*({[\s\S]*});?\s*$/m);
-          if (match) {
-            layout = JSON.parse(match[1]);
+          // Try to extract JSON from TypeScript file - look for the export statement
+          const exportMatch = content.match(/export\s+const\s+\w+\s*:\s*TicketLayout\s*=\s*({[\s\S]*?});/);
+          if (exportMatch) {
+            layout = JSON.parse(exportMatch[1]);
           } else {
-            throw new Error('Could not parse TypeScript file');
+            throw new Error('Could not find valid TicketLayout export in TypeScript file');
           }
         }
 
@@ -411,7 +411,9 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
         }
         return false;
       case 'progressive-reveal':
-        const lastAreaId = scratchAreas[scratchAreas.length - 1]?.id;
+        // Check if last area exists and is revealed
+        if (scratchAreas.length === 0) return false;
+        const lastAreaId = scratchAreas[scratchAreas.length - 1].id;
         return revealed.has(lastAreaId);
       default:
         return false;
