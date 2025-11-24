@@ -10,6 +10,9 @@ A visual GUI tool for designing and configuring scratch-off ticket layouts for S
 - **Configuration Options**: Set reveal mechanics, win conditions, and area properties
 - **Code Generation**: Export as TypeScript or JSON for integration with the game
 - **Real-time Preview**: See your layout as you design it
+- **Load Existing Layouts**: Import and edit existing layout files from your core folder
+- **Testing & Debugging**: Simulate ticket scratching and validate win conditions
+- **Core Integration**: Direct save to core game logic folder with version tracking
 
 ## Getting Started
 
@@ -74,7 +77,30 @@ Choose the appropriate mechanics for your ticket:
    - Canvas dimensions (for rendering quality)
 5. Delete selected areas with the "Delete Area" button
 
-### 5. Export Configuration
+### 5. Test Your Layout (NEW!)
+
+Before exporting, test your layout using the interactive testing panel:
+
+1. Click "▶ Show Test Panel" in the right sidebar
+2. Click on areas to simulate scratching them
+3. The panel shows:
+   - 🔒 = Area not revealed
+   - ✓ = Area revealed
+   - 🎉 WINNER! = Win condition met
+   - ❌ Not a winner yet = Keep scratching
+4. Click "🔄 Reset Test" to start over
+
+**Why Test?**
+- Validate win conditions work correctly
+- Ensure reveal mechanics match expectations
+- Catch configuration issues before exporting
+
+### 6. Export Configuration
+
+**Save to Core (Recommended):**
+- Click "💾 Download for Core" to get a file ready for core integration
+- Save to `core/game-logic/tickets/[layoutId]Layout.ts`
+- Includes version tracking, timestamps, and integration instructions
 
 **TypeScript Export:**
 - Click "Copy TypeScript" to copy code to clipboard
@@ -86,7 +112,22 @@ Choose the appropriate mechanics for your ticket:
 - Click "Download .json" to download as a JSON file
 - Use JSON for dynamic loading or configuration files
 
-### 6. Integrate with Game
+### 7. Load Existing Layouts (NEW!)
+
+You can now edit existing ticket layouts:
+
+1. Click "📂 Load Existing Layout" button
+2. Select a `.ts` or `.json` file from `core/game-logic/tickets/`
+3. The tool loads all layout data
+4. Make your changes and save
+
+**Use Cases:**
+- Update existing ticket designs
+- Create variations of successful tickets
+- Fix bugs in existing layouts
+- Adjust thresholds based on playtesting
+
+### 8. Integrate with Game
 
 1. Copy the generated TypeScript code
 2. Add it to your project (e.g., `core/game-logic/tickets/`)
@@ -178,6 +219,15 @@ npm run lint
 - **Canvas API**: HTML5 Canvas for interactive drawing
 - **No Backend**: Completely client-side, no server required
 
+## Recent Updates
+
+**Version 2.0 (2025-11-24)**
+- ✅ Added interactive testing and debugging panel
+- ✅ Added ability to load existing layouts for editing
+- ✅ Added "Save to Core" feature with version tracking
+- ✅ Improved export with auto-generated integration instructions
+- ✅ Added win condition validation in real-time
+
 ## Future Enhancements
 
 Potential features for future versions:
@@ -189,7 +239,7 @@ Potential features for future versions:
 - [ ] Shape masks (circles, polygons)
 - [ ] Preview with actual game rendering
 - [ ] Batch export multiple layouts
-- [ ] Import existing layouts for editing
+- [ ] Auto-save drafts to browser storage
 
 ## Questions or Issues?
 
