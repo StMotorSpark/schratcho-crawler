@@ -1,9 +1,10 @@
-# Ticket Layout Designer
+# Game Designer Toolkit
 
-A visual GUI tool for designing and configuring scratch-off ticket layouts for Schratcho Crawler.
+A comprehensive visual GUI tool for designing scratch-off ticket layouts, scratchers, and prizes for Schratcho Crawler.
 
 ## Features
 
+### Ticket Layout Designer
 - **Visual Layout Design**: Draw scratch areas directly on your ticket image
 - **Image Upload**: Upload ticket background images and automatically detect dimensions
 - **Interactive Editor**: Click and drag to create scratch areas, click to select and edit
@@ -13,6 +14,23 @@ A visual GUI tool for designing and configuring scratch-off ticket layouts for S
 - **Load Existing Layouts**: Import and edit existing layout files from your core folder
 - **Testing & Debugging**: Simulate ticket scratching and validate win conditions
 - **Core Integration**: Direct save to core game logic folder with version tracking
+
+### Scratcher Designer (NEW!)
+- **Create Custom Scratchers**: Define unique scratcher tools with custom symbols and behaviors
+- **Visual Preview**: See your scratcher with its overlay color and pattern
+- **Emoji Validation**: Ensures valid emoji symbols are used
+- **Scratch Radius Control**: Slider to adjust scratch area size (10-60px)
+- **Style Customization**: Configure overlay colors (supports CSS gradients) and patterns
+- **Code Generation**: Export as TypeScript or JSON for integration
+- **Load Existing Scratchers**: Import and edit existing scratcher files
+
+### Prize Designer (NEW!)
+- **Create Custom Prizes**: Define prizes with name, value, and emoji
+- **Visual Preview**: See how your prize will appear in-game
+- **Quick Emoji Picker**: Choose from common prize emojis with one click
+- **Emoji Validation**: Ensures valid emoji symbols are used
+- **Code Generation**: Export as TypeScript or JSON for integration
+- **Load Existing Prizes**: Import and edit existing prize files
 
 ## Getting Started
 
@@ -149,6 +167,81 @@ export const TICKET_LAYOUTS: Record<string, TicketLayout> = {
 const layout = getTicketLayout('my-custom');
 ```
 
+## Scratcher Designer
+
+The Scratcher Designer tab allows you to create and customize scratcher tools.
+
+### Creating a Scratcher
+
+1. Click the "🪙 Scratchers" tab
+2. Fill in the scratcher details:
+   - **Scratcher ID**: Unique kebab-case identifier (e.g., `fire-sword`)
+   - **Scratcher Name**: Display name (e.g., `Fire Sword`)
+   - **Description**: Brief description of the scratcher
+   - **Symbol (Emoji)**: The emoji to display (validated for proper emoji format)
+   - **Scratch Radius**: Size of the scratch area (10-60px)
+   - **Overlay Color**: CSS color or gradient for the scratch overlay
+   - **Overlay Pattern**: Text pattern to display on the overlay (e.g., `SCRATCH`)
+
+### Scratch Radius Guidelines
+
+- **10-15px**: Very precise, strategic scratching
+- **20-25px**: Balanced, standard scratching
+- **30-35px**: Fast, efficient scratching
+- **40-50px**: Very fast, large area reveals
+- **50+px**: Extremely fast reveals (use sparingly)
+
+### Saving Your Scratcher
+
+1. Click "💾 Download for Core" to get a ready-to-use TypeScript file
+2. Save to `core/game-logic/scratchers/[scratcher-id].ts`
+3. Import in `core/mechanics/scratchers.ts`:
+
+```typescript
+import { FIRE_SWORD_SCRATCHER } from '../game-logic/scratchers/fire-sword';
+
+export const SCRATCHER_TYPES: Record<string, Scratcher> = {
+  // ... existing scratchers
+  'fire-sword': FIRE_SWORD_SCRATCHER,
+};
+```
+
+## Prize Designer
+
+The Prize Designer tab allows you to create and customize prize definitions.
+
+### Creating a Prize
+
+1. Click the "🏆 Prizes" tab
+2. Fill in the prize details:
+   - **Prize ID**: Unique kebab-case identifier for the filename (e.g., `grand-prize`)
+   - **Prize Name**: Display name (e.g., `Grand Prize`)
+   - **Prize Value**: The value description (e.g., `$1000`, `500 Coins`, `+50 HP`)
+   - **Emoji**: The emoji to display (use the Quick Emoji Picker or type your own)
+
+### Quick Emoji Picker
+
+The Prize Designer includes a quick emoji picker with common prize-related emojis:
+- 🏆 💎 🪙 ⭐ 🎁 🧪 🔑 ⚔️ 🛡️ 👑 💰 🎰 🍀 🌟 💫
+
+Click any emoji to select it instantly.
+
+### Saving Your Prize
+
+1. Click "💾 Download for Core" to get a ready-to-use TypeScript file
+2. Save to `core/game-logic/prizes/[prize-id].ts`
+3. Import in `core/mechanics/prizes.ts` or use directly in game logic:
+
+```typescript
+import { GRAND_PRIZE } from '../game-logic/prizes/grand-prize';
+
+// Add to prizes array or use directly
+const prizes: Prize[] = [
+  GRAND_PRIZE,
+  // ... other prizes
+];
+```
+
 ## Tips for Good Layout Design
 
 ### Canvas Size Guidelines
@@ -221,6 +314,16 @@ npm run lint
 
 ## Recent Updates
 
+**Version 3.0 (2025-11-25)**
+- ✅ Renamed to "Game Designer Toolkit" to reflect expanded functionality
+- ✅ Added Scratcher Designer tab with full CRUD operations
+- ✅ Added Prize Designer tab with full CRUD operations
+- ✅ Added Quick Emoji Picker for prizes
+- ✅ Added emoji validation for scratchers and prizes
+- ✅ Added load/save functionality for scratchers and prizes
+- ✅ Added tab-based navigation between designers
+- ✅ Added scratcher visual preview with overlay
+
 **Version 2.0 (2025-11-24)**
 - ✅ Added interactive testing and debugging panel
 - ✅ Added ability to load existing layouts for editing
@@ -240,7 +343,9 @@ Potential features for future versions:
 - [ ] Preview with actual game rendering
 - [ ] Batch export multiple layouts
 - [ ] Auto-save drafts to browser storage
+- [ ] Scratcher testing/preview with actual scratch behavior
+- [ ] Prize pool management and probability configuration
 
 ## Questions or Issues?
 
-For questions or issues with the Layout Designer, please refer to the main project README or open an issue on GitHub.
+For questions or issues with the Game Designer Toolkit, please refer to the main project README or open an issue on GitHub.
