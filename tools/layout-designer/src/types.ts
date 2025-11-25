@@ -71,6 +71,9 @@ export interface Scratcher {
 
 /**
  * Prize configuration - mirrors core/mechanics/prizes.ts
+ * Note: Unlike Scratcher, the Prize interface does not have an 'id' field.
+ * The 'prizeId' in the designer tool is only used for file naming and constant naming,
+ * not as part of the Prize data structure itself.
  */
 export interface Prize {
   /** Display name of the prize */

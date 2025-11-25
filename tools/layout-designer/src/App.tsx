@@ -64,6 +64,8 @@ function App() {
   const [scratcherSymbolError, setScratcherSymbolError] = useState<string | null>(null);
 
   // Prize state
+  // Note: prizeId is only used for file naming and constant naming, not as part of the Prize data
+  // The Prize interface intentionally doesn't have an id field (matches core/mechanics/prizes.ts)
   const [prizeId, setPrizeId] = useState('custom-prize');
   const [prizeName, setPrizeName] = useState('My Custom Prize');
   const [prizeValue, setPrizeValue] = useState('$100');
