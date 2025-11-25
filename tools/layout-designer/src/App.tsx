@@ -340,6 +340,30 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
     URL.revokeObjectURL(url);
   };
 
+  // Convert TypeScript object literal to JSON-compatible string
+  const convertTsObjectToJson = (tsObject: string): string => {
+    // Remove comments (single-line and multi-line)
+    let result = tsObject.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    
+    // Remove trailing commas before closing braces/brackets
+    result = result.replace(/,(\s*[}\]])/g, '$1');
+    
+    // Convert unquoted property names to quoted ones
+    // Match property names that aren't already quoted
+    result = result.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)(\s*:)/g, '$1"$2"$3');
+    
+    // Convert single quotes to double quotes for string values
+    // This handles simple cases - be careful with nested quotes
+    result = result.replace(/'([^'\\]*(\\.[^'\\]*)*)'/g, '"$1"');
+    
+    // Remove any variable references (like imported assets) - replace with empty string
+    // Match patterns like: "backgroundImage": goblinGoldAsset,
+    result = result.replace(/"([^"]+)":\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,/g, '"$1": "",');
+    result = result.replace(/"([^"]+)":\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*}/g, '"$1": ""}');
+    
+    return result;
+  };
+
   const handleLoadLayout = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -354,10 +378,17 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
         if (file.name.endsWith('.json')) {
           layout = JSON.parse(content);
         } else {
-          // Try to extract JSON from TypeScript file - look for the export statement
-          const exportMatch = content.match(/export\s+const\s+\w+\s*:\s*TicketLayout\s*=\s*({[\s\S]*?});/);
+          // Try to extract object from TypeScript file - look for the export statement
+          // Use greedy match to get the complete object
+          const exportMatch = content.match(/export\s+const\s+\w+\s*:\s*TicketLayout\s*=\s*({[\s\S]*});/);
           if (exportMatch) {
-            layout = JSON.parse(exportMatch[1]);
+            // Convert TypeScript object syntax to valid JSON
+            const jsonStr = convertTsObjectToJson(exportMatch[1]);
+            try {
+              layout = JSON.parse(jsonStr);
+            } catch (parseError) {
+              throw new Error('Failed to parse layout object. The file may contain unsupported syntax.');
+            }
           } else {
             throw new Error('Could not find valid TicketLayout export in TypeScript file');
           }
