@@ -8,6 +8,23 @@
 - ‼️ Always run `npm run lint` and `npm run build` before committing changes to ensure code quality.
 - ‼️ Never commit build artifacts (files in `dist/` directory) to the repository.
 
+## Prompt Completion Upkeep
+When implementing a prompt file from the `kickstart-prompts/` directory:
+
+1. **After successful implementation**, update the `kickstart-prompts/completed-log.md` file:
+   - Add the prompt filename to the appropriate section (e.g., `gh-agent-completed`)
+   - Include a brief description of what was implemented
+   - Add the completion date
+
+2. **Moving completed prompts**: The prompt file should be moved to `kickstart-prompts/gh-agent-completed/` after implementation
+
+3. **Log format**: Use the table format in `completed-log.md`:
+   ```markdown
+   | prompt-filename.md | Brief description of implementation | YYYY-MM-DD |
+   ```
+
+4. **Exception**: Only modify `kickstart-prompts/` files (including the log) when explicitly asked to implement a prompt from that folder
+
 ## Project Overview
 This project is a web and mobile game that combines game mechanics around:
 - **Scratch Off Tickets** - Primary game mechanic where users can scratch off tickets to win prizes.
