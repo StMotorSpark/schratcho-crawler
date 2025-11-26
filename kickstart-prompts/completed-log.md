@@ -27,6 +27,7 @@ When implementing a prompt from this folder, add an entry to the appropriate sec
 | 011-enhance-dev-tooling-2.md | Enhanced development tooling part 2 | - |
 | 012-refactor-scratch-mechanic.md | Refactored scratch mechanic | - |
 | 013-user-state-tracking.md | User state tracking with persistence, sessions, achievements, and analytics | 2025-11-26 |
+| 014-ticket-layout-editor-updates.md | Updated ticket layout editor UI and functionality | - |
 
 ---
 
