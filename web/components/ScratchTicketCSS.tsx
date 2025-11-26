@@ -80,6 +80,19 @@ function fillCanvasWithOverlay(
 }
 
 /**
+ * Pixel check interval for reveal percentage calculation.
+ * We check every 10th pixel (RGBA has 4 values per pixel, so 4 * 10 = 40).
+ * This provides a good balance between accuracy and performance.
+ */
+const PIXEL_CHECK_STRIDE = 40;
+
+/**
+ * Minimum interval between reveal percentage checks in milliseconds.
+ * Throttles the expensive getImageData() call during rapid scratching.
+ */
+const REVEAL_CHECK_THROTTLE_MS = 100;
+
+/**
  * Calculate what percentage of the canvas has been scratched (erased).
  * Checks every 10th pixel for performance optimization.
  */
@@ -92,13 +105,13 @@ function calculateRevealPercentage(
   let transparentPixels = 0;
 
   // Check every 10th pixel for performance (checking alpha channel)
-  for (let i = 3; i < pixels.length; i += 40) {
+  for (let i = 3; i < pixels.length; i += PIXEL_CHECK_STRIDE) {
     if (pixels[i] < 128) {
       transparentPixels++;
     }
   }
 
-  const totalChecked = pixels.length / 40;
+  const totalChecked = pixels.length / PIXEL_CHECK_STRIDE;
   return (transparentPixels / totalChecked) * 100;
 }
 
@@ -120,6 +133,7 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
   const [revealedAreaIds, setRevealedAreaIds] = useState<Set<string>>(new Set());
   const revealedRef = useRef(false);
   const lastScratchTime = useRef(0);
+  const lastRevealCheckTime = useRef(0);
   
   // Store canvas scratch areas in a ref to avoid re-rendering on every scratch
   const canvasAreasRef = useRef<CanvasScratchArea[]>([]);
@@ -246,8 +260,9 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
             lastScratchTime.current = now;
           }
 
-          // Check if area should be marked as revealed
-          if (!area.isRevealed) {
+          // Check if area should be marked as revealed (throttled to avoid expensive getImageData calls)
+          if (!area.isRevealed && now - lastRevealCheckTime.current > REVEAL_CHECK_THROTTLE_MS) {
+            lastRevealCheckTime.current = now;
             const percentage = calculateRevealPercentage(area.ctx, area.canvas);
             if (percentage >= area.config.revealThreshold) {
               area.isRevealed = true;
