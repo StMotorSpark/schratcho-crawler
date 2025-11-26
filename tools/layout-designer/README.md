@@ -1,6 +1,6 @@
 # Ticket Layout Designer
 
-A visual GUI tool for designing and configuring scratch-off ticket layouts for Schratcho Crawler.
+A visual GUI tool for designing and configuring scratch-off ticket layouts, scratchers, and prizes for Schratcho Crawler.
 
 ## Features
 
@@ -8,6 +8,8 @@ A visual GUI tool for designing and configuring scratch-off ticket layouts for S
 - **Image Upload**: Upload ticket background images and automatically detect dimensions
 - **Interactive Editor**: Click and drag to create scratch areas, click to select and edit
 - **Configuration Options**: Set reveal mechanics, win conditions, and area properties
+- **Scratcher Management**: Create, edit, and delete scratchers with emoji validation
+- **Prize Management**: Create, edit, and delete prizes with emoji validation
 - **Code Generation**: Export as TypeScript or JSON for integration with the game
 - **Real-time Preview**: See your layout as you design it
 - **Load Existing Layouts**: Import and edit existing layout files from your core folder
@@ -95,7 +97,39 @@ Before exporting, test your layout using the interactive testing panel:
 - Ensure reveal mechanics match expectations
 - Catch configuration issues before exporting
 
-### 6. Export Configuration
+### 6. Manage Scratchers (NEW!)
+
+Create and customize scratchers that players use to reveal prizes:
+
+1. Click "▶ Show Scratchers" in the Scratcher Management section
+2. Click "➕ Add Scratcher" to create a new scratcher
+3. Configure scratcher properties:
+   - **ID**: Unique identifier (e.g., `my-coin`)
+   - **Name**: Display name (e.g., `Golden Coin`)
+   - **Description**: Brief description
+   - **Symbol**: Emoji character (validated) - e.g., 🪙, 🖌️, ✨
+   - **Scratch Radius**: Size of scratch area in pixels (10-100)
+   - **Overlay Color**: CSS gradient or color for the overlay
+   - **Overlay Pattern**: Text pattern displayed on the overlay
+4. Click "Delete Scratcher" to remove selected scratcher
+
+**Emoji Validation:**
+- Invalid emojis show ⚠️ warning
+- Use standard emoji characters for best cross-platform support
+
+### 7. Manage Prizes (NEW!)
+
+Create and customize prizes that players can win:
+
+1. Click "▶ Show Prizes" in the Prize Management section
+2. Click "➕ Add Prize" to create a new prize
+3. Configure prize properties:
+   - **Name**: Display name (e.g., `Grand Prize`)
+   - **Value**: Prize value description (e.g., `$1000`, `500 Coins`)
+   - **Emoji**: Emoji character (validated) - e.g., 🏆, 💎, 🎁
+4. Click "Delete Prize" to remove selected prize
+
+### 8. Export Configuration
 
 **Save to Core (Recommended):**
 - Click "💾 Download for Core" to get a file ready for core integration
@@ -112,7 +146,17 @@ Before exporting, test your layout using the interactive testing panel:
 - Click "Download .json" to download as a JSON file
 - Use JSON for dynamic loading or configuration files
 
-### 7. Load Existing Layouts (NEW!)
+**Scratcher Export (NEW!):**
+- Click "Copy Scratchers" to copy scratcher configuration
+- Click "Download scratchers.ts" to download the file
+- Replace `core/mechanics/scratchers.ts` with the downloaded file
+
+**Prize Export (NEW!):**
+- Click "Copy Prizes" to copy prize configuration
+- Click "Download prizes.ts" to download the file
+- Replace `core/mechanics/prizes.ts` with the downloaded file
+
+### 9. Load Existing Layouts
 
 You can now edit existing ticket layouts:
 
@@ -127,7 +171,7 @@ You can now edit existing ticket layouts:
 - Fix bugs in existing layouts
 - Adjust thresholds based on playtesting
 
-### 8. Integrate with Game
+### 10. Integrate with Game
 
 1. Copy the generated TypeScript code
 2. Add it to your project (e.g., `core/game-logic/tickets/`)
@@ -220,6 +264,13 @@ npm run lint
 - **No Backend**: Completely client-side, no server required
 
 ## Recent Updates
+
+**Version 3.0 (2025-11-26)**
+- ✅ Added Scratcher Management - create, edit, delete scratchers with emoji validation
+- ✅ Added Prize Management - create, edit, delete prizes with emoji validation
+- ✅ Added Scratcher export to `scratchers.ts` with full configuration
+- ✅ Added Prize export to `prizes.ts` with full configuration
+- ✅ Added emoji validation for symbols
 
 **Version 2.0 (2025-11-24)**
 - ✅ Added interactive testing and debugging panel
