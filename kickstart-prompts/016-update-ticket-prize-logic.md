@@ -6,6 +6,8 @@ In addition, the ticket layout definition should also include chances for each p
 # Technical Details
 Currently, the ticket prize logic is handled via `core/mechanics/prizes.ts -> getRandomPrize()` function which is used in `web/App.tsx`. Ideally, we would like to have the ticket layout define which prizes are available for that ticket, and the prize logic to be updated accordingly.
 
+This change may require some tighter integration between the dev tools and the `/core/game-logic` folders.
+
 # Requirements
 1.  **Update Ticket Layout Schema**:
     *   Modify the ticket layout schema to include a list of prize IDs that are associated with each ticket layout.
