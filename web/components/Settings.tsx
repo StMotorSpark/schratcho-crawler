@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { detectCapabilities, getCapabilityStatus, type BrowserCapabilities } from '../../core/mechanics/capabilities';
+import { resetUserData } from '../../core/user-state';
 import './Settings.css';
 
 interface SettingsProps {
@@ -14,6 +15,14 @@ export default function Settings({ onClose }: SettingsProps) {
     const caps = detectCapabilities();
     setCapabilities(caps);
   }, []);
+
+  const handleResetUserState = () => {
+    if (window.confirm('Are you sure you want to reset all user progress? This cannot be undone.')) {
+      resetUserData();
+      // Reload the page to reflect the reset state
+      window.location.reload();
+    }
+  };
 
   if (!capabilities) {
     return null;
@@ -67,6 +76,22 @@ export default function Settings({ onClose }: SettingsProps) {
                 </p>
               )}
             </div>
+          </section>
+
+          <section className="settings-section">
+            <h3>Developer Tools</h3>
+            <p className="settings-description">
+              Testing and debugging options:
+            </p>
+            <button 
+              className="reset-button" 
+              onClick={handleResetUserState}
+            >
+              🔄 Reset User State
+            </button>
+            <p className="settings-note">
+              Clears all progress including gold, tickets, and achievements.
+            </p>
           </section>
 
           <section className="settings-section">

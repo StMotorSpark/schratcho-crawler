@@ -9,6 +9,7 @@ export const TEST_TWO_COLUMN_TICKET: TicketLayout = {
   id: 'test-two-column',
   name: 'Test Two Column Ticket',
   description: 'A test ticket with two vertical scratch areas',
+  goldCost: 5,
   scratchAreas: [
     {
       id: 'left-column',

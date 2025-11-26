@@ -72,6 +72,8 @@ export interface TicketLayout {
   ticketHeight: number;
   /** Optional background image path for the ticket */
   backgroundImage?: string;
+  /** Gold cost to purchase this ticket type (default: 5, 0 = free) */
+  goldCost?: number;
 }
 
 /**
@@ -82,6 +84,7 @@ export const CLASSIC_TICKET: TicketLayout = {
   id: 'classic',
   name: 'Classic Scratch Ticket',
   description: 'Three horizontal scratch areas - reveal all to win',
+  goldCost: 5,
   scratchAreas: [
     {
       id: 'area-1',
@@ -127,6 +130,7 @@ export const GRID_TICKET: TicketLayout = {
   id: 'grid',
   name: 'Grid Ticket',
   description: 'Nine areas in a 3x3 grid - match three to win',
+  goldCost: 10,
   scratchAreas: [
     // Row 1
     {
@@ -235,6 +239,7 @@ export const SINGLE_AREA_TICKET: TicketLayout = {
   id: 'single',
   name: 'Single Area Ticket',
   description: 'One large scratch area - reveal to win',
+  goldCost: 3,
   scratchAreas: [
     {
       id: 'single-area',
@@ -269,6 +274,18 @@ export const TICKET_LAYOUTS: Record<string, TicketLayout> = {
  */
 export function getTicketLayout(id: string): TicketLayout {
   return TICKET_LAYOUTS[id] || CLASSIC_TICKET;
+}
+
+/**
+ * Default gold cost for tickets if not specified
+ */
+export const DEFAULT_TICKET_GOLD_COST = 5;
+
+/**
+ * Get the gold cost for a ticket layout
+ */
+export function getTicketGoldCost(layout: TicketLayout): number {
+  return layout.goldCost ?? DEFAULT_TICKET_GOLD_COST;
 }
 
 /**

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import ScratchTicketCSS from './components/ScratchTicketCSS';
 import Settings from './components/Settings';
 import { getRandomPrize, getPrizeGoldValue, type Prize } from '../core/mechanics/prizes';
-import { getTicketLayout, TICKET_LAYOUTS } from '../core/mechanics/ticketLayouts';
+import { getTicketLayout, getTicketGoldCost, TICKET_LAYOUTS } from '../core/mechanics/ticketLayouts';
 import { getScratcher, SCRATCHER_TYPES } from '../core/mechanics/scratchers';
 import {
   initializeUserState,
@@ -12,6 +12,11 @@ import {
   checkAndUnlockAchievements,
   getAchievementDefinition,
   logEvent,
+  purchaseTicketForLayout,
+  useTicketForLayout,
+  getOwnedTicketsForLayout,
+  canAfford,
+  subscribeToUserState,
   type UserState,
 } from '../core/user-state';
 import './App.css';
@@ -25,25 +30,70 @@ function App() {
   const [scratcherId, setScratcherId] = useState('coin');
   const [userState, setUserState] = useState<UserState | null>(null);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
+  const [hasTicket, setHasTicket] = useState(false);
+  const [showPurchasePrompt, setShowPurchasePrompt] = useState(true);
+  const [isTicketInProgress, setIsTicketInProgress] = useState(false);
   const currentLayout = getTicketLayout(layoutId);
   const currentScratcher = getScratcher(scratcherId);
+  const ticketCost = getTicketGoldCost(currentLayout);
 
-  // Initialize user state on mount
+  // Initialize user state on mount and subscribe to changes
   useEffect(() => {
     initializeUserState();
     setUserState(getUserState());
+    
+    // Subscribe to state changes
+    const unsubscribe = subscribeToUserState((newState) => {
+      setUserState(newState);
+    });
+    
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
+  // Update ticket availability when layout or state changes
+  useEffect(() => {
+    const ownedCount = getOwnedTicketsForLayout(layoutId);
+    setHasTicket(ownedCount > 0);
+    // Only show purchase prompt if no tickets owned AND no ticket in progress
+    if (!isTicketInProgress) {
+      setShowPurchasePrompt(ownedCount === 0);
+    }
+  }, [layoutId, userState, isTicketInProgress]);
+
+  const handlePurchaseTicket = () => {
+    if (purchaseTicketForLayout(layoutId, ticketCost)) {
+      setHasTicket(true);
+      setShowPurchasePrompt(false);
+    }
+  };
+
+  const handleStartTicket = () => {
+    if (useTicketForLayout(layoutId)) {
+      setPrize(getRandomPrize());
+      setIsCompleted(false);
+      setIsTicketInProgress(true);
+      setShowPurchasePrompt(false);
+      setKey((prev) => prev + 1);
+      setNewAchievements([]);
+      logEvent('ticket_start', { layoutId, scratcherId });
+    }
+  };
+
   const handleNewTicket = () => {
-    setPrize(getRandomPrize());
-    setIsCompleted(false);
-    setKey((prev) => prev + 1);
-    setNewAchievements([]);
-    logEvent('ticket_start', { layoutId, scratcherId });
+    // If user has a ticket, start a new one
+    if (hasTicket) {
+      handleStartTicket();
+    } else {
+      // Show purchase prompt
+      setShowPurchasePrompt(true);
+    }
   };
 
   const handleComplete = () => {
     setIsCompleted(true);
+    setIsTicketInProgress(false);
     
     // Record ticket scratched
     recordTicketScratched();
@@ -71,6 +121,9 @@ function App() {
     // Update UI state
     setUserState(getUserState());
   };
+
+  const ownedTicketCount = getOwnedTicketsForLayout(layoutId);
+  const canAffordTicket = canAfford(ticketCost);
 
   return (
     <div className="app">
@@ -120,7 +173,7 @@ function App() {
           >
             {Object.keys(TICKET_LAYOUTS).map((id) => (
               <option key={id} value={id}>
-                {TICKET_LAYOUTS[id].name}
+                {TICKET_LAYOUTS[id].name} ({getTicketGoldCost(TICKET_LAYOUTS[id])} 🪙)
               </option>
             ))}
           </select>
@@ -143,12 +196,52 @@ function App() {
           </select>
         </div>
 
-        <div className="ticket-wrapper">
-          <ScratchTicketCSS key={key} prize={prize} onComplete={handleComplete} layout={currentLayout} scratcher={currentScratcher} />
+        {/* Ticket Info Display */}
+        <div className="ticket-info">
+          <span className="ticket-count">
+            🎫 Owned: {ownedTicketCount}
+          </span>
+          <span className="ticket-cost">
+            💰 Cost: {ticketCost} 🪙
+          </span>
         </div>
 
+        {/* Purchase Prompt or Ticket */}
+        {showPurchasePrompt && !hasTicket ? (
+          <div className="purchase-prompt">
+            <p className="purchase-message">
+              You need to purchase a ticket to play!
+            </p>
+            <button 
+              className={`purchase-button ${!canAffordTicket ? 'disabled' : ''}`}
+              onClick={handlePurchaseTicket}
+              disabled={!canAffordTicket}
+            >
+              🎫 Buy Ticket ({ticketCost} 🪙)
+            </button>
+            {!canAffordTicket && (
+              <p className="insufficient-funds">
+                ❌ Not enough gold! You need {ticketCost - (userState?.currentGold ?? 0)} more.
+              </p>
+            )}
+          </div>
+        ) : hasTicket && !isTicketInProgress ? (
+          <div className="start-prompt">
+            <button 
+              className="start-button"
+              onClick={handleStartTicket}
+            >
+              🎫 Start Scratching!
+            </button>
+          </div>
+        ) : isTicketInProgress ? (
+          <div className="ticket-wrapper">
+            <ScratchTicketCSS key={key} prize={prize} onComplete={handleComplete} layout={currentLayout} scratcher={currentScratcher} />
+          </div>
+        ) : null}
+
         <button className="new-ticket-button" onClick={handleNewTicket}>
-          🎫 New Ticket
+          {hasTicket ? '🎫 New Ticket' : '🎫 Buy Ticket'}
         </button>
 
         {isCompleted && (
