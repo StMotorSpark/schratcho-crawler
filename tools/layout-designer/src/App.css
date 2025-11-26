@@ -321,6 +321,55 @@ canvas {
   border-left: 3px solid #667eea;
 }
 
+/* Scratcher and Prize Management Styles */
+.scratcher-panel,
+.prize-panel {
+  background: #0f3460;
+  padding: 15px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.scratcher-list,
+.prize-list {
+  margin-bottom: 15px;
+}
+
+.scratcher-list button,
+.prize-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.scratcher-list button.selected,
+.prize-list button.selected {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.scratcher-editor,
+.prize-editor {
+  background: rgba(102, 126, 234, 0.1);
+  padding: 15px;
+  border-radius: 4px;
+  border-left: 3px solid #667eea;
+}
+
+.scratcher-editor h3,
+.prize-editor h3 {
+  margin: 0 0 15px 0;
+  color: #8b9dc3;
+  font-size: 1rem;
+}
+
+.validation-error {
+  display: block;
+  margin-top: 5px;
+  color: #e74c3c;
+  font-size: 0.8rem;
+}
+
 @media (max-width: 1400px) {
   .content {
     grid-template-columns: 1fr;

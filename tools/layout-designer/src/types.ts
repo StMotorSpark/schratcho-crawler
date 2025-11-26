@@ -45,3 +45,38 @@ export interface DrawingRect {
   width: number;
   height: number;
 }
+
+/**
+ * Scratcher configuration - mirrors core/mechanics/scratchers.ts
+ */
+export interface Scratcher {
+  /** Unique identifier for this scratcher */
+  id: string;
+  /** Display name for this scratcher */
+  name: string;
+  /** Description of this scratcher */
+  description: string;
+  /** Emoji or symbol to display as the scratcher cursor/token */
+  symbol: string;
+  /** Scratch radius in pixels (size of the scratch area per action) */
+  scratchRadius: number;
+  /** Visual style for the scratcher overlay */
+  style?: {
+    /** Background color/gradient for the scratch overlay */
+    overlayColor?: string;
+    /** Pattern or texture for the overlay */
+    overlayPattern?: string;
+  };
+}
+
+/**
+ * Prize configuration - mirrors core/mechanics/prizes.ts
+ */
+export interface Prize {
+  /** Display name for this prize */
+  name: string;
+  /** Value description of this prize */
+  value: string;
+  /** Emoji to display for this prize */
+  emoji: string;
+}
