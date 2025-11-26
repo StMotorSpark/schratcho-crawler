@@ -5,6 +5,15 @@ import type { TicketLayout, ScratchAreaConfig } from '../../core/mechanics/ticke
 import { evaluateWinCondition, getPrizeDisplayForArea } from '../../core/mechanics/ticketLayouts';
 import type { Scratcher } from '../../core/mechanics/scratchers';
 
+// Constants for overlay pattern styling
+const PATTERN_LINE_COLOR = 'rgba(160, 160, 160, 0.4)';
+const PATTERN_LINE_WIDTH = 2;
+const PATTERN_LINE_SPACING = 16;
+
+// Pixel sampling interval for reveal percentage calculation
+// We check every 10th pixel (4 bytes per pixel = 40 byte stride)
+const PIXEL_SAMPLE_STRIDE = 40;
+
 interface ScratchTicketCSSProps {
   prize: Prize;
   onComplete: () => void;
@@ -70,11 +79,10 @@ function drawOverlay(
   ctx.fillRect(0, 0, width, height);
 
   // Draw diagonal pattern lines
-  ctx.strokeStyle = 'rgba(160, 160, 160, 0.4)';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = PATTERN_LINE_COLOR;
+  ctx.lineWidth = PATTERN_LINE_WIDTH;
   
-  const spacing = 16;
-  for (let i = -height; i < width + height; i += spacing) {
+  for (let i = -height; i < width + height; i += PATTERN_LINE_SPACING) {
     ctx.beginPath();
     ctx.moveTo(i, 0);
     ctx.lineTo(i + height, height);
@@ -114,14 +122,14 @@ function calculateRevealPercentage(canvas: HTMLCanvasElement): number {
   let transparentPixels = 0;
 
   // Check every 10th pixel for performance (checking alpha channel)
-  // Pixels are RGBA, so we check every 4th value starting from index 3 (alpha)
-  for (let i = 3; i < pixels.length; i += 40) {
+  // Pixels are RGBA (4 bytes), we sample every 10th pixel using PIXEL_SAMPLE_STRIDE
+  for (let i = 3; i < pixels.length; i += PIXEL_SAMPLE_STRIDE) {
     if (pixels[i] < 128) {
       transparentPixels++;
     }
   }
 
-  const totalChecked = pixels.length / 40;
+  const totalChecked = pixels.length / PIXEL_SAMPLE_STRIDE;
   return (transparentPixels / totalChecked) * 100;
 }
 
