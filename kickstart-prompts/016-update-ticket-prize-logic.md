@@ -1,12 +1,15 @@
 # Overview
 As we have continued to develop the core game loop (ticket purchasing, scratching, and prize claiming), we have identified the need to update the ticket prize logic to better align with our vision of prize management. We would like individual tickets to support a subset of prizes instead of all tickets sharing the same prize pool. This will allow for more diverse and engaging gameplay experiences.
 
+In addition, the ticket layout definition should also include chances for each prize associated with that ticket. This will enable game developers to create tickets with varying levels of prize rarity and excitement.
+
 # Technical Details
 Currently, the ticket prize logic is handled via `core/mechanics/prizes.ts -> getRandomPrize()` function which is used in `web/App.tsx`. Ideally, we would like to have the ticket layout define which prizes are available for that ticket, and the prize logic to be updated accordingly.
 
 # Requirements
 1.  **Update Ticket Layout Schema**:
     *   Modify the ticket layout schema to include a list of prize IDs that are associated with each ticket layout.
+    *   Include chances or weights for each prize to define their rarity.
 2.  **Update Prize Retrieval Logic**:
     *   Update the `getRandomPrize()` function to accept a ticket layout parameter and retrieve prizes based on the associated prize IDs for that layout.
 3.  **Modify Ticket Purchasing Logic**:
