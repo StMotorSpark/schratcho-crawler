@@ -1,7 +1,7 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import type { Prize } from '../../core/mechanics/prizes';
 import { soundManager } from '../../core/mechanics/sounds';
-import type { TicketLayout } from '../../core/mechanics/ticketLayouts';
+import type { TicketLayout, ScratchAreaConfig } from '../../core/mechanics/ticketLayouts';
 import { evaluateWinCondition, getPrizeDisplayForArea } from '../../core/mechanics/ticketLayouts';
 import type { Scratcher } from '../../core/mechanics/scratchers';
 
@@ -12,255 +12,284 @@ interface ScratchTicketCSSProps {
   scratcher: Scratcher;
 }
 
-interface ScratchArea {
+interface ScratchAreaState {
   id: string;
-  maskCanvas: HTMLCanvasElement | null;
-  maskImage: string;
   isRevealed: boolean;
-  config: {
-    topPercent: number;
-    leftPercent: number;
-    widthPercent: number;
-    heightPercent: number;
-    canvasWidth: number;
-    canvasHeight: number;
-    revealThreshold: number;
-  };
 }
 
+/**
+ * Parses a CSS gradient string and extracts color stops.
+ * Returns a function that creates a CanvasGradient.
+ */
+function parseGradient(
+  ctx: CanvasRenderingContext2D,
+  gradientStr: string,
+  width: number,
+  height: number
+): CanvasGradient | string {
+  // Check if it's a gradient
+  if (!gradientStr.includes('gradient')) {
+    return gradientStr;
+  }
+
+  // Extract colors from gradient string
+  // Format: "linear-gradient(135deg, #color1 0%, #color2 100%)"
+  const colorMatch = gradientStr.match(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}/g);
+  
+  // Create linear gradient (135deg = diagonal from top-left to bottom-right)
+  const gradient = ctx.createLinearGradient(0, 0, width, height);
+  
+  if (colorMatch && colorMatch.length >= 2) {
+    gradient.addColorStop(0, colorMatch[0]);
+    gradient.addColorStop(1, colorMatch[1]);
+  } else {
+    // Fallback colors
+    gradient.addColorStop(0, '#667eea');
+    gradient.addColorStop(1, '#764ba2');
+  }
+  
+  return gradient;
+}
+
+/**
+ * Draws the scratch overlay on a canvas with the given style.
+ */
+function drawOverlay(
+  canvas: HTMLCanvasElement,
+  overlayColor: string,
+  overlayPattern: string
+): void {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return;
+
+  const { width, height } = canvas;
+
+  // Fill with the overlay color/gradient
+  const fill = parseGradient(ctx, overlayColor, width, height);
+  ctx.fillStyle = fill;
+  ctx.fillRect(0, 0, width, height);
+
+  // Draw diagonal pattern lines
+  ctx.strokeStyle = 'rgba(160, 160, 160, 0.4)';
+  ctx.lineWidth = 2;
+  
+  const spacing = 16;
+  for (let i = -height; i < width + height; i += spacing) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i + height, height);
+    ctx.stroke();
+  }
+
+  // Draw overlay text
+  if (overlayPattern) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = 'bold 18px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText(overlayPattern, width / 2, height / 2);
+    
+    // Reset shadow
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  }
+}
+
+/**
+ * Calculates the percentage of transparent pixels in a canvas.
+ * Uses sampling for performance (every 10th pixel).
+ */
+function calculateRevealPercentage(canvas: HTMLCanvasElement): number {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return 0;
+
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+  let transparentPixels = 0;
+
+  // Check every 10th pixel for performance (checking alpha channel)
+  // Pixels are RGBA, so we check every 4th value starting from index 3 (alpha)
+  for (let i = 3; i < pixels.length; i += 40) {
+    if (pixels[i] < 128) {
+      transparentPixels++;
+    }
+  }
+
+  const totalChecked = pixels.length / 40;
+  return (transparentPixels / totalChecked) * 100;
+}
+
+/**
+ * ScratchTicketCSS - A high-performance scratch-off ticket component.
+ * 
+ * Uses direct canvas rendering with globalCompositeOperation = 'destination-out'
+ * to achieve 60fps performance. No toDataURL() calls during scratching.
+ */
 export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher }: ScratchTicketCSSProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scratchAreasRef = useRef<HTMLDivElement>(null);
+  const canvasRefs = useRef<Map<string, HTMLCanvasElement>>(new Map());
+  
   const [isScratching, setIsScratching] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
+  const [, setAreaStates] = useState<ScratchAreaState[]>(
+    layout.scratchAreas.map((area) => ({ id: area.id, isRevealed: false }))
+  );
+  
   const revealedRef = useRef(false);
   const lastScratchTime = useRef(0);
-  const animationFrameRef = useRef<number | null>(null);
-  const pendingUpdateRef = useRef<boolean>(false);
-  
-  // Create scratch areas from layout configuration
-  const [scratchAreas, setScratchAreas] = useState<ScratchArea[]>(
-    layout.scratchAreas.map((areaConfig) => ({
-      id: areaConfig.id,
-      maskCanvas: null,
-      maskImage: '',
-      isRevealed: false,
-      config: {
-        topPercent: areaConfig.topPercent,
-        leftPercent: areaConfig.leftPercent,
-        widthPercent: areaConfig.widthPercent,
-        heightPercent: areaConfig.heightPercent,
-        canvasWidth: areaConfig.canvasWidth,
-        canvasHeight: areaConfig.canvasHeight,
-        revealThreshold: areaConfig.revealThreshold,
-      },
-    }))
-  );
+  const initializationKey = useRef(0);
 
+  // Initialize canvases when layout/prize changes
   useEffect(() => {
-    // Initialize all scratch areas from layout configuration
-    const newAreas = layout.scratchAreas.map((areaConfig) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) {
-        return {
-          id: areaConfig.id,
-          maskCanvas: null,
-          maskImage: '',
-          isRevealed: false,
-          config: {
-            topPercent: areaConfig.topPercent,
-            leftPercent: areaConfig.leftPercent,
-            widthPercent: areaConfig.widthPercent,
-            heightPercent: areaConfig.heightPercent,
-            canvasWidth: areaConfig.canvasWidth,
-            canvasHeight: areaConfig.canvasHeight,
-            revealThreshold: areaConfig.revealThreshold,
-          },
-        };
-      }
-
-      // Set canvas size from configuration
-      canvas.width = areaConfig.canvasWidth;
-      canvas.height = areaConfig.canvasHeight;
-
-      // Fill with white (opaque mask)
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      return {
-        id: areaConfig.id,
-        maskCanvas: canvas,
-        maskImage: canvas.toDataURL(),
-        isRevealed: false,
-        config: {
-          topPercent: areaConfig.topPercent,
-          leftPercent: areaConfig.leftPercent,
-          widthPercent: areaConfig.widthPercent,
-          heightPercent: areaConfig.heightPercent,
-          canvasWidth: areaConfig.canvasWidth,
-          canvasHeight: areaConfig.canvasHeight,
-          revealThreshold: areaConfig.revealThreshold,
-        },
-      };
-    });
-
-    setScratchAreas(newAreas);
+    initializationKey.current += 1;
     revealedRef.current = false;
-
-    // Cleanup animation frame on unmount
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+    setIsRevealed(false);
+    setAreaStates(layout.scratchAreas.map((area) => ({ id: area.id, isRevealed: false })));
+    
+    // Initialize all canvases after render
+    const initCanvases = () => {
+      layout.scratchAreas.forEach((areaConfig) => {
+        const canvas = canvasRefs.current.get(areaConfig.id);
+        if (canvas) {
+          // Set canvas dimensions
+          canvas.width = areaConfig.canvasWidth;
+          canvas.height = areaConfig.canvasHeight;
+          
+          // Draw overlay
+          const overlayColor = scratcher.style?.overlayColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+          const overlayPattern = scratcher.style?.overlayPattern || 'SCRATCH';
+          drawOverlay(canvas, overlayColor, overlayPattern);
+        }
+      });
     };
-  }, [prize, layout]);
 
-  const checkRevealPercentage = (areaId: string, canvas: HTMLCanvasElement, threshold: number) => {
+    // Use requestAnimationFrame to ensure canvases are mounted
+    const rafId = requestAnimationFrame(initCanvases);
+    return () => cancelAnimationFrame(rafId);
+  }, [prize, layout, scratcher]);
+
+  // Store canvas ref for a specific area
+  const setCanvasRef = useCallback((areaId: string, canvas: HTMLCanvasElement | null) => {
+    if (canvas) {
+      canvasRefs.current.set(areaId, canvas);
+    } else {
+      canvasRefs.current.delete(areaId);
+    }
+  }, []);
+
+  // Check win condition based on revealed areas
+  const checkWinCondition = useCallback((newAreaStates: ScratchAreaState[]) => {
     if (revealedRef.current) return;
 
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return;
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-    let transparentPixels = 0;
-
-    // Check every 10th pixel for performance (checking alpha channel)
-    for (let i = 3; i < pixels.length; i += 40) {
-      // Check alpha channel - pixels are RGBA, so alpha is every 4th value
-      if (pixels[i] < 128) {
-        transparentPixels++;
-      }
-    }
-
-    const totalChecked = pixels.length / 40;
-    const percentage = (transparentPixels / totalChecked) * 100;
-
-    // Mark area as revealed if threshold is exceeded
-    if (percentage > threshold) {
-      setScratchAreas((prev) =>
-        prev.map((area) =>
-          area.id === areaId ? { ...area, isRevealed: true } : area
-        )
-      );
-    }
-
-    // Build set of revealed areas for win condition evaluation
     const revealedAreaIds = new Set<string>();
-    scratchAreas.forEach((area) => {
-      if (area.id === areaId && percentage > threshold) {
-        revealedAreaIds.add(area.id);
-      } else if (area.isRevealed) {
-        revealedAreaIds.add(area.id);
+    newAreaStates.forEach((state) => {
+      if (state.isRevealed) {
+        revealedAreaIds.add(state.id);
       }
     });
 
-    // Evaluate win condition using layout configuration
     const isWinner = evaluateWinCondition(layout, revealedAreaIds);
-
-    if (isWinner && !revealedRef.current) {
+    if (isWinner) {
       revealedRef.current = true;
       setIsRevealed(true);
       soundManager.playWin();
       onComplete();
     }
-  };
+  }, [layout, onComplete]);
 
-  const scratch = (x: number, y: number) => {
+  // Check if an area is revealed based on threshold
+  const checkAreaReveal = useCallback((areaId: string, canvas: HTMLCanvasElement, threshold: number) => {
+    const percentage = calculateRevealPercentage(canvas);
+    
+    if (percentage > threshold) {
+      setAreaStates((prev) => {
+        const newStates = prev.map((state) =>
+          state.id === areaId ? { ...state, isRevealed: true } : state
+        );
+        // Check win condition with updated states
+        checkWinCondition(newStates);
+        return newStates;
+      });
+    }
+  }, [checkWinCondition]);
+
+  // Scratch at the given client coordinates
+  const scratch = useCallback((clientX: number, clientY: number) => {
     const scratchAreasElement = scratchAreasRef.current;
-    if (!scratchAreasElement) return;
+    if (!scratchAreasElement || revealedRef.current) return;
 
     const rect = scratchAreasElement.getBoundingClientRect();
-    const relativeY = y - rect.top;
-    const relativeX = x - rect.left;
+    const relativeX = clientX - rect.left;
+    const relativeY = clientY - rect.top;
 
-    // Determine which scratch area was scratched based on position
-    let targetArea: ScratchArea | null = null;
-    let areaRect: { top: number; left: number; width: number; height: number } | null = null;
-
-    for (const area of scratchAreas) {
-      const areaTop = rect.height * area.config.topPercent;
-      const areaLeft = rect.width * area.config.leftPercent;
-      const areaWidth = rect.width * area.config.widthPercent;
-      const areaHeight = rect.height * area.config.heightPercent;
+    // Find which scratch area was hit
+    for (const areaConfig of layout.scratchAreas) {
+      const areaTop = rect.height * areaConfig.topPercent;
+      const areaLeft = rect.width * areaConfig.leftPercent;
+      const areaWidth = rect.width * areaConfig.widthPercent;
+      const areaHeight = rect.height * areaConfig.heightPercent;
 
       if (
-        relativeY >= areaTop &&
-        relativeY <= areaTop + areaHeight &&
         relativeX >= areaLeft &&
-        relativeX <= areaLeft + areaWidth
+        relativeX <= areaLeft + areaWidth &&
+        relativeY >= areaTop &&
+        relativeY <= areaTop + areaHeight
       ) {
-        targetArea = area;
-        areaRect = { top: areaTop, left: areaLeft, width: areaWidth, height: areaHeight };
+        const canvas = canvasRefs.current.get(areaConfig.id);
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) return;
+
+        // Calculate position within the canvas
+        const scaleX = canvas.width / areaWidth;
+        const scaleY = canvas.height / areaHeight;
+        const localX = (relativeX - areaLeft) * scaleX;
+        const localY = (relativeY - areaTop) * scaleY;
+
+        // Erase pixels at this position using destination-out
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(localX, localY, scratcher.scratchRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Reset composite operation
+        ctx.globalCompositeOperation = 'source-over';
+
+        // Play scratch sound (throttled)
+        const now = Date.now();
+        if (now - lastScratchTime.current > 50) {
+          soundManager.playScratch();
+          lastScratchTime.current = now;
+        }
+
+        // Check if area is revealed
+        checkAreaReveal(areaConfig.id, canvas, areaConfig.revealThreshold);
         break;
       }
     }
+  }, [layout, scratcher.scratchRadius, checkAreaReveal]);
 
-    if (!targetArea || !areaRect || !targetArea.maskCanvas) return;
-
-    const ctx = targetArea.maskCanvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return;
-
-    const scaleX = targetArea.maskCanvas.width / areaRect.width;
-    const scaleY = targetArea.maskCanvas.height / areaRect.height;
-    const localY = relativeY - areaRect.top;
-    const localX = relativeX - areaRect.left;
-
-    // Draw black circle (transparent in mask) using scratcher radius
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(
-      localX * scaleX,
-      localY * scaleY,
-      scratcher.scratchRadius,
-      0,
-      Math.PI * 2
-    );
-    ctx.fill();
-
-    // Update mask image for this area using requestAnimationFrame to prevent flickering
-    if (!pendingUpdateRef.current) {
-      pendingUpdateRef.current = true;
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      animationFrameRef.current = requestAnimationFrame(() => {
-        const newMaskImage = targetArea!.maskCanvas!.toDataURL();
-        setScratchAreas((prev) =>
-          prev.map((a) =>
-            a.id === targetArea!.id ? { ...a, maskImage: newMaskImage } : a
-          )
-        );
-        pendingUpdateRef.current = false;
-        animationFrameRef.current = null;
-      });
-    }
-
-    // Play scratch sound (throttled to avoid too many sounds)
-    const now = Date.now();
-    if (now - lastScratchTime.current > 50) {
-      soundManager.playScratch();
-      lastScratchTime.current = now;
-    }
-
-    checkRevealPercentage(targetArea.id, targetArea.maskCanvas, targetArea.config.revealThreshold);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // Initialize audio context on first user interaction (iOS requirement)
+  // Event handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     soundManager.initialize();
-    
     setIsScratching(true);
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
       setCursorPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     }
     scratch(e.clientX, e.clientY);
-  };
+  }, [scratch]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
       setCursorPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
@@ -268,60 +297,62 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
     if (isScratching) {
       scratch(e.clientX, e.clientY);
     }
-  };
+  }, [isScratching, scratch]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsScratching(false);
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setIsScratching(false);
     setCursorPosition(null);
-  };
+  }, []);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
-    
-    // Initialize audio context on first user interaction (iOS requirement)
     soundManager.initialize();
-    
     setIsScratching(true);
+    
     const touch = e.touches[0];
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
       setCursorPosition({ x: touch.clientX - rect.left, y: touch.clientY - rect.top });
     }
-    // Trigger haptic feedback on mobile (Note: Not supported on iOS)
+    
+    // Trigger haptic feedback on mobile
     if (navigator.vibrate) {
       navigator.vibrate(10);
     }
+    
     scratch(touch.clientX, touch.clientY);
-  };
+  }, [scratch]);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
-    if (isScratching) {
-      const touch = e.touches[0];
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (rect) {
-        setCursorPosition({ x: touch.clientX - rect.left, y: touch.clientY - rect.top });
-      }
-      // Trigger haptic feedback on mobile (throttled)
-      const now = Date.now();
-      if (now - lastScratchTime.current > 100 && navigator.vibrate) {
-        navigator.vibrate(5);
-      }
-      scratch(touch.clientX, touch.clientY);
+    if (!isScratching) return;
+    
+    const touch = e.touches[0];
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setCursorPosition({ x: touch.clientX - rect.left, y: touch.clientY - rect.top });
     }
-  };
+    
+    // Trigger haptic feedback (throttled)
+    const now = Date.now();
+    if (now - lastScratchTime.current > 100 && navigator.vibrate) {
+      navigator.vibrate(5);
+    }
+    
+    scratch(touch.clientX, touch.clientY);
+  }, [isScratching, scratch]);
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     setIsScratching(false);
     setCursorPosition(null);
-  };
+  }, []);
 
-  // Calculate aspect ratio and height for the ticket
+  // Calculate aspect ratio for the ticket
   const aspectRatio = layout.ticketHeight / layout.ticketWidth;
   const hasBackgroundImage = !!layout.backgroundImage;
 
@@ -364,18 +395,18 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
               position: 'relative',
             }}
           >
-            {scratchAreas.map((area, index) => {
+            {layout.scratchAreas.map((areaConfig: ScratchAreaConfig, index: number) => {
               const prizeDisplay = getPrizeDisplayForArea(layout, index, prize);
               return (
                 <div
-                  key={area.id}
+                  key={areaConfig.id}
                   className="scratch-area"
                   style={{
                     position: 'absolute',
-                    top: `${area.config.topPercent * 100}%`,
-                    left: `${area.config.leftPercent * 100}%`,
-                    width: `${area.config.widthPercent * 100}%`,
-                    height: `${area.config.heightPercent * 100}%`,
+                    top: `${areaConfig.topPercent * 100}%`,
+                    left: `${areaConfig.leftPercent * 100}%`,
+                    width: `${areaConfig.widthPercent * 100}%`,
+                    height: `${areaConfig.heightPercent * 100}%`,
                   }}
                 >
                   <div className="area-content">
@@ -385,20 +416,19 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
                       {prizeDisplay.value && <div className="prize-value">{prizeDisplay.value}</div>}
                     </div>
                   </div>
-                  <div
-                    className="scratch-overlay"
+                  {/* Direct canvas rendering - no CSS mask-image */}
+                  <canvas
+                    ref={(el) => setCanvasRef(areaConfig.id, el)}
+                    className="scratch-canvas-overlay"
                     style={{
-                      maskImage: `url(${area.maskImage})`,
-                      WebkitMaskImage: `url(${area.maskImage})`,
-                      maskSize: 'cover',
-                      WebkitMaskSize: 'cover',
-                      background: scratcher.style?.overlayColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      pointerEvents: 'none',
                     }}
-                  >
-                    <div className="overlay-pattern">
-                      <span className="overlay-text">{scratcher.style?.overlayPattern || 'SCRATCH'}</span>
-                    </div>
-                  </div>
+                  />
                 </div>
               );
             })}
