@@ -401,6 +401,117 @@
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
 }
 
+.gold-won {
+  font-size: 1.5rem !important;
+  margin-top: 10px !important;
+  color: #b8860b !important;
+}
+
+/* User State Display */
+.user-state-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.gold-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gold-icon {
+  font-size: 1.8rem;
+  animation: pulse-gold 2s ease-in-out infinite;
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.gold-amount {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.gold-label {
+  font-size: 0.9rem;
+  color: #888;
+  font-weight: 600;
+}
+
+.stats-display {
+  display: flex;
+  gap: 15px;
+}
+
+.stat-item {
+  font-size: 1rem;
+  color: #ccc;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: help;
+}
+
+/* Achievements Popup */
+.achievements-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 30px 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  text-align: center;
+  animation: achievement-pop 0.5s ease-out;
+}
+
+@keyframes achievement-pop {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.achievements-popup h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.achievement-item {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  margin: 10px 0;
+  font-size: 1.2rem;
+  color: white;
+  font-weight: 600;
+}
+
 
 
 /* Animations */

@@ -1,0 +1,434 @@
+/**
+ * User State Manager Module
+ * 
+ * Core module for managing user state including gold, tickets,
+ * achievements, and sessions with automatic persistence.
+ */
+
+import type {
+  UserData,
+  UserState,
+  Achievement,
+  Session,
+  StateEffect,
+  PrizeEffect,
+} from './types';
+import {
+  DEFAULT_USER_STATE,
+  USER_DATA_VERSION,
+  SESSION_TIMEOUT_MS,
+  MAX_SESSION_HISTORY,
+} from './types';
+import { loadUserData, saveUserData, clearUserData } from './storage';
+import { logEvent } from './analytics';
+
+/**
+ * Generate a unique ID for sessions.
+ */
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Create initial user data with defaults.
+ */
+function createInitialUserData(): UserData {
+  const now = Date.now();
+  return {
+    version: USER_DATA_VERSION,
+    state: { ...DEFAULT_USER_STATE },
+    achievements: {},
+    currentSession: null,
+    sessionHistory: [],
+    lastActivityTime: now,
+    createdAt: now,
+  };
+}
+
+/**
+ * The in-memory user data cache.
+ */
+let userData: UserData | null = null;
+
+/**
+ * Initialize the user state manager.
+ * Loads existing data or creates new data if none exists.
+ * Also handles session management based on inactivity.
+ */
+export function initializeUserState(): UserData {
+  // Load existing data or create new
+  const loadedData = loadUserData();
+  const now = Date.now();
+
+  if (loadedData) {
+    userData = loadedData;
+
+    // Check if current session should be ended due to timeout
+    if (userData.currentSession) {
+      const timeSinceLastActivity = now - userData.lastActivityTime;
+      if (timeSinceLastActivity > SESSION_TIMEOUT_MS) {
+        // End the previous session due to timeout
+        endSession();
+      }
+    }
+  } else {
+    userData = createInitialUserData();
+  }
+
+  // Start a new session if we don't have one
+  if (!userData.currentSession) {
+    startSession();
+  }
+
+  // Update last activity time
+  userData.lastActivityTime = now;
+  persist();
+
+  return userData;
+}
+
+/**
+ * Get the current user data.
+ * Initializes if not already initialized.
+ */
+export function getUserData(): UserData {
+  if (!userData) {
+    return initializeUserState();
+  }
+  updateActivity();
+  return userData;
+}
+
+/**
+ * Get the current user state values.
+ */
+export function getUserState(): UserState {
+  return getUserData().state;
+}
+
+/**
+ * Update the last activity timestamp.
+ */
+function updateActivity(): void {
+  if (userData) {
+    userData.lastActivityTime = Date.now();
+  }
+}
+
+/**
+ * Persist current data to storage.
+ */
+function persist(): void {
+  if (userData) {
+    saveUserData(userData);
+  }
+}
+
+/**
+ * Start a new session.
+ */
+export function startSession(): void {
+  if (!userData) {
+    initializeUserState();
+    return;
+  }
+
+  const now = Date.now();
+  userData.currentSession = {
+    id: generateId(),
+    startTime: now,
+    ticketsScratched: 0,
+    goldEarned: 0,
+    goldSpent: 0,
+  };
+
+  logEvent('session_start', { sessionId: userData.currentSession.id });
+  persist();
+}
+
+/**
+ * End the current session.
+ */
+export function endSession(): void {
+  if (!userData || !userData.currentSession) {
+    return;
+  }
+
+  const session = userData.currentSession;
+  session.endTime = Date.now();
+
+  // Log session end
+  logEvent('session_end', {
+    sessionId: session.id,
+    duration: session.endTime - session.startTime,
+    ticketsScratched: session.ticketsScratched,
+    goldEarned: session.goldEarned,
+    goldSpent: session.goldSpent,
+  });
+
+  // Add to session history
+  userData.sessionHistory.unshift(session);
+
+  // Trim history to max size
+  if (userData.sessionHistory.length > MAX_SESSION_HISTORY) {
+    userData.sessionHistory = userData.sessionHistory.slice(0, MAX_SESSION_HISTORY);
+  }
+
+  userData.currentSession = null;
+  persist();
+}
+
+/**
+ * Update a specific field in user state.
+ */
+export function updateState(
+  field: keyof UserState,
+  value: number | string | string[]
+): void {
+  if (!userData) {
+    initializeUserState();
+  }
+  if (userData) {
+    (userData.state[field] as typeof value) = value;
+    updateActivity();
+    persist();
+  }
+}
+
+/**
+ * Apply a state effect to user state.
+ */
+export function applyStateEffect(effect: StateEffect): void {
+  if (!userData) {
+    initializeUserState();
+  }
+  if (!userData) return;
+
+  const currentValue = userData.state[effect.field];
+
+  switch (effect.operation) {
+    case 'add':
+      if (typeof currentValue === 'number' && typeof effect.value === 'number') {
+        (userData.state[effect.field] as number) = currentValue + effect.value;
+      } else if (Array.isArray(currentValue) && typeof effect.value === 'string') {
+        if (!currentValue.includes(effect.value)) {
+          (userData.state[effect.field] as string[]) = [...currentValue, effect.value];
+        }
+      }
+      break;
+
+    case 'subtract':
+      if (typeof currentValue === 'number' && typeof effect.value === 'number') {
+        (userData.state[effect.field] as number) = Math.max(0, currentValue - effect.value);
+      }
+      break;
+
+    case 'set':
+      (userData.state[effect.field] as typeof effect.value) = effect.value;
+      break;
+
+    case 'multiply':
+      if (typeof currentValue === 'number' && typeof effect.value === 'number') {
+        (userData.state[effect.field] as number) = currentValue * effect.value;
+      }
+      break;
+  }
+
+  updateActivity();
+  persist();
+}
+
+/**
+ * Add gold to the user's balance.
+ */
+export function addGold(amount: number): void {
+  if (!userData) initializeUserState();
+  if (!userData) return;
+
+  userData.state.currentGold += amount;
+  userData.state.totalGoldEarned += amount;
+
+  // Update highest win if applicable
+  if (amount > userData.state.highestWin) {
+    userData.state.highestWin = amount;
+  }
+
+  // Track in current session
+  if (userData.currentSession) {
+    userData.currentSession.goldEarned += amount;
+  }
+
+  logEvent('gold_earned', { amount });
+  updateActivity();
+  persist();
+}
+
+/**
+ * Spend gold from the user's balance.
+ * Returns true if successful, false if insufficient funds.
+ */
+export function spendGold(amount: number): boolean {
+  if (!userData) initializeUserState();
+  if (!userData) return false;
+
+  if (userData.state.currentGold < amount) {
+    return false;
+  }
+
+  userData.state.currentGold -= amount;
+  userData.state.totalGoldSpent += amount;
+
+  // Track in current session
+  if (userData.currentSession) {
+    userData.currentSession.goldSpent += amount;
+  }
+
+  logEvent('gold_spent', { amount });
+  updateActivity();
+  persist();
+  return true;
+}
+
+/**
+ * Record that a ticket was scratched.
+ */
+export function recordTicketScratched(): void {
+  if (!userData) initializeUserState();
+  if (!userData) return;
+
+  userData.state.totalTicketsScratched++;
+
+  if (userData.currentSession) {
+    userData.currentSession.ticketsScratched++;
+  }
+
+  updateActivity();
+  persist();
+}
+
+/**
+ * Unlock an achievement.
+ */
+export function unlockAchievement(achievement: Achievement): boolean {
+  if (!userData) initializeUserState();
+  if (!userData) return false;
+
+  // Check if already unlocked
+  if (userData.achievements[achievement.id]?.unlocked) {
+    return false;
+  }
+
+  userData.achievements[achievement.id] = {
+    ...achievement,
+    unlocked: true,
+    unlockedAt: Date.now(),
+  };
+
+  logEvent('achievement_unlock', { achievementId: achievement.id });
+  updateActivity();
+  persist();
+  return true;
+}
+
+/**
+ * Get all achievements.
+ */
+export function getAchievements(): Record<string, Achievement> {
+  return getUserData().achievements;
+}
+
+/**
+ * Check if an achievement is unlocked.
+ */
+export function isAchievementUnlocked(achievementId: string): boolean {
+  const data = getUserData();
+  return data.achievements[achievementId]?.unlocked ?? false;
+}
+
+/**
+ * Apply prize effects to user state.
+ */
+export function applyPrizeEffects(prizeEffect: PrizeEffect): void {
+  if (!prizeEffect) return;
+
+  // Apply state effects
+  if (prizeEffect.stateEffects) {
+    for (const effect of prizeEffect.stateEffects) {
+      applyStateEffect(effect);
+    }
+  }
+
+  // Note: Achievement unlocking would need the full achievement definition
+  // This is a simplified approach - in practice, achievements would be defined elsewhere
+}
+
+/**
+ * Get session history.
+ */
+export function getSessionHistory(): Session[] {
+  return getUserData().sessionHistory;
+}
+
+/**
+ * Get the current session.
+ */
+export function getCurrentSession(): Session | null {
+  return getUserData().currentSession;
+}
+
+/**
+ * Reset all user data (for testing or user request).
+ */
+export function resetUserData(): void {
+  clearUserData();
+  userData = createInitialUserData();
+  startSession();
+  persist();
+}
+
+/**
+ * Check if the user can afford a specific amount.
+ */
+export function canAfford(amount: number): boolean {
+  return getUserState().currentGold >= amount;
+}
+
+/**
+ * Purchase a ticket (deducts gold, adds ticket).
+ * Returns true if successful.
+ */
+export function purchaseTicket(cost: number): boolean {
+  if (!canAfford(cost)) {
+    return false;
+  }
+
+  if (spendGold(cost)) {
+    if (userData) {
+      userData.state.availableTickets++;
+      logEvent('ticket_purchase', { cost });
+      persist();
+    }
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Use a ticket (deducts from available tickets).
+ * Returns true if successful.
+ */
+export function useTicket(): boolean {
+  if (!userData) initializeUserState();
+  if (!userData) return false;
+
+  if (userData.state.availableTickets < 1) {
+    return false;
+  }
+
+  userData.state.availableTickets--;
+  logEvent('ticket_start', {});
+  updateActivity();
+  persist();
+  return true;
+}
