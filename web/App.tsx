@@ -238,9 +238,12 @@ function App() {
           </div>
         ) : null}
 
-        <button className="new-ticket-button" onClick={handleNewTicket}>
-          {hasTicket ? '🎫 New Ticket' : '🎫 Buy Ticket'}
-        </button>
+        {/* Only show New Ticket button when not showing purchase prompt */}
+        {!showPurchasePrompt && (
+          <button className="new-ticket-button" onClick={handleNewTicket}>
+            {hasTicket ? '🎫 New Ticket' : '🎫 Buy Ticket'}
+          </button>
+        )}
 
         {isCompleted && (
           <div className="completion-badge">
@@ -253,7 +256,7 @@ function App() {
 
         {/* New Achievements Display */}
         {newAchievements.length > 0 && (
-          <div className="achievements-popup">
+          <div className="achievements-popup" onClick={() => setNewAchievements([])}>
             <h3>🎉 Achievement Unlocked!</h3>
             {newAchievements.map((id) => {
               const achievement = getAchievementDefinition(id);
@@ -263,6 +266,7 @@ function App() {
                 </div>
               );
             })}
+            <p className="achievement-dismiss">Tap to dismiss</p>
           </div>
         )}
       </div>

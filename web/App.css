@@ -479,6 +479,7 @@
   z-index: 2000;
   text-align: center;
   animation: achievement-pop 0.5s ease-out;
+  cursor: pointer;
 }
 
 @keyframes achievement-pop {
@@ -510,6 +511,13 @@
   font-size: 1.2rem;
   color: white;
   font-weight: 600;
+}
+
+.achievement-dismiss {
+  margin: 15px 0 0 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
 }
 
 /* Ticket Info Display */
