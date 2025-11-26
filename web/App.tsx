@@ -1,9 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ScratchTicketCSS from './components/ScratchTicketCSS';
 import Settings from './components/Settings';
-import { getRandomPrize, type Prize } from '../core/mechanics/prizes';
+import { getRandomPrize, getPrizeGoldValue, type Prize } from '../core/mechanics/prizes';
 import { getTicketLayout, TICKET_LAYOUTS } from '../core/mechanics/ticketLayouts';
 import { getScratcher, SCRATCHER_TYPES } from '../core/mechanics/scratchers';
+import {
+  initializeUserState,
+  getUserState,
+  addGold,
+  recordTicketScratched,
+  checkAndUnlockAchievements,
+  getAchievementDefinition,
+  logEvent,
+  type UserState,
+} from '../core/user-state';
 import './App.css';
 
 function App() {
@@ -13,17 +23,53 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [layoutId, setLayoutId] = useState('classic');
   const [scratcherId, setScratcherId] = useState('coin');
+  const [userState, setUserState] = useState<UserState | null>(null);
+  const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const currentLayout = getTicketLayout(layoutId);
   const currentScratcher = getScratcher(scratcherId);
+
+  // Initialize user state on mount
+  useEffect(() => {
+    initializeUserState();
+    setUserState(getUserState());
+  }, []);
 
   const handleNewTicket = () => {
     setPrize(getRandomPrize());
     setIsCompleted(false);
     setKey((prev) => prev + 1);
+    setNewAchievements([]);
+    logEvent('ticket_start', { layoutId, scratcherId });
   };
 
   const handleComplete = () => {
     setIsCompleted(true);
+    
+    // Record ticket scratched
+    recordTicketScratched();
+    
+    // Apply prize gold effect
+    const goldValue = getPrizeGoldValue(prize);
+    if (goldValue > 0) {
+      addGold(goldValue);
+    }
+    
+    // Log ticket completion
+    logEvent('ticket_complete', { 
+      layoutId, 
+      scratcherId, 
+      prizeValue: goldValue,
+      prizeName: prize.name,
+    });
+    
+    // Check for new achievements
+    const unlocked = checkAndUnlockAchievements();
+    if (unlocked.length > 0) {
+      setNewAchievements(unlocked);
+    }
+    
+    // Update UI state
+    setUserState(getUserState());
   };
 
   return (
@@ -40,6 +86,25 @@ function App() {
           </button>
         </div>
         <p className="subtitle">Scratch to reveal your prize!</p>
+
+        {/* User State Display */}
+        {userState && (
+          <div className="user-state-display">
+            <div className="gold-display">
+              <span className="gold-icon">🪙</span>
+              <span className="gold-amount">{userState.currentGold}</span>
+              <span className="gold-label">Gold</span>
+            </div>
+            <div className="stats-display">
+              <span className="stat-item" title="Tickets Scratched">
+                🎫 {userState.totalTicketsScratched}
+              </span>
+              <span className="stat-item" title="Highest Win">
+                🏆 {userState.highestWin}
+              </span>
+            </div>
+          </div>
+        )}
 
         <div className="layout-selector">
           <label htmlFor="layout-select">Ticket Layout: </label>
@@ -89,6 +154,24 @@ function App() {
         {isCompleted && (
           <div className="completion-badge">
             <p>✨ Ticket Completed! ✨</p>
+            {getPrizeGoldValue(prize) > 0 && (
+              <p className="gold-won">+{getPrizeGoldValue(prize)} 🪙</p>
+            )}
+          </div>
+        )}
+
+        {/* New Achievements Display */}
+        {newAchievements.length > 0 && (
+          <div className="achievements-popup">
+            <h3>🎉 Achievement Unlocked!</h3>
+            {newAchievements.map((id) => {
+              const achievement = getAchievementDefinition(id);
+              return (
+                <div key={id} className="achievement-item">
+                  {achievement ? `${achievement.icon} ${achievement.name}` : id}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
