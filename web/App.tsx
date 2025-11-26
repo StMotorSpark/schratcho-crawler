@@ -10,6 +10,7 @@ import {
   addGold,
   recordTicketScratched,
   checkAndUnlockAchievements,
+  getAchievementDefinition,
   logEvent,
   type UserState,
 } from '../core/user-state';
@@ -163,11 +164,14 @@ function App() {
         {newAchievements.length > 0 && (
           <div className="achievements-popup">
             <h3>🎉 Achievement Unlocked!</h3>
-            {newAchievements.map((id) => (
-              <div key={id} className="achievement-item">
-                {id.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-              </div>
-            ))}
+            {newAchievements.map((id) => {
+              const achievement = getAchievementDefinition(id);
+              return (
+                <div key={id} className="achievement-item">
+                  {achievement ? `${achievement.icon} ${achievement.name}` : id}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -51,6 +51,20 @@ function createInitialUserData(): UserData {
 let userData: UserData | null = null;
 
 /**
+ * Ensures userData is initialized and returns it.
+ * Throws if initialization fails (should never happen in normal flow).
+ */
+function ensureInitialized(): UserData {
+  if (!userData) {
+    initializeUserState();
+  }
+  if (!userData) {
+    throw new Error('Failed to initialize user data');
+  }
+  return userData;
+}
+
+/**
  * Initialize the user state manager.
  * Loads existing data or creates new data if none exists.
  * Also handles session management based on inactivity.
@@ -185,51 +199,43 @@ export function updateState(
   field: keyof UserState,
   value: number | string | string[]
 ): void {
-  if (!userData) {
-    initializeUserState();
-  }
-  if (userData) {
-    (userData.state[field] as typeof value) = value;
-    updateActivity();
-    persist();
-  }
+  const data = ensureInitialized();
+  (data.state[field] as typeof value) = value;
+  updateActivity();
+  persist();
 }
 
 /**
  * Apply a state effect to user state.
  */
 export function applyStateEffect(effect: StateEffect): void {
-  if (!userData) {
-    initializeUserState();
-  }
-  if (!userData) return;
-
-  const currentValue = userData.state[effect.field];
+  const data = ensureInitialized();
+  const currentValue = data.state[effect.field];
 
   switch (effect.operation) {
     case 'add':
       if (typeof currentValue === 'number' && typeof effect.value === 'number') {
-        (userData.state[effect.field] as number) = currentValue + effect.value;
+        (data.state[effect.field] as number) = currentValue + effect.value;
       } else if (Array.isArray(currentValue) && typeof effect.value === 'string') {
         if (!currentValue.includes(effect.value)) {
-          (userData.state[effect.field] as string[]) = [...currentValue, effect.value];
+          (data.state[effect.field] as string[]) = [...currentValue, effect.value];
         }
       }
       break;
 
     case 'subtract':
       if (typeof currentValue === 'number' && typeof effect.value === 'number') {
-        (userData.state[effect.field] as number) = Math.max(0, currentValue - effect.value);
+        (data.state[effect.field] as number) = Math.max(0, currentValue - effect.value);
       }
       break;
 
     case 'set':
-      (userData.state[effect.field] as typeof effect.value) = effect.value;
+      (data.state[effect.field] as typeof effect.value) = effect.value;
       break;
 
     case 'multiply':
       if (typeof currentValue === 'number' && typeof effect.value === 'number') {
-        (userData.state[effect.field] as number) = currentValue * effect.value;
+        (data.state[effect.field] as number) = currentValue * effect.value;
       }
       break;
   }
@@ -242,20 +248,19 @@ export function applyStateEffect(effect: StateEffect): void {
  * Add gold to the user's balance.
  */
 export function addGold(amount: number): void {
-  if (!userData) initializeUserState();
-  if (!userData) return;
+  const data = ensureInitialized();
 
-  userData.state.currentGold += amount;
-  userData.state.totalGoldEarned += amount;
+  data.state.currentGold += amount;
+  data.state.totalGoldEarned += amount;
 
   // Update highest win if applicable
-  if (amount > userData.state.highestWin) {
-    userData.state.highestWin = amount;
+  if (amount > data.state.highestWin) {
+    data.state.highestWin = amount;
   }
 
   // Track in current session
-  if (userData.currentSession) {
-    userData.currentSession.goldEarned += amount;
+  if (data.currentSession) {
+    data.currentSession.goldEarned += amount;
   }
 
   logEvent('gold_earned', { amount });
@@ -268,19 +273,18 @@ export function addGold(amount: number): void {
  * Returns true if successful, false if insufficient funds.
  */
 export function spendGold(amount: number): boolean {
-  if (!userData) initializeUserState();
-  if (!userData) return false;
+  const data = ensureInitialized();
 
-  if (userData.state.currentGold < amount) {
+  if (data.state.currentGold < amount) {
     return false;
   }
 
-  userData.state.currentGold -= amount;
-  userData.state.totalGoldSpent += amount;
+  data.state.currentGold -= amount;
+  data.state.totalGoldSpent += amount;
 
   // Track in current session
-  if (userData.currentSession) {
-    userData.currentSession.goldSpent += amount;
+  if (data.currentSession) {
+    data.currentSession.goldSpent += amount;
   }
 
   logEvent('gold_spent', { amount });
@@ -293,13 +297,12 @@ export function spendGold(amount: number): boolean {
  * Record that a ticket was scratched.
  */
 export function recordTicketScratched(): void {
-  if (!userData) initializeUserState();
-  if (!userData) return;
+  const data = ensureInitialized();
 
-  userData.state.totalTicketsScratched++;
+  data.state.totalTicketsScratched++;
 
-  if (userData.currentSession) {
-    userData.currentSession.ticketsScratched++;
+  if (data.currentSession) {
+    data.currentSession.ticketsScratched++;
   }
 
   updateActivity();
@@ -310,15 +313,14 @@ export function recordTicketScratched(): void {
  * Unlock an achievement.
  */
 export function unlockAchievement(achievement: Achievement): boolean {
-  if (!userData) initializeUserState();
-  if (!userData) return false;
+  const data = ensureInitialized();
 
   // Check if already unlocked
-  if (userData.achievements[achievement.id]?.unlocked) {
+  if (data.achievements[achievement.id]?.unlocked) {
     return false;
   }
 
-  userData.achievements[achievement.id] = {
+  data.achievements[achievement.id] = {
     ...achievement,
     unlocked: true,
     unlockedAt: Date.now(),
@@ -403,11 +405,10 @@ export function purchaseTicket(cost: number): boolean {
   }
 
   if (spendGold(cost)) {
-    if (userData) {
-      userData.state.availableTickets++;
-      logEvent('ticket_purchase', { cost });
-      persist();
-    }
+    const data = ensureInitialized();
+    data.state.availableTickets++;
+    logEvent('ticket_purchase', { cost });
+    persist();
     return true;
   }
 
@@ -419,14 +420,13 @@ export function purchaseTicket(cost: number): boolean {
  * Returns true if successful.
  */
 export function useTicket(): boolean {
-  if (!userData) initializeUserState();
-  if (!userData) return false;
+  const data = ensureInitialized();
 
-  if (userData.state.availableTickets < 1) {
+  if (data.state.availableTickets < 1) {
     return false;
   }
 
-  userData.state.availableTickets--;
+  data.state.availableTickets--;
   logEvent('ticket_start', {});
   updateActivity();
   persist();
