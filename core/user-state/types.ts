@@ -11,8 +11,10 @@
 export interface UserState {
   /** Current gold balance */
   currentGold: number;
-  /** Number of available tickets the user can use */
+  /** Number of available tickets the user can use (deprecated, use ownedTickets) */
   availableTickets: number;
+  /** Tickets owned by layout ID (layout-specific ticket tracking) */
+  ownedTickets: Record<string, number>;
   /** IDs of scratchers the user has unlocked */
   unlockedScratchers: string[];
   /** IDs of ticket types the user has unlocked */
@@ -147,7 +149,8 @@ export interface AnalyticsEvent {
  */
 export const DEFAULT_USER_STATE: UserState = {
   currentGold: 100, // Start with some gold
-  availableTickets: 3, // Start with a few tickets
+  availableTickets: 3, // Start with a few tickets (deprecated)
+  ownedTickets: {}, // Start with no layout-specific tickets
   unlockedScratchers: ['coin'], // Default scratcher
   unlockedTicketTypes: ['classic'], // Default ticket type
   totalTicketsScratched: 0,

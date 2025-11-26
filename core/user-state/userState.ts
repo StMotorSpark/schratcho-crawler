@@ -51,6 +51,33 @@ function createInitialUserData(): UserData {
 let userData: UserData | null = null;
 
 /**
+ * Subscription listeners for state changes.
+ */
+type StateListener = (state: UserState) => void;
+const stateListeners: Set<StateListener> = new Set();
+
+/**
+ * Subscribe to user state changes.
+ * Returns an unsubscribe function.
+ */
+export function subscribeToUserState(listener: StateListener): () => void {
+  stateListeners.add(listener);
+  return () => {
+    stateListeners.delete(listener);
+  };
+}
+
+/**
+ * Notify all listeners of state changes.
+ */
+function notifyStateChange(): void {
+  if (userData) {
+    const state = { ...userData.state };
+    stateListeners.forEach((listener) => listener(state));
+  }
+}
+
+/**
  * Ensures userData is initialized and returns it.
  * Throws if initialization fails (should never happen in normal flow).
  */
@@ -135,6 +162,7 @@ function updateActivity(): void {
 function persist(): void {
   if (userData) {
     saveUserData(userData);
+    notifyStateChange();
   }
 }
 
@@ -398,6 +426,7 @@ export function canAfford(amount: number): boolean {
 /**
  * Purchase a ticket (deducts gold, adds ticket).
  * Returns true if successful.
+ * @deprecated Use purchaseTicketForLayout instead
  */
 export function purchaseTicket(cost: number): boolean {
   if (!canAfford(cost)) {
@@ -418,6 +447,7 @@ export function purchaseTicket(cost: number): boolean {
 /**
  * Use a ticket (deducts from available tickets).
  * Returns true if successful.
+ * @deprecated Use useTicketForLayout instead
  */
 export function useTicket(): boolean {
   const data = ensureInitialized();
@@ -431,4 +461,70 @@ export function useTicket(): boolean {
   updateActivity();
   persist();
   return true;
+}
+
+/**
+ * Ensure ownedTickets is initialized on user state.
+ */
+function ensureOwnedTicketsInitialized(data: UserData): void {
+  if (!data.state.ownedTickets) {
+    data.state.ownedTickets = {};
+  }
+}
+
+/**
+ * Get the number of tickets owned for a specific layout.
+ */
+export function getOwnedTicketsForLayout(layoutId: string): number {
+  const data = ensureInitialized();
+  ensureOwnedTicketsInitialized(data);
+  return data.state.ownedTickets[layoutId] ?? 0;
+}
+
+/**
+ * Purchase a ticket for a specific layout (deducts gold, adds ticket to layout).
+ * Returns true if successful.
+ */
+export function purchaseTicketForLayout(layoutId: string, cost: number): boolean {
+  if (!canAfford(cost)) {
+    return false;
+  }
+
+  if (spendGold(cost)) {
+    const data = ensureInitialized();
+    ensureOwnedTicketsInitialized(data);
+    data.state.ownedTickets[layoutId] = (data.state.ownedTickets[layoutId] ?? 0) + 1;
+    logEvent('ticket_purchase', { layoutId, cost });
+    persist();
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Use a ticket for a specific layout (deducts from owned tickets).
+ * Returns true if successful.
+ */
+export function useTicketForLayout(layoutId: string): boolean {
+  const data = ensureInitialized();
+  ensureOwnedTicketsInitialized(data);
+
+  const ownedCount = data.state.ownedTickets[layoutId] ?? 0;
+  if (ownedCount < 1) {
+    return false;
+  }
+
+  data.state.ownedTickets[layoutId] = ownedCount - 1;
+  logEvent('ticket_start', { layoutId });
+  updateActivity();
+  persist();
+  return true;
+}
+
+/**
+ * Check if the user has any tickets for a specific layout.
+ */
+export function hasTicketForLayout(layoutId: string): boolean {
+  return getOwnedTicketsForLayout(layoutId) > 0;
 }
