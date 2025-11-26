@@ -57,9 +57,7 @@ function App() {
     const ownedCount = getOwnedTicketsForLayout(layoutId);
     setHasTicket(ownedCount > 0);
     // Only show purchase prompt if no tickets owned AND no ticket in progress
-    if (!isTicketInProgress) {
-      setShowPurchasePrompt(ownedCount === 0);
-    }
+    setShowPurchasePrompt(ownedCount === 0 && !isTicketInProgress);
   }, [layoutId, userState, isTicketInProgress]);
 
   const handlePurchaseTicket = () => {
@@ -221,7 +219,7 @@ function App() {
             </button>
             {!canAffordTicket && (
               <p className="insufficient-funds">
-                ❌ Not enough gold! You need {ticketCost - (userState?.currentGold ?? 0)} more.
+                ❌ Not enough gold! You need {Math.max(0, ticketCost - (userState?.currentGold ?? 0))} more.
               </p>
             )}
           </div>

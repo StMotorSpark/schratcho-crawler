@@ -464,10 +464,20 @@ export function useTicket(): boolean {
 }
 
 /**
+ * Ensure ownedTickets is initialized on user state.
+ */
+function ensureOwnedTicketsInitialized(data: UserData): void {
+  if (!data.state.ownedTickets) {
+    data.state.ownedTickets = {};
+  }
+}
+
+/**
  * Get the number of tickets owned for a specific layout.
  */
 export function getOwnedTicketsForLayout(layoutId: string): number {
   const data = ensureInitialized();
+  ensureOwnedTicketsInitialized(data);
   return data.state.ownedTickets[layoutId] ?? 0;
 }
 
@@ -482,9 +492,7 @@ export function purchaseTicketForLayout(layoutId: string, cost: number): boolean
 
   if (spendGold(cost)) {
     const data = ensureInitialized();
-    if (!data.state.ownedTickets) {
-      data.state.ownedTickets = {};
-    }
+    ensureOwnedTicketsInitialized(data);
     data.state.ownedTickets[layoutId] = (data.state.ownedTickets[layoutId] ?? 0) + 1;
     logEvent('ticket_purchase', { layoutId, cost });
     persist();
@@ -500,10 +508,7 @@ export function purchaseTicketForLayout(layoutId: string, cost: number): boolean
  */
 export function useTicketForLayout(layoutId: string): boolean {
   const data = ensureInitialized();
-
-  if (!data.state.ownedTickets) {
-    data.state.ownedTickets = {};
-  }
+  ensureOwnedTicketsInitialized(data);
 
   const ownedCount = data.state.ownedTickets[layoutId] ?? 0;
   if (ownedCount < 1) {
