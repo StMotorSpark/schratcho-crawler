@@ -206,10 +206,13 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
 
   // Get revealed prizes for win condition evaluation and completion
   const getRevealedPrizes = useCallback((): Prize[] => {
-    return layout.scratchAreas
-      .map((area, index) => ({ area, prize: areaPrizes[index] }))
-      .filter(({ area }) => revealedAreaIds.has(area.id))
-      .map(({ prize }) => prize);
+    const revealedPrizes: Prize[] = [];
+    for (let i = 0; i < layout.scratchAreas.length; i++) {
+      if (revealedAreaIds.has(layout.scratchAreas[i].id)) {
+        revealedPrizes.push(areaPrizes[i]);
+      }
+    }
+    return revealedPrizes;
   }, [layout.scratchAreas, areaPrizes, revealedAreaIds]);
 
   // Check win condition when revealed areas change

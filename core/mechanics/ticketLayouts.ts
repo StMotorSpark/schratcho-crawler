@@ -433,10 +433,13 @@ export function evaluateWinCondition(
   // Get the revealed prizes for match-based conditions
   const getRevealedPrizes = (): Prize[] => {
     if (!areaPrizes) return [];
-    return layout.scratchAreas
-      .map((area, index) => ({ area, prize: areaPrizes[index] }))
-      .filter(({ area }) => revealedAreas.has(area.id))
-      .map(({ prize }) => prize);
+    const revealedPrizes: Prize[] = [];
+    for (let i = 0; i < layout.scratchAreas.length; i++) {
+      if (revealedAreas.has(layout.scratchAreas[i].id)) {
+        revealedPrizes.push(areaPrizes[i]);
+      }
+    }
+    return revealedPrizes;
   };
 
   switch (layout.winCondition) {

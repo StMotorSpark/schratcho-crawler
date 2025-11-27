@@ -263,9 +263,10 @@ function App() {
                 <p className="prizes-won">
                   {wonPrizes.map(p => p.emoji).join(' ')}
                 </p>
-                {wonPrizes.reduce((sum, p) => sum + getPrizeGoldValue(p), 0) > 0 && (
-                  <p className="gold-won">+{wonPrizes.reduce((sum, p) => sum + getPrizeGoldValue(p), 0)} 🪙</p>
-                )}
+                {(() => {
+                  const totalGold = wonPrizes.reduce((sum, p) => sum + getPrizeGoldValue(p), 0);
+                  return totalGold > 0 ? <p className="gold-won">+{totalGold} 🪙</p> : null;
+                })()}
               </>
             )}
           </div>
