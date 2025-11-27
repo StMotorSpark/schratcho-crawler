@@ -10,6 +10,7 @@
  */
 
 import type { Prize, PrizeConfig } from './prizes';
+import { getRandomPrizeForLayout, getRandomPrize as getLegacyRandomPrize } from './prizes';
 import { GOBLIN_GOLD_TICKET } from '../game-logic/tickets/basic-goblinGold/goblinGoldLayout';
 import { TEST_TWO_COLUMN_TICKET } from '../game-logic/tickets/test-two-column';
 
@@ -327,8 +328,6 @@ export function getTicketGoldCost(layout: TicketLayout): number {
   return layout.goldCost ?? DEFAULT_TICKET_GOLD_COST;
 }
 
-import { getRandomPrizeForLayout, getRandomPrize as getLegacyRandomPrize, type Prize as PrizeType } from './prizes';
-
 /**
  * Get a random prize for a ticket layout.
  * Uses the layout's prize configuration if available, otherwise falls back to legacy behavior.
@@ -336,7 +335,7 @@ import { getRandomPrizeForLayout, getRandomPrize as getLegacyRandomPrize, type P
  * @param layout - The ticket layout to get a prize for
  * @returns A randomly selected prize based on the layout's configuration
  */
-export function getRandomPrizeForTicket(layout: TicketLayout): PrizeType {
+export function getRandomPrizeForTicket(layout: TicketLayout): Prize {
   if (layout.prizeConfigs && layout.prizeConfigs.length > 0) {
     return getRandomPrizeForLayout(layout.prizeConfigs);
   }
