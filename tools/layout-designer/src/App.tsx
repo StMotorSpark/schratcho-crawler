@@ -36,6 +36,7 @@ function App() {
   const [ticketHeight, setTicketHeight] = useState(300);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [backgroundImagePath, setBackgroundImagePath] = useState('');
+  const [goldCost, setGoldCost] = useState<number>(5);
 
   // Scratch areas state
   const [scratchAreas, setScratchAreas] = useState<ScratchAreaConfig[]>([]);
@@ -320,6 +321,7 @@ function App() {
       ticketWidth,
       ticketHeight,
       backgroundImage: backgroundImagePath || undefined,
+      goldCost,
     };
 
     const timestamp = new Date().toISOString();
@@ -357,6 +359,7 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
       ticketWidth,
       ticketHeight,
       backgroundImage: backgroundImagePath || undefined,
+      goldCost,
     };
 
     return JSON.stringify(layout, null, 2);
@@ -442,6 +445,7 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
         setTicketHeight(layout.ticketHeight);
         setScratchAreas(layout.scratchAreas);
         setBackgroundImagePath(layout.backgroundImage || '');
+        setGoldCost(layout.goldCost ?? 5);
         setToastMessage('✓ Layout loaded successfully!');
       } catch (error) {
         setToastMessage('✗ Failed to load layout: ' + (error as Error).message);
@@ -1124,6 +1128,19 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
                 onChange={(e) => setLayoutDescription(e.target.value)}
                 rows={3}
               />
+            </div>
+            <div className="form-group">
+              <label>Gold Cost:</label>
+              <input
+                type="number"
+                value={goldCost}
+                onChange={(e) => setGoldCost(Math.max(0, parseInt(e.target.value) || 0))}
+                min="0"
+                placeholder="Cost in gold (0 = free)"
+              />
+              <p className="instructions" style={{ fontSize: '12px', marginTop: '4px' }}>
+                Cost to purchase this ticket type (0 = free)
+              </p>
             </div>
           </section>
 

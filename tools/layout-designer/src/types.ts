@@ -37,6 +37,8 @@ export interface TicketLayout {
   ticketWidth: number;
   ticketHeight: number;
   backgroundImage?: string;
+  /** Gold cost to purchase this ticket type (default: 5, 0 = free) */
+  goldCost?: number;
 }
 
 export interface DrawingRect {
