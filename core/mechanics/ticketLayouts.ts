@@ -10,7 +10,7 @@
  */
 
 import type { Prize, PrizeConfig } from './prizes';
-import { getRandomPrizeForLayout, getRandomPrize as getLegacyRandomPrize } from './prizes';
+import { getRandomPrizeForLayout, getRandomPrize as getLegacyRandomPrize, getPrizeGoldValue } from './prizes';
 import { GOBLIN_GOLD_TICKET } from '../game-logic/tickets/basic-goblinGold/goblinGoldLayout';
 import { TEST_TWO_COLUMN_TICKET } from '../game-logic/tickets/test-two-column';
 
@@ -37,23 +37,41 @@ export interface ScratchAreaConfig {
 }
 
 /**
- * Prize reveal mechanics determine how prizes are displayed across scratch areas
+ * Prize reveal mechanics determine how prizes are displayed across scratch areas.
+ * 
+ * The new 'independent' mechanic means each scratch area contains its own unique prize,
+ * enabling authentic scratch-off mechanics where players discover different prizes under each area.
  */
 export type RevealMechanic = 
-  | 'reveal-all'      // Same prize revealed in all areas
-  | 'reveal-one'      // Prize only revealed in one specific area
-  | 'match-three'     // Win if all three areas match
-  | 'match-two'       // Win if any two areas match
-  | 'progressive';    // Each area reveals part of the prize info
+  | 'independent'     // Each area has its own independent prize (recommended)
+  | 'reveal-all'      // @deprecated - Same prize revealed in all areas
+  | 'reveal-one'      // @deprecated - Prize only revealed in one specific area
+  | 'match-three'     // @deprecated - Use 'independent' with 'match-three' win condition
+  | 'match-two'       // @deprecated - Use 'independent' with 'match-two' win condition
+  | 'progressive';    // @deprecated - Each area reveals part of the prize info
 
 /**
- * Win conditions determine what counts as a winning ticket
+ * Win conditions determine what counts as a winning ticket.
+ * 
+ * The new win conditions work with arrays of prizes (one per scratch area):
+ * - 'no-win-condition': Always wins (just reveals what was won)
+ * - 'match-two': Two areas must have matching prize emojis
+ * - 'match-three': Three areas must have matching prize emojis
+ * - 'match-all': All areas must have matching prize emojis (jackpot)
+ * - 'find-one': Must find a specific prize (defined by targetPrizeId)
+ * - 'total-value-threshold': Combined prize values must exceed a threshold
  */
 export type WinCondition = 
-  | 'reveal-all-areas'     // Must scratch all areas to win
-  | 'reveal-any-area'      // Win when any single area is revealed
-  | 'match-symbols'        // Win if symbols match according to reveal mechanic
-  | 'progressive-reveal';  // Win when final area is revealed
+  | 'no-win-condition'       // Always wins - show what you got
+  | 'match-two'              // Two areas must match
+  | 'match-three'            // Three areas must match
+  | 'match-all'              // All areas must match (jackpot)
+  | 'find-one'               // Find a specific prize (uses targetPrizeId)
+  | 'total-value-threshold'  // Combined value exceeds threshold
+  | 'reveal-all-areas'       // @deprecated - Must scratch all areas to win
+  | 'reveal-any-area'        // @deprecated - Win when any single area is revealed
+  | 'match-symbols'          // @deprecated - Use new match conditions instead
+  | 'progressive-reveal';    // @deprecated - Win when final area is revealed
 
 /**
  * Complete ticket layout configuration
@@ -85,16 +103,26 @@ export interface TicketLayout {
    * If not specified, falls back to legacy global prize pool.
    */
   prizeConfigs?: PrizeConfig[];
+  /**
+   * Target prize ID for 'find-one' win condition.
+   * Player must reveal an area containing this prize to win.
+   */
+  targetPrizeId?: string;
+  /**
+   * Value threshold for 'total-value-threshold' win condition.
+   * Combined gold value of revealed prizes must exceed this amount to win.
+   */
+  valueThreshold?: number;
 }
 
 /**
  * Default classic ticket layout (3 horizontal areas)
- * This replicates the current demo behavior
+ * Uses independent prize per area with no-win-condition
  */
 export const CLASSIC_TICKET: TicketLayout = {
   id: 'classic',
   name: 'Classic Scratch Ticket',
-  description: 'Three horizontal scratch areas - reveal all to win',
+  description: 'Three horizontal scratch areas - each reveals its own prize',
   goldCost: 5,
   scratchAreas: [
     {
@@ -128,8 +156,8 @@ export const CLASSIC_TICKET: TicketLayout = {
       revealThreshold: 50,
     },
   ],
-  revealMechanic: 'reveal-all',
-  winCondition: 'reveal-all-areas',
+  revealMechanic: 'independent',
+  winCondition: 'match-three',
   ticketWidth: 500,
   ticketHeight: 300,
   // Classic ticket has a balanced prize pool with all prizes
@@ -149,6 +177,7 @@ export const CLASSIC_TICKET: TicketLayout = {
 
 /**
  * Grid ticket layout (3x3 grid)
+ * Uses match-three win condition - find 3 matching prizes to win
  */
 export const GRID_TICKET: TicketLayout = {
   id: 'grid',
@@ -250,8 +279,8 @@ export const GRID_TICKET: TicketLayout = {
       revealThreshold: 60,
     },
   ],
-  revealMechanic: 'match-three',
-  winCondition: 'match-symbols',
+  revealMechanic: 'independent',
+  winCondition: 'match-three',
   ticketWidth: 500,
   ticketHeight: 300,
   // Grid ticket has higher-value prizes since it costs more
@@ -266,11 +295,12 @@ export const GRID_TICKET: TicketLayout = {
 
 /**
  * Single area ticket layout
+ * Uses no-win-condition - always wins (just reveals the prize)
  */
 export const SINGLE_AREA_TICKET: TicketLayout = {
   id: 'single',
   name: 'Single Area Ticket',
-  description: 'One large scratch area - reveal to win',
+  description: 'One large scratch area - reveal your prize',
   goldCost: 3,
   scratchAreas: [
     {
@@ -284,8 +314,8 @@ export const SINGLE_AREA_TICKET: TicketLayout = {
       revealThreshold: 50,
     },
   ],
-  revealMechanic: 'reveal-one',
-  winCondition: 'reveal-any-area',
+  revealMechanic: 'independent',
+  winCondition: 'no-win-condition',
   ticketWidth: 500,
   ticketHeight: 300,
   // Budget ticket with smaller prizes
@@ -346,14 +376,119 @@ export function getRandomPrizeForTicket(layout: TicketLayout): Prize {
 }
 
 /**
- * Evaluate if a ticket is a winner based on win condition
+ * Generate an array of prizes, one for each scratch area in the layout.
+ * This is used for the new 'independent' reveal mechanic where each area has its own prize.
+ * 
+ * @param layout - The ticket layout to generate prizes for
+ * @returns An array of prizes, one for each scratch area
+ */
+export function generateAreaPrizes(layout: TicketLayout): Prize[] {
+  return layout.scratchAreas.map(() => getRandomPrizeForTicket(layout));
+}
+
+/**
+ * Count how many times each prize emoji appears in the revealed prizes.
+ * Used for match-based win conditions.
+ * 
+ * @param prizes - Array of prizes to count
+ * @returns A record mapping emoji to count
+ */
+export function countPrizeMatches(prizes: Prize[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const prize of prizes) {
+    counts[prize.emoji] = (counts[prize.emoji] || 0) + 1;
+  }
+  return counts;
+}
+
+/**
+ * Get the maximum match count from a prize array.
+ * 
+ * @param prizes - Array of prizes to check
+ * @returns The highest number of matching prizes
+ */
+export function getMaxMatchCount(prizes: Prize[]): number {
+  const counts = countPrizeMatches(prizes);
+  return Math.max(0, ...Object.values(counts));
+}
+
+/**
+ * Evaluate if a ticket is a winner based on win condition.
+ * 
+ * For the new architecture with independent prizes per area, pass areaPrizes.
+ * The function checks revealed prizes based on revealedAreas to determine the winner.
+ * 
+ * @param layout - The ticket layout configuration
+ * @param revealedAreas - Set of revealed area IDs
+ * @param areaPrizes - Array of prizes, one per scratch area (for new system)
+ * @param matchData - Legacy match data (deprecated)
+ * @returns true if the ticket is a winner based on its win condition
  */
 export function evaluateWinCondition(
   layout: TicketLayout,
   revealedAreas: Set<string>,
+  areaPrizes?: Prize[],
   matchData?: { symbols: string[]; matches: number }
 ): boolean {
+  // Get the revealed prizes for match-based conditions
+  const getRevealedPrizes = (): Prize[] => {
+    if (!areaPrizes) return [];
+    const revealedPrizes: Prize[] = [];
+    for (let i = 0; i < layout.scratchAreas.length; i++) {
+      if (revealedAreas.has(layout.scratchAreas[i].id)) {
+        revealedPrizes.push(areaPrizes[i]);
+      }
+    }
+    return revealedPrizes;
+  };
+
   switch (layout.winCondition) {
+    // New win conditions
+    case 'no-win-condition':
+      // Always wins when at least one area is revealed
+      return revealedAreas.size > 0;
+    
+    case 'match-two': {
+      const revealed = getRevealedPrizes();
+      return getMaxMatchCount(revealed) >= 2;
+    }
+    
+    case 'match-three': {
+      const revealed = getRevealedPrizes();
+      return getMaxMatchCount(revealed) >= 3;
+    }
+    
+    case 'match-all': {
+      // All areas must be revealed and all must match
+      if (revealedAreas.size !== layout.scratchAreas.length) return false;
+      const revealed = getRevealedPrizes();
+      if (revealed.length === 0) return false;
+      const firstEmoji = revealed[0].emoji;
+      return revealed.every(p => p.emoji === firstEmoji);
+    }
+    
+    case 'find-one': {
+      if (!layout.targetPrizeId) {
+        console.warn(`Layout "${layout.id}" uses 'find-one' but has no targetPrizeId set.`);
+        return false;
+      }
+      const revealed = getRevealedPrizes();
+      return revealed.some(p => p.id === layout.targetPrizeId);
+    }
+    
+    case 'total-value-threshold': {
+      if (!layout.valueThreshold) {
+        console.warn(`Layout "${layout.id}" uses 'total-value-threshold' but has no valueThreshold set.`);
+        return false;
+      }
+      const revealed = getRevealedPrizes();
+      const totalValue = revealed.reduce((sum, prize) => {
+        return sum + getPrizeGoldValue(prize);
+      }, 0);
+      return totalValue >= layout.valueThreshold;
+    }
+
+    // Legacy win conditions (deprecated but maintained for backwards compatibility)
     case 'reveal-all-areas':
       // All areas must be revealed
       return revealedAreas.size === layout.scratchAreas.length;
@@ -363,7 +498,7 @@ export function evaluateWinCondition(
       return revealedAreas.size > 0;
     
     case 'match-symbols':
-      // Check if symbols match according to reveal mechanic
+      // Check if symbols match according to reveal mechanic (legacy)
       if (!matchData) return false;
       if (layout.revealMechanic === 'match-three') {
         return matchData.matches >= 3;
@@ -373,10 +508,11 @@ export function evaluateWinCondition(
       }
       return false;
     
-    case 'progressive-reveal':
+    case 'progressive-reveal': {
       // Last area must be revealed
       const lastAreaId = layout.scratchAreas[layout.scratchAreas.length - 1].id;
       return revealedAreas.has(lastAreaId);
+    }
     
     default:
       return false;
@@ -384,7 +520,15 @@ export function evaluateWinCondition(
 }
 
 /**
- * Determine what prize information to show in each area based on reveal mechanic
+ * Determine what prize information to show in each area based on reveal mechanic.
+ * 
+ * For the new 'independent' mechanic, the prize passed should be the specific
+ * prize for that area (from areaPrizes[areaIndex]).
+ * 
+ * @param layout - The ticket layout
+ * @param areaIndex - Index of the scratch area
+ * @param prize - The prize for this specific area
+ * @returns Display information for the prize
  */
 export function getPrizeDisplayForArea(
   layout: TicketLayout,
@@ -392,6 +536,26 @@ export function getPrizeDisplayForArea(
   prize: Prize
 ): { emoji: string; name: string; value: string } {
   switch (layout.revealMechanic) {
+    case 'independent':
+      // Each area shows its own prize with emoji only (for matching games)
+      // or full info for no-win-condition tickets
+      if (layout.winCondition === 'no-win-condition' || 
+          layout.winCondition === 'total-value-threshold' ||
+          layout.winCondition === 'find-one') {
+        return {
+          emoji: prize.emoji,
+          name: prize.name,
+          value: prize.value,
+        };
+      }
+      // For matching games, just show emoji to keep it clean
+      return {
+        emoji: prize.emoji,
+        name: '',
+        value: '',
+      };
+    
+    // Legacy reveal mechanics (deprecated)
     case 'reveal-all':
       // Show same prize in all areas
       return {

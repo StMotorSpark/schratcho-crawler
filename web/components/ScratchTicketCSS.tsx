@@ -6,8 +6,10 @@ import { evaluateWinCondition, getPrizeDisplayForArea } from '../../core/mechani
 import type { Scratcher } from '../../core/mechanics/scratchers';
 
 interface ScratchTicketCSSProps {
-  prize: Prize;
-  onComplete: () => void;
+  /** Array of prizes, one for each scratch area */
+  areaPrizes: Prize[];
+  /** Callback when ticket is completed, receives the revealed prizes */
+  onComplete: (revealedPrizes: Prize[]) => void;
   layout: TicketLayout;
   scratcher: Scratcher;
 }
@@ -123,8 +125,10 @@ function calculateRevealPercentage(
  * - Employs globalCompositeOperation = 'destination-out' for efficient pixel erasing
  * - Eliminates expensive toDataURL() calls and DOM updates during scratching
  * - Maintains 60fps performance on both desktop and mobile devices
+ * 
+ * New architecture: Each scratch area has its own prize from areaPrizes array.
  */
-export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher }: ScratchTicketCSSProps) {
+export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scratcher }: ScratchTicketCSSProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scratchAreasRef = useRef<HTMLDivElement>(null);
   const [isScratching, setIsScratching] = useState(false);
@@ -144,7 +148,7 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
   const overlayColor = scratcher.style?.overlayColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
   const overlayPattern = scratcher.style?.overlayPattern || 'SCRATCH';
 
-  // Initialize canvas areas when component mounts or layout/prize changes
+  // Initialize canvas areas when component mounts or layout/areaPrizes changes
   useEffect(() => {
     const newAreas: CanvasScratchArea[] = layout.scratchAreas.map((areaConfig) => {
       const canvas = document.createElement('canvas');
@@ -198,21 +202,34 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [prize, layout, overlayColor, overlayPattern]);
+  }, [areaPrizes, layout, overlayColor, overlayPattern]);
+
+  // Get revealed prizes for win condition evaluation and completion
+  const getRevealedPrizes = useCallback((): Prize[] => {
+    const revealedPrizes: Prize[] = [];
+    for (let i = 0; i < layout.scratchAreas.length; i++) {
+      if (revealedAreaIds.has(layout.scratchAreas[i].id)) {
+        revealedPrizes.push(areaPrizes[i]);
+      }
+    }
+    return revealedPrizes;
+  }, [layout.scratchAreas, areaPrizes, revealedAreaIds]);
 
   // Check win condition when revealed areas change
   useEffect(() => {
     if (revealedRef.current) return;
 
-    const isWinner = evaluateWinCondition(layout, revealedAreaIds);
+    const isWinner = evaluateWinCondition(layout, revealedAreaIds, areaPrizes);
 
     if (isWinner) {
       revealedRef.current = true;
       setIsRevealed(true);
       soundManager.playWin();
-      onComplete();
+      // Pass revealed prizes to onComplete
+      const revealedPrizes = getRevealedPrizes();
+      onComplete(revealedPrizes);
     }
-  }, [revealedAreaIds, layout, onComplete]);
+  }, [revealedAreaIds, layout, areaPrizes, onComplete, getRevealedPrizes]);
 
   // Handle scratch at position - uses direct canvas manipulation
   const scratch = useCallback(
@@ -412,7 +429,9 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
             }}
           >
             {layout.scratchAreas.map((areaConfig, index) => {
-              const prizeDisplay = getPrizeDisplayForArea(layout, index, prize);
+              // Get the specific prize for this area from areaPrizes
+              const areaPrize = areaPrizes[index];
+              const prizeDisplay = getPrizeDisplayForArea(layout, index, areaPrize);
               return (
                 <div
                   key={areaConfig.id}
@@ -474,7 +493,7 @@ export default function ScratchTicketCSS({ prize, onComplete, layout, scratcher 
           </div>
           <div className="reveal-message">
             <p>🎉 Congratulations! 🎉</p>
-            <p>You won: {prize.name}</p>
+            <p>You won: {getRevealedPrizes().map(p => p.emoji).join(' ')}</p>
           </div>
         </>
       )}

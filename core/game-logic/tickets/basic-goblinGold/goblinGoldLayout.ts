@@ -3,6 +3,8 @@
  * 
  * A fantasy-themed scratch ticket featuring a goblin treasure hunter.
  * The ticket has 10 scratch areas arranged in 2 rows of 5, designed for match-3 gameplay.
+ * 
+ * Uses independent prizes per area with match-three win condition.
  */
 
 import type { TicketLayout } from '../../../mechanics/ticketLayouts';
@@ -122,8 +124,8 @@ export const GOBLIN_GOLD_TICKET: TicketLayout = {
       revealThreshold: 50,
     },
   ],
-  revealMechanic: 'match-three',
-  winCondition: 'match-symbols',
+  revealMechanic: 'independent',
+  winCondition: 'match-three',
   ticketWidth: 1024,
   ticketHeight: 1536,
   // Goblin Gold themed prizes - fantasy adventure focus

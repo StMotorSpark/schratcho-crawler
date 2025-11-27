@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import ScratchTicketCSS from './components/ScratchTicketCSS';
 import Settings from './components/Settings';
 import { getPrizeGoldValue, type Prize } from '../core/mechanics/prizes';
-import { getTicketLayout, getTicketGoldCost, getRandomPrizeForTicket, TICKET_LAYOUTS } from '../core/mechanics/ticketLayouts';
+import { getTicketLayout, getTicketGoldCost, generateAreaPrizes, TICKET_LAYOUTS } from '../core/mechanics/ticketLayouts';
 import { getScratcher, SCRATCHER_TYPES } from '../core/mechanics/scratchers';
 import {
   initializeUserState,
@@ -24,7 +24,7 @@ import './App.css';
 function App() {
   // Get initial layout for prize initialization
   const initialLayout = getTicketLayout('classic');
-  const [prize, setPrize] = useState<Prize>(getRandomPrizeForTicket(initialLayout));
+  const [areaPrizes, setAreaPrizes] = useState<Prize[]>(generateAreaPrizes(initialLayout));
   const [isCompleted, setIsCompleted] = useState(false);
   const [key, setKey] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
@@ -35,6 +35,8 @@ function App() {
   const [hasTicket, setHasTicket] = useState(false);
   const [showPurchasePrompt, setShowPurchasePrompt] = useState(true);
   const [isTicketInProgress, setIsTicketInProgress] = useState(false);
+  // Track which prizes were won (for display purposes)
+  const [wonPrizes, setWonPrizes] = useState<Prize[]>([]);
   const currentLayout = getTicketLayout(layoutId);
   const currentScratcher = getScratcher(scratcherId);
   const ticketCost = getTicketGoldCost(currentLayout);
@@ -71,10 +73,11 @@ function App() {
 
   const handleStartTicket = () => {
     if (useTicketForLayout(layoutId)) {
-      setPrize(getRandomPrizeForTicket(currentLayout));
+      setAreaPrizes(generateAreaPrizes(currentLayout));
       setIsCompleted(false);
       setIsTicketInProgress(true);
       setShowPurchasePrompt(false);
+      setWonPrizes([]);
       setKey((prev) => prev + 1);
       setNewAchievements([]);
       logEvent('ticket_start', { layoutId, scratcherId });
@@ -91,25 +94,27 @@ function App() {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = (revealedPrizes: Prize[]) => {
     setIsCompleted(true);
     setIsTicketInProgress(false);
+    setWonPrizes(revealedPrizes);
     
     // Record ticket scratched
     recordTicketScratched();
     
-    // Apply prize gold effect
-    const goldValue = getPrizeGoldValue(prize);
-    if (goldValue > 0) {
-      addGold(goldValue);
+    // Apply prize gold effects for all revealed prizes
+    const totalGoldValue = revealedPrizes.reduce((sum, prize) => sum + getPrizeGoldValue(prize), 0);
+    if (totalGoldValue > 0) {
+      addGold(totalGoldValue);
     }
     
     // Log ticket completion
     logEvent('ticket_complete', { 
       layoutId, 
       scratcherId, 
-      prizeValue: goldValue,
-      prizeName: prize.name,
+      prizeValue: totalGoldValue,
+      prizeCount: revealedPrizes.length,
+      prizeNames: revealedPrizes.map(p => p.name).join(', '),
     });
     
     // Check for new achievements
@@ -170,7 +175,8 @@ function App() {
               setLayoutId(newLayoutId);
               setKey((prev) => prev + 1);
               setIsCompleted(false);
-              setPrize(getRandomPrizeForTicket(newLayout));
+              setAreaPrizes(generateAreaPrizes(newLayout));
+              setWonPrizes([]);
             }}
           >
             {Object.keys(TICKET_LAYOUTS).map((id) => (
@@ -238,7 +244,7 @@ function App() {
           </div>
         ) : isTicketInProgress ? (
           <div className="ticket-wrapper">
-            <ScratchTicketCSS key={key} prize={prize} onComplete={handleComplete} layout={currentLayout} scratcher={currentScratcher} />
+            <ScratchTicketCSS key={key} areaPrizes={areaPrizes} onComplete={handleComplete} layout={currentLayout} scratcher={currentScratcher} />
           </div>
         ) : null}
 
@@ -252,8 +258,16 @@ function App() {
         {isCompleted && (
           <div className="completion-badge">
             <p>✨ Ticket Completed! ✨</p>
-            {getPrizeGoldValue(prize) > 0 && (
-              <p className="gold-won">+{getPrizeGoldValue(prize)} 🪙</p>
+            {wonPrizes.length > 0 && (
+              <>
+                <p className="prizes-won">
+                  {wonPrizes.map(p => p.emoji).join(' ')}
+                </p>
+                {(() => {
+                  const totalGold = wonPrizes.reduce((sum, p) => sum + getPrizeGoldValue(p), 0);
+                  return totalGold > 0 ? <p className="gold-won">+{totalGold} 🪙</p> : null;
+                })()}
+              </>
             )}
           </div>
         )}

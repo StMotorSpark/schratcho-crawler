@@ -14,18 +14,33 @@ export interface ScratchAreaConfig {
   revealThreshold: number;
 }
 
+/**
+ * Reveal mechanics - 'independent' is the recommended mechanic for new tickets.
+ * Legacy mechanics are deprecated but maintained for backward compatibility.
+ */
 export type RevealMechanic = 
-  | 'reveal-all'
-  | 'reveal-one'
-  | 'match-three'
-  | 'match-two'
-  | 'progressive';
+  | 'independent'     // Recommended: Each area has its own independent prize
+  | 'reveal-all'      // @deprecated
+  | 'reveal-one'      // @deprecated
+  | 'match-three'     // @deprecated
+  | 'match-two'       // @deprecated
+  | 'progressive';    // @deprecated
 
+/**
+ * Win conditions for ticket layouts.
+ * New conditions work with independent prizes per area.
+ */
 export type WinCondition = 
-  | 'reveal-all-areas'
-  | 'reveal-any-area'
-  | 'match-symbols'
-  | 'progressive-reveal';
+  | 'no-win-condition'       // Always wins - just reveals what was won
+  | 'match-two'              // Two areas must have matching prizes
+  | 'match-three'            // Three areas must have matching prizes
+  | 'match-all'              // All areas must have matching prizes (jackpot)
+  | 'find-one'               // Must find a specific prize (uses targetPrizeId)
+  | 'total-value-threshold'  // Combined value exceeds threshold
+  | 'reveal-all-areas'       // @deprecated
+  | 'reveal-any-area'        // @deprecated
+  | 'match-symbols'          // @deprecated
+  | 'progressive-reveal';    // @deprecated
 
 /**
  * Configuration for associating a prize with a ticket layout.
@@ -58,6 +73,10 @@ export interface TicketLayout {
    * Defines which prizes are available and their relative weights.
    */
   prizeConfigs?: PrizeConfig[];
+  /** Target prize ID for 'find-one' win condition */
+  targetPrizeId?: string;
+  /** Value threshold for 'total-value-threshold' win condition */
+  valueThreshold?: number;
 }
 
 export interface DrawingRect {

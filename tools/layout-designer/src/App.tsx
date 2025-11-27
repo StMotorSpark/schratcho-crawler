@@ -48,13 +48,15 @@ function App() {
   const [layoutId, setLayoutId] = useState('custom-layout');
   const [layoutName, setLayoutName] = useState('My Custom Layout');
   const [layoutDescription, setLayoutDescription] = useState('A custom ticket layout');
-  const [revealMechanic, setRevealMechanic] = useState<RevealMechanic>('reveal-all');
-  const [winCondition, setWinCondition] = useState<WinCondition>('reveal-all-areas');
+  const [revealMechanic, setRevealMechanic] = useState<RevealMechanic>('independent');
+  const [winCondition, setWinCondition] = useState<WinCondition>('match-three');
   const [ticketWidth, setTicketWidth] = useState(500);
   const [ticketHeight, setTicketHeight] = useState(300);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [backgroundImagePath, setBackgroundImagePath] = useState('');
   const [goldCost, setGoldCost] = useState<number>(5);
+  const [targetPrizeId, setTargetPrizeId] = useState<string>('');
+  const [valueThreshold, setValueThreshold] = useState<number>(100);
 
   // Prize configuration state
   const [prizeConfigs, setPrizeConfigs] = useState<PrizeConfig[]>([
@@ -348,6 +350,8 @@ function App() {
       backgroundImage: backgroundImagePath || undefined,
       goldCost,
       prizeConfigs: prizeConfigs.length > 0 ? prizeConfigs : undefined,
+      targetPrizeId: winCondition === 'find-one' && targetPrizeId ? targetPrizeId : undefined,
+      valueThreshold: winCondition === 'total-value-threshold' ? valueThreshold : undefined,
     };
 
     const timestamp = new Date().toISOString();
@@ -387,6 +391,8 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
       backgroundImage: backgroundImagePath || undefined,
       goldCost,
       prizeConfigs: prizeConfigs.length > 0 ? prizeConfigs : undefined,
+      targetPrizeId: winCondition === 'find-one' && targetPrizeId ? targetPrizeId : undefined,
+      valueThreshold: winCondition === 'total-value-threshold' ? valueThreshold : undefined,
     };
 
     return JSON.stringify(layout, null, 2);
@@ -474,6 +480,8 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
         setBackgroundImagePath(layout.backgroundImage || '');
         setGoldCost(layout.goldCost ?? 5);
         setPrizeConfigs(layout.prizeConfigs || []);
+        setTargetPrizeId(layout.targetPrizeId || '');
+        setValueThreshold(layout.valueThreshold ?? 100);
         setToastMessage('✓ Layout loaded successfully!');
       } catch (error) {
         setToastMessage('✗ Failed to load layout: ' + (error as Error).message);
@@ -498,6 +506,23 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
 
   const evaluateTestWinCondition = (revealed: Set<string>): boolean => {
     switch (winCondition) {
+      // New win conditions
+      case 'no-win-condition':
+        return revealed.size > 0;
+      case 'match-two':
+        // For testing, simulate with enough revealed areas
+        return revealed.size >= 2;
+      case 'match-three':
+        return revealed.size >= 3;
+      case 'match-all':
+        return revealed.size === scratchAreas.length;
+      case 'find-one':
+        // For testing, simulate as win when any area is revealed
+        return revealed.size > 0 && !!targetPrizeId;
+      case 'total-value-threshold':
+        // For testing, simulate as win when enough areas revealed
+        return revealed.size >= Math.ceil(scratchAreas.length / 2);
+      // Legacy win conditions
       case 'reveal-all-areas':
         return revealed.size === scratchAreas.length;
       case 'reveal-any-area':
@@ -1223,12 +1248,18 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
                 value={revealMechanic}
                 onChange={(e) => setRevealMechanic(e.target.value as RevealMechanic)}
               >
-                <option value="reveal-all">Reveal All</option>
-                <option value="reveal-one">Reveal One</option>
-                <option value="match-three">Match Three</option>
-                <option value="match-two">Match Two</option>
-                <option value="progressive">Progressive</option>
+                <option value="independent">✨ Independent (Recommended)</option>
+                <optgroup label="Legacy (Deprecated)">
+                  <option value="reveal-all">Reveal All</option>
+                  <option value="reveal-one">Reveal One</option>
+                  <option value="match-three">Match Three</option>
+                  <option value="match-two">Match Two</option>
+                  <option value="progressive">Progressive</option>
+                </optgroup>
               </select>
+              <p className="instructions" style={{ fontSize: '12px', marginTop: '4px' }}>
+                Use 'Independent' for one prize per area (recommended for new tickets)
+              </p>
             </div>
             <div className="form-group">
               <label>Win Condition:</label>
@@ -1236,12 +1267,59 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
                 value={winCondition}
                 onChange={(e) => setWinCondition(e.target.value as WinCondition)}
               >
-                <option value="reveal-all-areas">Reveal All Areas</option>
-                <option value="reveal-any-area">Reveal Any Area</option>
-                <option value="match-symbols">Match Symbols</option>
-                <option value="progressive-reveal">Progressive Reveal</option>
+                <optgroup label="New Win Conditions">
+                  <option value="no-win-condition">Always Win (No Condition)</option>
+                  <option value="match-two">Match Two</option>
+                  <option value="match-three">Match Three</option>
+                  <option value="match-all">Match All (Jackpot)</option>
+                  <option value="find-one">Find One (Specific Prize)</option>
+                  <option value="total-value-threshold">Value Threshold</option>
+                </optgroup>
+                <optgroup label="Legacy (Deprecated)">
+                  <option value="reveal-all-areas">Reveal All Areas</option>
+                  <option value="reveal-any-area">Reveal Any Area</option>
+                  <option value="match-symbols">Match Symbols</option>
+                  <option value="progressive-reveal">Progressive Reveal</option>
+                </optgroup>
               </select>
             </div>
+
+            {/* Show targetPrizeId field when find-one is selected */}
+            {winCondition === 'find-one' && (
+              <div className="form-group">
+                <label>Target Prize ID:</label>
+                <select
+                  value={targetPrizeId}
+                  onChange={(e) => setTargetPrizeId(e.target.value)}
+                >
+                  <option value="">-- Select Target Prize --</option>
+                  {AVAILABLE_PRIZES.map(prize => (
+                    <option key={prize.id} value={prize.id}>
+                      {prize.emoji} {prize.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="instructions" style={{ fontSize: '12px', marginTop: '4px' }}>
+                  Player must find this prize to win
+                </p>
+              </div>
+            )}
+
+            {/* Show valueThreshold field when total-value-threshold is selected */}
+            {winCondition === 'total-value-threshold' && (
+              <div className="form-group">
+                <label>Value Threshold (Gold):</label>
+                <input
+                  type="number"
+                  value={valueThreshold}
+                  onChange={(e) => setValueThreshold(Math.max(1, parseInt(e.target.value) || 1))}
+                  min="1"
+                />
+                <p className="instructions" style={{ fontSize: '12px', marginTop: '4px' }}>
+                  Combined prize gold value must exceed this amount
+                </p>
+              </div>
+            )}
           </section>
 
           <section className="panel">
