@@ -34,3 +34,4 @@ This change may require some tighter integration between the dev tools and the `
 - [ ] Ticket purchasing and scratching logic is updated to utilize the new prize logic.
 - [ ] Thorough testing is completed, and any bugs are resolved.
 - [ ] Relevant dev tooling is updated to support the new prize association feature.
+- [ ] Completion log has been updated appropriately.
