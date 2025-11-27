@@ -28,7 +28,8 @@ When implementing a prompt from this folder, add an entry to the appropriate sec
 | 012-refactor-scratch-mechanic.md | Refactored scratch mechanic | - |
 | 013-user-state-tracking.md | User state tracking with persistence, sessions, achievements, and analytics | 2025-11-26 |
 | 014-ticket-layout-editor-updates.md | Updated ticket layout editor UI and functionality | - |
-| 015-ticket-layout-gold-cost.md | Integrated gold cost into ticket layouts and purchasing flow
+| 015-ticket-layout-gold-cost.md | Integrated gold cost into ticket layouts and purchasing flow | - |
+| 016-update-ticket-prize-logic.md | Ticket-specific prize pools with weighted random selection | 2025-11-27 |
 
 ---
 

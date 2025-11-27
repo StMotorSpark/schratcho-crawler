@@ -7,9 +7,27 @@ import type {
   DrawingRect,
   Scratcher,
   Prize,
+  PrizeConfig,
   DesignerTab
 } from './types';
 import './App.css';
+
+/**
+ * Available prizes for the designer to choose from.
+ * These match the prize IDs in core/mechanics/prizes.ts
+ */
+const AVAILABLE_PRIZES = [
+  { id: 'grand-prize', name: 'Grand Prize', emoji: '🏆' },
+  { id: 'gold-coins', name: 'Gold Coins', emoji: '🪙' },
+  { id: 'diamond', name: 'Diamond', emoji: '💎' },
+  { id: 'treasure-chest', name: 'Treasure Chest', emoji: '🎁' },
+  { id: 'magic-potion', name: 'Magic Potion', emoji: '🧪' },
+  { id: 'lucky-star', name: 'Lucky Star', emoji: '⭐' },
+  { id: 'golden-key', name: 'Golden Key', emoji: '🔑' },
+  { id: 'fire-sword', name: 'Fire Sword', emoji: '⚔️' },
+  { id: 'shield', name: 'Shield', emoji: '🛡️' },
+  { id: 'crown', name: 'Crown', emoji: '👑' },
+];
 
 /**
  * Validate if a string is a valid emoji
@@ -37,6 +55,13 @@ function App() {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [backgroundImagePath, setBackgroundImagePath] = useState('');
   const [goldCost, setGoldCost] = useState<number>(5);
+
+  // Prize configuration state
+  const [prizeConfigs, setPrizeConfigs] = useState<PrizeConfig[]>([
+    { prizeId: 'diamond', weight: 5 },
+    { prizeId: 'magic-potion', weight: 10 },
+    { prizeId: 'shield', weight: 15 },
+  ]);
 
   // Scratch areas state
   const [scratchAreas, setScratchAreas] = useState<ScratchAreaConfig[]>([]);
@@ -322,6 +347,7 @@ function App() {
       ticketHeight,
       backgroundImage: backgroundImagePath || undefined,
       goldCost,
+      prizeConfigs: prizeConfigs.length > 0 ? prizeConfigs : undefined,
     };
 
     const timestamp = new Date().toISOString();
@@ -360,6 +386,7 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
       ticketHeight,
       backgroundImage: backgroundImagePath || undefined,
       goldCost,
+      prizeConfigs: prizeConfigs.length > 0 ? prizeConfigs : undefined,
     };
 
     return JSON.stringify(layout, null, 2);
@@ -446,6 +473,7 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
         setScratchAreas(layout.scratchAreas);
         setBackgroundImagePath(layout.backgroundImage || '');
         setGoldCost(layout.goldCost ?? 5);
+        setPrizeConfigs(layout.prizeConfigs || []);
         setToastMessage('✓ Layout loaded successfully!');
       } catch (error) {
         setToastMessage('✗ Failed to load layout: ' + (error as Error).message);
@@ -619,6 +647,7 @@ export const ${constantName}: Scratcher = ${JSON.stringify(scratcher, null, 2)};
   // Generate TypeScript code for Prize
   const generatePrizeTypeScriptCode = () => {
     const prize: Prize = {
+      id: prizeId,
       name: prizeName,
       value: prizeValue,
       emoji: prizeEmoji,
@@ -651,6 +680,7 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
   // Generate JSON code for Prize
   const generatePrizeJSONCode = () => {
     const prize: Prize = {
+      id: prizeId,
       name: prizeName,
       value: prizeValue,
       emoji: prizeEmoji,
@@ -683,9 +713,9 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
           }
         }
 
-        // Load prize data - derive ID from filename
+        // Load prize data - use id from prize if available, otherwise derive from filename
         const fileBaseName = file.name.replace(/\.(ts|json)$/, '');
-        setPrizeId(fileBaseName);
+        setPrizeId(prize.id || fileBaseName);
         setPrizeName(prize.name);
         setPrizeValue(prize.value);
         setPrizeEmoji(prize.emoji);
@@ -1212,6 +1242,98 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
                 <option value="progressive-reveal">Progressive Reveal</option>
               </select>
             </div>
+          </section>
+
+          <section className="panel">
+            <h2>Prize Configuration</h2>
+            <p className="instructions" style={{ fontSize: '12px', marginBottom: '10px' }}>
+              Configure which prizes are available for this ticket and their relative weights.
+              Higher weights = higher chance of being selected.
+            </p>
+            
+            <div className="prize-configs">
+              {prizeConfigs.map((config, index) => {
+                const prizeInfo = AVAILABLE_PRIZES.find(p => p.id === config.prizeId);
+                return (
+                  <div key={index} className="prize-config-item" style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px', 
+                    marginBottom: '8px',
+                    padding: '8px',
+                    background: '#0a1929',
+                    borderRadius: '4px'
+                  }}>
+                    <span style={{ fontSize: '20px' }}>{prizeInfo?.emoji || '?'}</span>
+                    <select
+                      value={config.prizeId}
+                      onChange={(e) => {
+                        const newConfigs = [...prizeConfigs];
+                        newConfigs[index] = { ...config, prizeId: e.target.value };
+                        setPrizeConfigs(newConfigs);
+                      }}
+                      style={{ flex: 1 }}
+                    >
+                      {AVAILABLE_PRIZES.map(prize => (
+                        <option key={prize.id} value={prize.id}>
+                          {prize.emoji} {prize.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      value={config.weight}
+                      onChange={(e) => {
+                        const newConfigs = [...prizeConfigs];
+                        newConfigs[index] = { ...config, weight: Math.max(0, parseInt(e.target.value) || 0) };
+                        setPrizeConfigs(newConfigs);
+                      }}
+                      style={{ width: '60px' }}
+                      min="0"
+                      title="Weight"
+                    />
+                    <button
+                      onClick={() => {
+                        const newConfigs = prizeConfigs.filter((_, i) => i !== index);
+                        setPrizeConfigs(newConfigs);
+                      }}
+                      style={{ 
+                        background: '#dc3545', 
+                        color: 'white', 
+                        border: 'none',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => {
+                const newConfigs = [...prizeConfigs, { prizeId: 'diamond', weight: 5 }];
+                setPrizeConfigs(newConfigs);
+              }}
+              style={{ marginTop: '8px', width: '100%' }}
+            >
+              + Add Prize
+            </button>
+
+            {prizeConfigs.length === 0 && (
+              <p style={{ color: '#dc3545', fontSize: '12px', marginTop: '8px' }}>
+                ⚠️ No prizes configured. Add at least one prize with a positive weight.
+              </p>
+            )}
+
+            {prizeConfigs.some(c => c.weight <= 0) && (
+              <p style={{ color: '#ffc107', fontSize: '12px', marginTop: '8px' }}>
+                ⚠️ Some prizes have zero or negative weights and will be skipped.
+              </p>
+            )}
           </section>
 
           <section className="panel">

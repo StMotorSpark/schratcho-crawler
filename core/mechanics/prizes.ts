@@ -4,6 +4,8 @@ import type { PrizeEffect, StateEffect } from '../user-state/types';
  * Represents a prize that can be won from a scratch ticket.
  */
 export interface Prize {
+  /** Unique identifier for this prize (used for prize association) */
+  id: string;
   /** Display name of the prize */
   name: string;
   /** Display value of the prize (for UI) */
@@ -12,6 +14,20 @@ export interface Prize {
   emoji: string;
   /** Optional effects to apply to user state when this prize is won */
   effects?: PrizeEffect;
+}
+
+/**
+ * Configuration for associating a prize with a ticket layout.
+ * Defines which prize is available and its relative weight for selection.
+ */
+export interface PrizeConfig {
+  /** The ID of the prize (references Prize.id) */
+  prizeId: string;
+  /** 
+   * Weight for random selection (higher = more likely).
+   * Must be a positive number. Zero or negative weights will trigger warnings.
+   */
+  weight: number;
 }
 
 /**
@@ -38,9 +54,11 @@ export function createTicketEffect(amount: number): StateEffect {
 
 /**
  * All available prizes with their effects.
+ * Each prize has a unique ID for explicit association with ticket layouts.
  */
 const prizes: Prize[] = [
   {
+    id: 'grand-prize',
     name: 'Grand Prize',
     value: '1000 Gold',
     emoji: '🏆',
@@ -50,6 +68,7 @@ const prizes: Prize[] = [
     },
   },
   {
+    id: 'gold-coins',
     name: 'Gold Coins',
     value: '500 Gold',
     emoji: '🪙',
@@ -59,6 +78,7 @@ const prizes: Prize[] = [
     },
   },
   {
+    id: 'diamond',
     name: 'Diamond',
     value: '100 Gold',
     emoji: '💎',
@@ -68,6 +88,7 @@ const prizes: Prize[] = [
     },
   },
   {
+    id: 'treasure-chest',
     name: 'Treasure Chest',
     value: '250 Gold',
     emoji: '🎁',
@@ -76,6 +97,7 @@ const prizes: Prize[] = [
     },
   },
   {
+    id: 'magic-potion',
     name: 'Magic Potion',
     value: '50 Gold',
     emoji: '🧪',
@@ -84,6 +106,7 @@ const prizes: Prize[] = [
     },
   },
   {
+    id: 'lucky-star',
     name: 'Lucky Star',
     value: '150 Gold',
     emoji: '⭐',
@@ -92,6 +115,7 @@ const prizes: Prize[] = [
     },
   },
   {
+    id: 'golden-key',
     name: 'Golden Key',
     value: 'Free Ticket',
     emoji: '🔑',
@@ -100,6 +124,7 @@ const prizes: Prize[] = [
     },
   },
   {
+    id: 'fire-sword',
     name: 'Fire Sword',
     value: '75 Gold',
     emoji: '⚔️',
@@ -108,6 +133,7 @@ const prizes: Prize[] = [
     },
   },
   {
+    id: 'shield',
     name: 'Shield',
     value: '25 Gold',
     emoji: '🛡️',
@@ -116,6 +142,7 @@ const prizes: Prize[] = [
     },
   },
   {
+    id: 'crown',
     name: 'Crown',
     value: '200 Gold',
     emoji: '👑',
@@ -126,10 +153,128 @@ const prizes: Prize[] = [
 ];
 
 /**
- * Get a random prize.
+ * Get a prize by its ID.
+ * @param id - The prize ID to look up
+ * @returns The prize if found, undefined otherwise
+ */
+export function getPrizeById(id: string): Prize | undefined {
+  return prizes.find((p) => p.id === id);
+}
+
+/**
+ * Get a random prize from the global pool (legacy behavior).
+ * @deprecated Use getRandomPrizeForLayout for layout-specific prize selection.
  */
 export function getRandomPrize(): Prize {
   return prizes[Math.floor(Math.random() * prizes.length)];
+}
+
+/**
+ * Get a random prize based on a ticket layout's prize configuration.
+ * Uses weighted random selection based on prize weights.
+ * 
+ * @param prizeConfigs - Array of prize configurations with weights
+ * @returns A randomly selected prize based on weights
+ * @throws Error if no valid prizes are configured or all prizes have zero weight
+ * 
+ * ## Weight System
+ * - Weights are relative, so [1, 1, 1] gives equal probability
+ * - Higher weights = higher chance of selection
+ * - Weights of 0 or less are excluded and trigger console warnings
+ * 
+ * ## Example
+ * ```typescript
+ * const prizes = [
+ *   { prizeId: 'grand-prize', weight: 1 },   // ~10%
+ *   { prizeId: 'gold-coins', weight: 4 },    // ~40%
+ *   { prizeId: 'diamond', weight: 5 },       // ~50%
+ * ];
+ * const prize = getRandomPrizeForLayout(prizes);
+ * ```
+ */
+export function getRandomPrizeForLayout(prizeConfigs: PrizeConfig[]): Prize {
+  // Validate prize configurations
+  if (!prizeConfigs || prizeConfigs.length === 0) {
+    throw new Error('No prize configurations provided for layout. Each ticket layout must have explicit prize associations.');
+  }
+
+  // Filter and validate prizes
+  const validConfigs: Array<{ prize: Prize; weight: number }> = [];
+  
+  for (const config of prizeConfigs) {
+    const prize = getPrizeById(config.prizeId);
+    
+    if (!prize) {
+      console.warn(`Prize with ID "${config.prizeId}" not found. Skipping this prize configuration.`);
+      continue;
+    }
+    
+    if (config.weight <= 0) {
+      console.warn(`Prize "${config.prizeId}" has non-positive weight (${config.weight}). Skipping this prize.`);
+      continue;
+    }
+    
+    validConfigs.push({ prize, weight: config.weight });
+  }
+
+  if (validConfigs.length === 0) {
+    throw new Error('No valid prizes available for selection. Check that prize IDs exist and weights are positive.');
+  }
+
+  // Calculate total weight
+  const totalWeight = validConfigs.reduce((sum, config) => sum + config.weight, 0);
+  
+  // Select prize based on weighted random
+  let random = Math.random() * totalWeight;
+  
+  for (const config of validConfigs) {
+    random -= config.weight;
+    if (random <= 0) {
+      return config.prize;
+    }
+  }
+  
+  // Fallback (should not reach here, but just in case due to floating point)
+  return validConfigs[validConfigs.length - 1].prize;
+}
+
+/**
+ * Validate prize configurations for a ticket layout.
+ * Returns an array of warning/error messages.
+ * 
+ * @param prizeConfigs - Array of prize configurations to validate
+ * @returns Array of validation messages (empty if all valid)
+ */
+export function validatePrizeConfigs(prizeConfigs: PrizeConfig[]): string[] {
+  const messages: string[] = [];
+
+  if (!prizeConfigs || prizeConfigs.length === 0) {
+    messages.push('ERROR: No prize configurations provided. Ticket layouts require explicit prize associations.');
+    return messages;
+  }
+
+  let hasValidPrize = false;
+
+  for (const config of prizeConfigs) {
+    const prize = getPrizeById(config.prizeId);
+    
+    if (!prize) {
+      messages.push(`ERROR: Prize with ID "${config.prizeId}" does not exist.`);
+      continue;
+    }
+    
+    if (config.weight <= 0) {
+      messages.push(`WARNING: Prize "${config.prizeId}" has non-positive weight (${config.weight}).`);
+    } else {
+      hasValidPrize = true;
+    }
+  }
+
+  if (!hasValidPrize) {
+    messages.push('ERROR: No valid prizes with positive weights configured.');
+  }
+
+  return messages;
 }
 
 /**

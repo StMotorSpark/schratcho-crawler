@@ -27,6 +27,20 @@ export type WinCondition =
   | 'match-symbols'
   | 'progressive-reveal';
 
+/**
+ * Configuration for associating a prize with a ticket layout.
+ * Defines which prize is available and its relative weight for selection.
+ */
+export interface PrizeConfig {
+  /** The ID of the prize (references Prize.id) */
+  prizeId: string;
+  /** 
+   * Weight for random selection (higher = more likely).
+   * Must be a positive number. Zero or negative weights will trigger warnings.
+   */
+  weight: number;
+}
+
 export interface TicketLayout {
   id: string;
   name: string;
@@ -39,6 +53,11 @@ export interface TicketLayout {
   backgroundImage?: string;
   /** Gold cost to purchase this ticket type (default: 5, 0 = free) */
   goldCost?: number;
+  /** 
+   * Prize configurations for this ticket layout.
+   * Defines which prizes are available and their relative weights.
+   */
+  prizeConfigs?: PrizeConfig[];
 }
 
 export interface DrawingRect {
@@ -73,11 +92,11 @@ export interface Scratcher {
 
 /**
  * Prize configuration - mirrors core/mechanics/prizes.ts
- * Note: Unlike Scratcher, the Prize interface does not have an 'id' field.
- * The 'prizeId' in the designer tool is only used for file naming and constant naming,
- * not as part of the Prize data structure itself.
+ * Note: Prize interface now includes an 'id' field for explicit association with ticket layouts.
  */
 export interface Prize {
+  /** Unique identifier for this prize (used for prize association) */
+  id: string;
   /** Display name of the prize */
   name: string;
   /** Value of the prize (e.g., "$1000", "500 Coins") */

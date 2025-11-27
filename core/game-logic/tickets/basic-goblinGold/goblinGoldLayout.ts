@@ -126,4 +126,15 @@ export const GOBLIN_GOLD_TICKET: TicketLayout = {
   winCondition: 'match-symbols',
   ticketWidth: 1024,
   ticketHeight: 1536,
+  // Goblin Gold themed prizes - fantasy adventure focus
+  prizeConfigs: [
+    { prizeId: 'grand-prize', weight: 1 },     // Jackpot - very rare
+    { prizeId: 'treasure-chest', weight: 5 },  // Fits goblin theme
+    { prizeId: 'gold-coins', weight: 4 },      // Gold fits theme
+    { prizeId: 'crown', weight: 3 },           // Royal treasure
+    { prizeId: 'fire-sword', weight: 6 },      // Adventure gear
+    { prizeId: 'shield', weight: 6 },          // Adventure gear
+    { prizeId: 'magic-potion', weight: 8 },    // Common loot
+    { prizeId: 'diamond', weight: 4 },         // Gem treasure
+  ],
 };

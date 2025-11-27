@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import ScratchTicketCSS from './components/ScratchTicketCSS';
 import Settings from './components/Settings';
-import { getRandomPrize, getPrizeGoldValue, type Prize } from '../core/mechanics/prizes';
-import { getTicketLayout, getTicketGoldCost, TICKET_LAYOUTS } from '../core/mechanics/ticketLayouts';
+import { getPrizeGoldValue, type Prize } from '../core/mechanics/prizes';
+import { getTicketLayout, getTicketGoldCost, getRandomPrizeForTicket, TICKET_LAYOUTS } from '../core/mechanics/ticketLayouts';
 import { getScratcher, SCRATCHER_TYPES } from '../core/mechanics/scratchers';
 import {
   initializeUserState,
@@ -22,7 +22,9 @@ import {
 import './App.css';
 
 function App() {
-  const [prize, setPrize] = useState<Prize>(getRandomPrize());
+  // Get initial layout for prize initialization
+  const initialLayout = getTicketLayout('classic');
+  const [prize, setPrize] = useState<Prize>(getRandomPrizeForTicket(initialLayout));
   const [isCompleted, setIsCompleted] = useState(false);
   const [key, setKey] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
@@ -69,7 +71,7 @@ function App() {
 
   const handleStartTicket = () => {
     if (useTicketForLayout(layoutId)) {
-      setPrize(getRandomPrize());
+      setPrize(getRandomPrizeForTicket(currentLayout));
       setIsCompleted(false);
       setIsTicketInProgress(true);
       setShowPurchasePrompt(false);
@@ -163,10 +165,12 @@ function App() {
             id="layout-select"
             value={layoutId} 
             onChange={(e) => {
-              setLayoutId(e.target.value);
+              const newLayoutId = e.target.value;
+              const newLayout = getTicketLayout(newLayoutId);
+              setLayoutId(newLayoutId);
               setKey((prev) => prev + 1);
               setIsCompleted(false);
-              setPrize(getRandomPrize());
+              setPrize(getRandomPrizeForTicket(newLayout));
             }}
           >
             {Object.keys(TICKET_LAYOUTS).map((id) => (

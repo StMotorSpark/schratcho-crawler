@@ -3,9 +3,14 @@
  * 
  * This module defines the structure for configurable ticket layouts,
  * allowing for dynamic scratch areas, prize reveal mechanics, and win conditions.
+ * 
+ * ## Prize Association
+ * Each ticket layout must define its own prize pool via the `prizeConfigs` field.
+ * This enables different tickets to have different prize pools and odds.
  */
 
-import type { Prize } from './prizes';
+import type { Prize, PrizeConfig } from './prizes';
+import { getRandomPrizeForLayout, getRandomPrize as getLegacyRandomPrize } from './prizes';
 import { GOBLIN_GOLD_TICKET } from '../game-logic/tickets/basic-goblinGold/goblinGoldLayout';
 import { TEST_TWO_COLUMN_TICKET } from '../game-logic/tickets/test-two-column';
 
@@ -74,6 +79,12 @@ export interface TicketLayout {
   backgroundImage?: string;
   /** Gold cost to purchase this ticket type (default: 5, 0 = free) */
   goldCost?: number;
+  /** 
+   * Prize configurations for this ticket layout.
+   * Defines which prizes are available and their relative weights.
+   * If not specified, falls back to legacy global prize pool.
+   */
+  prizeConfigs?: PrizeConfig[];
 }
 
 /**
@@ -121,6 +132,19 @@ export const CLASSIC_TICKET: TicketLayout = {
   winCondition: 'reveal-all-areas',
   ticketWidth: 500,
   ticketHeight: 300,
+  // Classic ticket has a balanced prize pool with all prizes
+  prizeConfigs: [
+    { prizeId: 'grand-prize', weight: 1 },     // Rare
+    { prizeId: 'gold-coins', weight: 2 },      // Uncommon
+    { prizeId: 'diamond', weight: 5 },         // Common
+    { prizeId: 'treasure-chest', weight: 3 },  // Uncommon
+    { prizeId: 'magic-potion', weight: 10 },   // Very common
+    { prizeId: 'lucky-star', weight: 4 },      // Somewhat common
+    { prizeId: 'golden-key', weight: 2 },      // Uncommon
+    { prizeId: 'fire-sword', weight: 6 },      // Common
+    { prizeId: 'shield', weight: 15 },         // Most common
+    { prizeId: 'crown', weight: 2 },           // Uncommon
+  ],
 };
 
 /**
@@ -230,6 +254,14 @@ export const GRID_TICKET: TicketLayout = {
   winCondition: 'match-symbols',
   ticketWidth: 500,
   ticketHeight: 300,
+  // Grid ticket has higher-value prizes since it costs more
+  prizeConfigs: [
+    { prizeId: 'grand-prize', weight: 2 },     // More frequent than classic
+    { prizeId: 'gold-coins', weight: 4 },      // Higher chance
+    { prizeId: 'diamond', weight: 6 },         // Good odds
+    { prizeId: 'treasure-chest', weight: 5 },  // Common
+    { prizeId: 'crown', weight: 3 },           // Decent odds
+  ],
 };
 
 /**
@@ -256,6 +288,14 @@ export const SINGLE_AREA_TICKET: TicketLayout = {
   winCondition: 'reveal-any-area',
   ticketWidth: 500,
   ticketHeight: 300,
+  // Budget ticket with smaller prizes
+  prizeConfigs: [
+    { prizeId: 'magic-potion', weight: 10 },   // Most common
+    { prizeId: 'shield', weight: 15 },         // Very common
+    { prizeId: 'fire-sword', weight: 8 },      // Common
+    { prizeId: 'diamond', weight: 3 },         // Less common
+    { prizeId: 'golden-key', weight: 2 },      // Rare bonus
+  ],
 };
 
 /**
@@ -286,6 +326,23 @@ export const DEFAULT_TICKET_GOLD_COST = 5;
  */
 export function getTicketGoldCost(layout: TicketLayout): number {
   return layout.goldCost ?? DEFAULT_TICKET_GOLD_COST;
+}
+
+/**
+ * Get a random prize for a ticket layout.
+ * Uses the layout's prize configuration if available, otherwise falls back to legacy behavior.
+ * 
+ * @param layout - The ticket layout to get a prize for
+ * @returns A randomly selected prize based on the layout's configuration
+ */
+export function getRandomPrizeForTicket(layout: TicketLayout): Prize {
+  if (layout.prizeConfigs && layout.prizeConfigs.length > 0) {
+    return getRandomPrizeForLayout(layout.prizeConfigs);
+  }
+  
+  // Fallback to legacy behavior for layouts without prize configs
+  console.warn(`Layout "${layout.id}" does not have prize configurations. Using legacy global prize pool.`);
+  return getLegacyRandomPrize();
 }
 
 /**
