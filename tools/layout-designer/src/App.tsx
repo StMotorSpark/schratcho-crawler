@@ -1134,7 +1134,12 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
               <input
                 type="number"
                 value={goldCost}
-                onChange={(e) => setGoldCost(Math.max(0, parseInt(e.target.value) || 0))}
+                onChange={(e) => {
+                  // Parse the value, defaulting to 0 for empty/invalid input
+                  // 0 is a valid value (free ticket), so this is intentional
+                  const value = parseInt(e.target.value);
+                  setGoldCost(Math.max(0, isNaN(value) ? 0 : value));
+                }}
                 min="0"
                 placeholder="Cost in gold (0 = free)"
               />
