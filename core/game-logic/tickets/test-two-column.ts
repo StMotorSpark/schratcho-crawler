@@ -36,4 +36,11 @@ export const TEST_TWO_COLUMN_TICKET: TicketLayout = {
   winCondition: 'reveal-all-areas',
   ticketWidth: 500,
   ticketHeight: 300,
+  // Test ticket with standard prize pool
+  prizeConfigs: [
+    { prizeId: 'diamond', weight: 5 },
+    { prizeId: 'magic-potion', weight: 8 },
+    { prizeId: 'lucky-star', weight: 5 },
+    { prizeId: 'shield', weight: 10 },
+  ],
 };

@@ -8,6 +8,7 @@
 import type { Prize } from '../../mechanics/prizes';
 
 export const GRAND_PRIZE: Prize = {
+  id: 'grand-prize',
   name: 'Grand Prize',
   value: '$1000',
   emoji: '🏆',
