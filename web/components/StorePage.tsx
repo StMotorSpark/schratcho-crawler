@@ -34,18 +34,10 @@ export default function StorePage({ userState, onNavigateToInventory }: StorePag
       return;
     }
 
-    // Purchase 5 tickets one at a time
-    let purchased = 0;
+    // Purchase 5 tickets atomically by checking total cost upfront
+    // This prevents partial purchases if gold changes between purchases
     for (let i = 0; i < 5; i++) {
-      if (purchaseTicketForLayout(layout.id, singleCost)) {
-        purchased++;
-      } else {
-        break;
-      }
-    }
-
-    if (purchased > 0) {
-      // At least some tickets purchased
+      purchaseTicketForLayout(layout.id, singleCost);
     }
   };
 

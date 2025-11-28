@@ -233,8 +233,14 @@ export default function ScratchPage({
 
       {/* Achievement Popup */}
       {newAchievements.length > 0 && (
-        <div className="achievements-popup" onClick={() => setNewAchievements([])}>
-          <h3>🎉 Achievement Unlocked!</h3>
+        <div 
+          className="achievements-popup" 
+          onClick={() => setNewAchievements([])}
+          role="dialog"
+          aria-labelledby="achievement-title"
+          aria-modal="true"
+        >
+          <h3 id="achievement-title">🎉 Achievement Unlocked!</h3>
           {newAchievements.map((id) => {
             const achievement = getAchievementDefinition(id);
             return (
