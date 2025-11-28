@@ -16,23 +16,11 @@
   gap: 10px;
 }
 
-.header-left {
-  flex: 0 0 auto;
-}
-
-.header-title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
 .header-nav {
   display: flex;
   gap: 8px;
   flex: 1 1 auto;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .nav-button {
@@ -116,10 +104,6 @@
     gap: 8px;
   }
 
-  .header-title {
-    font-size: 1rem;
-  }
-
   .nav-button {
     padding: 5px 10px;
     font-size: 0.8rem;
@@ -144,10 +128,6 @@
   .game-header {
     padding: 6px 10px;
     top: 5px;
-  }
-
-  .header-title {
-    font-size: 0.9rem;
   }
 
   .nav-button {

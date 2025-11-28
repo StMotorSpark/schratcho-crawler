@@ -12,6 +12,23 @@ interface HeaderProps {
 }
 
 /**
+ * Format gold amount with abbreviations for large numbers.
+ * e.g., 1500 -> "1.5k", 1200000 -> "1.2M"
+ */
+function formatGoldAmount(amount: number): string {
+  if (amount >= 1_000_000_000) {
+    return (amount / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+  }
+  if (amount >= 1_000_000) {
+    return (amount / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (amount >= 10_000) {
+    return (amount / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return amount.toString();
+}
+
+/**
  * Header component displayed on all pages.
  * Shows gold balance, navigation, and settings.
  */
@@ -37,10 +54,6 @@ export default function Header({
   return (
     <header className="game-header">
       <div className="header-content">
-        <div className="header-left">
-          <h1 className="header-title">🎮 Schratcho</h1>
-        </div>
-        
         <nav className="header-nav">
           <button
             className={`nav-button ${currentPage === 'store' ? 'active' : ''}`}
@@ -58,9 +71,9 @@ export default function Header({
 
         <div className="header-right">
           {userState && (
-            <div className="header-gold">
+            <div className="header-gold" title={`${userState.currentGold} gold`}>
               <span className="gold-icon">🪙</span>
-              <span className="gold-amount">{userState.currentGold}</span>
+              <span className="gold-amount">{formatGoldAmount(userState.currentGold)}</span>
             </div>
           )}
           <button
