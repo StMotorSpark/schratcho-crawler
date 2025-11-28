@@ -130,19 +130,6 @@ export default function ScratchPage({
     onComplete();
   };
 
-  const handleCancelTicket = () => {
-    if (pendingPrizes.length > 0) {
-      const confirmLeave = window.confirm(
-        '⚠️ Warning: You have pending prizes that haven\'t been claimed!\n\nIf you leave now, you will lose your unclaimed prizes.\n\nAre you sure you want to leave?'
-      );
-      if (!confirmLeave) {
-        return;
-      }
-    }
-    onHasPendingPrizesChange(false);
-    onCancel();
-  };
-
   const totalPendingGold = pendingPrizes.reduce(
     (sum, prize) => sum + getPrizeGoldValue(prize),
     0
@@ -161,13 +148,6 @@ export default function ScratchPage({
 
   return (
     <div className="scratch-page">
-      <div className="scratch-page-header">
-        <h2 className="scratch-page-title">🎫 {layout.name}</h2>
-        <button className="cancel-btn" onClick={handleCancelTicket}>
-          ← Back to Inventory
-        </button>
-      </div>
-
       <div className="scratcher-selector">
         <label htmlFor="scratcher-select">Scratcher: </label>
         <select
