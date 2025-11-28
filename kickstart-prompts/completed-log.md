@@ -31,6 +31,7 @@ When implementing a prompt from this folder, add an entry to the appropriate sec
 | 015-ticket-layout-gold-cost.md | Integrated gold cost into ticket layouts and purchasing flow | - |
 | 016-update-ticket-prize-logic.md | Ticket-specific prize pools with weighted random selection | 2025-11-27 |
 | 017-ticket-layout-prize-adjustments.md | Independent prizes per scratch area with new win conditions (match-two, match-three, match-all, find-one, total-value-threshold) | 2025-11-27 |
+| 018-game-user-flow.md | Multi-page game user flow with Store, Inventory, and Scratch pages including navigation, pending prize tracking, and "Turn In Ticket" functionality | 2025-11-28 |
 
 ---
 
