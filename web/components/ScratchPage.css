@@ -1,0 +1,268 @@
+.scratch-page {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.scratch-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.scratch-page-title {
+  font-size: 1.8rem;
+  color: #333;
+  margin: 0;
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.1);
+  color: #555;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: rgba(0, 0, 0, 0.15);
+  color: #333;
+}
+
+.scratcher-selector {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.scratcher-selector label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-right: 10px;
+}
+
+.scratcher-selector select {
+  padding: 8px 16px;
+  font-size: 1rem;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.scratcher-selector select:hover {
+  border-color: #764ba2;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.scratcher-selector select:focus {
+  outline: none;
+  border-color: #764ba2;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.scratcher-selector select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ticket-wrapper {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-spinner {
+  font-size: 4rem;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Scratch Instructions */
+.scratch-instructions {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.scratch-instructions p {
+  font-size: 1.1rem;
+  color: #666;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 15px 25px;
+  border-radius: 30px;
+  display: inline-block;
+}
+
+/* Completion Section */
+.completion-section {
+  margin-top: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+  border-radius: 20px;
+  text-align: center;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pending-prizes-display {
+  margin-bottom: 25px;
+}
+
+.pending-prizes-display h3 {
+  font-size: 1.6rem;
+  color: #333;
+  margin: 0 0 15px 0;
+}
+
+.prizes-preview {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.prize-icon-large {
+  font-size: 2.5rem;
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: bounceIn 0.5s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pending-gold {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #b8860b;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.no-prizes {
+  font-size: 1.1rem;
+  color: #888;
+  margin: 0;
+}
+
+.turn-in-btn {
+  padding: 18px 45px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 25px rgba(17, 153, 142, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.turn-in-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(17, 153, 142, 0.5);
+}
+
+.turn-in-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .scratch-page-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .scratch-page-title {
+    font-size: 1.5rem;
+  }
+
+  .cancel-btn {
+    width: 100%;
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .scratch-page-title {
+    font-size: 1.3rem;
+  }
+
+  .completion-section {
+    padding: 20px 15px;
+  }
+
+  .pending-prizes-display h3 {
+    font-size: 1.3rem;
+  }
+
+  .prize-icon-large {
+    font-size: 2rem;
+    padding: 12px;
+  }
+
+  .pending-gold {
+    font-size: 1.2rem;
+  }
+
+  .turn-in-btn {
+    padding: 15px 35px;
+    font-size: 1.1rem;
+    width: 100%;
+    max-width: 280px;
+  }
+}

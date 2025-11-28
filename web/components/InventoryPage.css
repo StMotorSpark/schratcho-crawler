@@ -1,0 +1,211 @@
+.inventory-page {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.inventory-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.inventory-title {
+  font-size: 2rem;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+.inventory-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.inventory-ticket-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.inventory-ticket-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: #667eea;
+}
+
+.inventory-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.inventory-card-title {
+  font-size: 1.3rem;
+  color: white;
+  margin: 0;
+}
+
+.ticket-count-badge {
+  background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 6px 15px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(233, 69, 96, 0.4);
+}
+
+.inventory-card-description {
+  font-size: 0.95rem;
+  color: #aaa;
+  margin: 0 0 15px 0;
+  line-height: 1.4;
+}
+
+.inventory-card-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.inventory-card-info .info-item {
+  font-size: 0.85rem;
+  color: #ccc;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.scratch-ticket-btn {
+  width: 100%;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+}
+
+.scratch-ticket-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(17, 153, 142, 0.5);
+}
+
+.scratch-ticket-btn:active {
+  transform: translateY(0);
+}
+
+/* Empty State */
+.empty-inventory {
+  text-align: center;
+  padding: 50px 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+  border-radius: 20px;
+  margin-bottom: 30px;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.empty-message {
+  font-size: 1.3rem;
+  color: #666;
+  margin: 0 0 25px 0;
+}
+
+.go-to-store-btn {
+  padding: 15px 35px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.go-to-store-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+.go-to-store-btn.secondary {
+  background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
+  box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+}
+
+.go-to-store-btn.secondary:hover {
+  box-shadow: 0 8px 25px rgba(233, 69, 96, 0.5);
+}
+
+/* Footer */
+.inventory-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 2px dashed rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .inventory-title {
+    font-size: 1.6rem;
+  }
+
+  .inventory-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .inventory-title {
+    font-size: 1.4rem;
+  }
+
+  .inventory-subtitle {
+    font-size: 1rem;
+  }
+
+  .inventory-ticket-card {
+    padding: 15px;
+  }
+
+  .inventory-card-title {
+    font-size: 1.1rem;
+  }
+
+  .scratch-ticket-btn {
+    padding: 12px 18px;
+    font-size: 1rem;
+  }
+
+  .go-to-store-btn {
+    padding: 12px 25px;
+    font-size: 1rem;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+  }
+
+  .empty-message {
+    font-size: 1.1rem;
+  }
+}
