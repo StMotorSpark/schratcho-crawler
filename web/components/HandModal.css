@@ -1,0 +1,288 @@
+.hand-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.hand-modal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 2px solid #4a4a6a;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.hand-modal-title {
+  text-align: center;
+  margin: 0 0 20px 0;
+  font-size: 1.5rem;
+  color: #f0c040;
+}
+
+/* Empty hand state */
+.hand-empty {
+  text-align: center;
+  padding: 20px;
+}
+
+.empty-hand-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.hand-empty p {
+  color: #aaa;
+  margin: 8px 0;
+}
+
+.empty-hint {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Progress bar */
+.hand-progress {
+  margin-bottom: 16px;
+}
+
+.hand-count {
+  display: block;
+  text-align: center;
+  margin-bottom: 8px;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.hand-progress-bar {
+  height: 8px;
+  background: #2a2a4a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hand-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Ticket list */
+.hand-tickets {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  border: 1px solid #3a3a5a;
+  border-radius: 8px;
+}
+
+.hand-ticket-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #3a3a5a;
+}
+
+.hand-ticket-item:last-child {
+  border-bottom: none;
+}
+
+.ticket-index {
+  font-size: 0.85rem;
+  color: #888;
+  min-width: 30px;
+}
+
+.ticket-layout-name {
+  flex: 1;
+  color: #ddd;
+  font-weight: 500;
+}
+
+.ticket-prize {
+  color: #f0c040;
+  font-size: 0.9rem;
+}
+
+/* Total value */
+.hand-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: rgba(240, 192, 64, 0.1);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(240, 192, 64, 0.3);
+}
+
+.total-label {
+  font-size: 1rem;
+  color: #ccc;
+}
+
+.total-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #f0c040;
+}
+
+/* Actions */
+.hand-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cash-out-hand-btn {
+  padding: 14px 24px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cash-out-hand-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.continue-scratching-btn {
+  padding: 12px 20px;
+  font-size: 1rem;
+  background: linear-gradient(135deg, #3a3a6a, #2a2a5a);
+  color: #ddd;
+  border: 1px solid #5a5a8a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.continue-scratching-btn:hover {
+  background: linear-gradient(135deg, #4a4a7a, #3a3a6a);
+  border-color: #7a7aaa;
+}
+
+.hand-full-message {
+  text-align: center;
+  color: #f0c040;
+  font-size: 0.9rem;
+  padding: 8px;
+  background: rgba(240, 192, 64, 0.1);
+  border-radius: 4px;
+  margin: 0;
+}
+
+/* Secondary actions */
+.hand-secondary-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  border-top: 1px solid #3a3a5a;
+}
+
+.discard-hand-btn {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  background: transparent;
+  color: #888;
+  border: 1px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.discard-hand-btn:hover {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.hand-close-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  background: #3a3a6a;
+  color: #ddd;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+.hand-close-btn:hover {
+  background: #4a4a7a;
+}
+
+/* Floating hand button */
+.floating-hand-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f0c040, #d4a030);
+  border: 2px solid #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.floating-hand-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.floating-hand-btn.has-tickets {
+  animation: pulse 2s infinite;
+}
+
+.hand-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #e74c3c;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #1a1a2e;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(240, 192, 64, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(240, 192, 64, 0.7);
+  }
+}

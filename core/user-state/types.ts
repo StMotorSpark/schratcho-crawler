@@ -66,6 +66,38 @@ export interface Session {
 }
 
 /**
+ * Represents a ticket in a hand with its associated prize information.
+ */
+export interface HandTicket {
+  /** Layout ID of the ticket */
+  layoutId: string;
+  /** Prize ID won from this ticket */
+  prizeId: string;
+  /** Gold value of the prize */
+  goldValue: number;
+  /** Timestamp when ticket was added to hand */
+  addedAt: number;
+}
+
+/**
+ * Represents a hand of tickets that can be cashed out together.
+ * Players can collect up to 5 tickets in a hand for a combined payout.
+ */
+export interface Hand {
+  /** Unique identifier for this hand */
+  id: string;
+  /** Tickets in the hand */
+  tickets: HandTicket[];
+  /** Timestamp when the hand was created */
+  createdAt: number;
+}
+
+/**
+ * Maximum number of tickets allowed in a hand.
+ */
+export const MAX_HAND_SIZE = 5;
+
+/**
  * Represents the full persisted user data.
  */
 export interface UserData {
@@ -79,6 +111,8 @@ export interface UserData {
   currentSession: Session | null;
   /** Past sessions (limited history) */
   sessionHistory: Session[];
+  /** Current hand of tickets (if any) */
+  currentHand: Hand | null;
   /** Timestamp of last activity */
   lastActivityTime: number;
   /** Timestamp when user data was created */
@@ -130,7 +164,10 @@ export type AnalyticsEventType =
   | 'gold_earned'
   | 'gold_spent'
   | 'scratcher_unlocked'
-  | 'ticket_type_unlocked';
+  | 'ticket_type_unlocked'
+  | 'ticket_added_to_hand'
+  | 'hand_cashed_out'
+  | 'hand_cleared';
 
 /**
  * Represents an analytics event.
