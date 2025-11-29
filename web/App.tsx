@@ -107,13 +107,16 @@ function App() {
   return (
     <div className="app">
       <div className="container">
-        <Header
-          userState={userState}
-          currentPage={currentPage}
-          onNavigate={handleNavigate}
-          onOpenSettings={() => setShowSettings(true)}
-          hasPendingPrizes={hasPendingPrizes}
-        />
+        {/* Hide header on scratch page for more vertical space */}
+        {currentPage !== 'scratch' && (
+          <Header
+            userState={userState}
+            currentPage={currentPage}
+            onNavigate={handleNavigate}
+            onOpenSettings={() => setShowSettings(true)}
+            hasPendingPrizes={hasPendingPrizes}
+          />
+        )}
         
         {renderPage()}
       </div>

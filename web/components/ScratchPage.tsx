@@ -44,6 +44,8 @@ export default function ScratchPage({
   const [pendingPrizes, setPendingPrizes] = useState<Prize[]>([]);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const [key] = useState(0);
+  const [showScratcherMenu, setShowScratcherMenu] = useState(false);
+  const [showPrizeDetails, setShowPrizeDetails] = useState(false);
   
   // Use a ref to prevent double-initialization in StrictMode
   const ticketInitializedRef = useRef(false);
@@ -77,6 +79,7 @@ export default function ScratchPage({
   const handleScratcherChange = (newScratcherId: string) => {
     setScratcherId(newScratcherId);
     setScratcher(getScratcher(newScratcherId));
+    setShowScratcherMenu(false);
   };
 
   const handleTicketComplete = (revealedPrizes: Prize[]) => {
@@ -130,6 +133,18 @@ export default function ScratchPage({
     onComplete();
   };
 
+  const handleBackClick = () => {
+    if (pendingPrizes.length > 0 && scratchState === 'completed') {
+      const confirmLeave = window.confirm(
+        '⚠️ Warning: You have pending prizes that haven\'t been claimed!\n\nIf you leave now, you will lose your unclaimed prizes.\n\nAre you sure you want to leave?'
+      );
+      if (!confirmLeave) {
+        return;
+      }
+    }
+    onCancel();
+  };
+
   const totalPendingGold = pendingPrizes.reduce(
     (sum, prize) => sum + getPrizeGoldValue(prize),
     0
@@ -148,21 +163,46 @@ export default function ScratchPage({
 
   return (
     <div className="scratch-page">
-      <div className="scratcher-selector">
-        <label htmlFor="scratcher-select">Scratcher: </label>
-        <select
-          id="scratcher-select"
-          value={scratcherId}
-          onChange={(e) => handleScratcherChange(e.target.value)}
-          disabled={scratchState === 'completed'}
+      {/* Floating navigation bar */}
+      <div className="scratch-floating-nav">
+        <button 
+          className="floating-back-btn" 
+          onClick={handleBackClick}
+          aria-label="Back to inventory"
         >
-          {Object.keys(SCRATCHER_TYPES).map((id) => (
-            <option key={id} value={id}>
-              {SCRATCHER_TYPES[id].symbol} {SCRATCHER_TYPES[id].name}
-            </option>
-          ))}
-        </select>
+          ←
+        </button>
+        
+        <button 
+          className="floating-scratcher-btn"
+          onClick={() => setShowScratcherMenu(!showScratcherMenu)}
+          disabled={scratchState === 'completed'}
+          aria-label="Select scratcher"
+        >
+          {SCRATCHER_TYPES[scratcherId].symbol}
+        </button>
       </div>
+
+      {/* Scratcher selection popup */}
+      {showScratcherMenu && (
+        <div className="scratcher-popup-overlay" onClick={() => setShowScratcherMenu(false)}>
+          <div className="scratcher-popup" onClick={(e) => e.stopPropagation()}>
+            <h4>Select Scratcher</h4>
+            <div className="scratcher-options">
+              {Object.keys(SCRATCHER_TYPES).map((id) => (
+                <button
+                  key={id}
+                  className={`scratcher-option ${id === scratcherId ? 'active' : ''}`}
+                  onClick={() => handleScratcherChange(id)}
+                >
+                  <span className="scratcher-symbol">{SCRATCHER_TYPES[id].symbol}</span>
+                  <span className="scratcher-name">{SCRATCHER_TYPES[id].name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="ticket-wrapper">
         <ScratchTicketCSS
@@ -174,40 +214,54 @@ export default function ScratchPage({
         />
       </div>
 
+      {/* Compact completion section - just the turn in button */}
       {scratchState === 'completed' && (
-        <div className="completion-section">
-          <div className="pending-prizes-display">
-            <h3>🎉 Ticket Completed!</h3>
-            {pendingPrizes.length > 0 ? (
-              <>
-                <div className="prizes-preview">
-                  {pendingPrizes.map((prize, index) => (
-                    <span key={index} className="prize-icon-large">
-                      {prize.emoji}
-                    </span>
-                  ))}
-                </div>
-                {totalPendingGold > 0 && (
-                  <p className="pending-gold">
-                    +{totalPendingGold} 🪙 waiting to be claimed!
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className="no-prizes">No prizes this time. Better luck next time!</p>
-            )}
-          </div>
-
+        <div className="completion-section-compact">
           <button className="turn-in-btn" onClick={handleTurnInTicket}>
             ✅ Turn In Ticket
             {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
           </button>
+          
+          {/* Info icon for prize details */}
+          {pendingPrizes.length > 0 && (
+            <button 
+              className="prize-info-btn"
+              onClick={() => setShowPrizeDetails(true)}
+              aria-label="View prize details"
+            >
+              ℹ️
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Prize details popup */}
+      {showPrizeDetails && (
+        <div className="prize-details-overlay" onClick={() => setShowPrizeDetails(false)}>
+          <div className="prize-details-popup" onClick={(e) => e.stopPropagation()}>
+            <h4>🎉 Your Prizes</h4>
+            <div className="prizes-preview">
+              {pendingPrizes.map((prize, index) => (
+                <div key={index} className="prize-detail-item">
+                  <span className="prize-emoji">{prize.emoji}</span>
+                  <span className="prize-name">{prize.name}</span>
+                  <span className="prize-value">+{getPrizeGoldValue(prize)} 🪙</span>
+                </div>
+              ))}
+            </div>
+            {totalPendingGold > 0 && (
+              <p className="total-gold">Total: +{totalPendingGold} 🪙</p>
+            )}
+            <button className="close-popup-btn" onClick={() => setShowPrizeDetails(false)}>
+              Close
+            </button>
+          </div>
         </div>
       )}
 
       {scratchState === 'scratching' && (
         <div className="scratch-instructions">
-          <p>👆 Scratch all areas to reveal your prizes!</p>
+          <p>👆 Scratch to reveal!</p>
         </div>
       )}
 

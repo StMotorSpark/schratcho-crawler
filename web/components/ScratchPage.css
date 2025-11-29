@@ -1,48 +1,129 @@
 .scratch-page {
   animation: fadeIn 0.3s ease-out;
+  position: relative;
+  min-height: calc(100vh - 40px);
 }
 
-.scratcher-selector {
-  text-align: center;
-  margin-bottom: 10px;
+/* Floating navigation bar */
+.scratch-floating-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  z-index: 50;
 }
 
-.scratcher-selector label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #333;
-  margin-right: 8px;
-}
-
-.scratcher-selector select {
-  padding: 6px 12px;
-  font-size: 0.9rem;
-  border: 2px solid #667eea;
-  border-radius: 8px;
-  background: white;
-  color: #333;
+.floating-back-btn,
+.floating-scratcher-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.4rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
 }
 
-.scratcher-selector select:hover {
-  border-color: #764ba2;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+.floating-back-btn {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
 }
 
-.scratcher-selector select:focus {
-  outline: none;
-  border-color: #764ba2;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+.floating-back-btn:hover {
+  background: rgba(0, 0, 0, 0.85);
+  transform: scale(1.05);
 }
 
-.scratcher-selector select:disabled {
-  opacity: 0.6;
+.floating-scratcher-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.floating-scratcher-btn:hover {
+  transform: scale(1.05);
+}
+
+.floating-scratcher-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
+/* Scratcher popup */
+.scratcher-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 60px 10px 10px 10px;
+  z-index: 100;
+}
+
+.scratcher-popup {
+  background: white;
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  min-width: 180px;
+}
+
+.scratcher-popup h4 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #333;
+  text-align: center;
+}
+
+.scratcher-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scratcher-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scratcher-option:hover {
+  background: #e8e8e8;
+}
+
+.scratcher-option.active {
+  background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+  border-color: #667eea;
+}
+
+.scratcher-symbol {
+  font-size: 1.4rem;
+}
+
+.scratcher-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
 .ticket-wrapper {
-  margin: 10px 0;
+  margin: 50px 0 10px 0;
   display: flex;
   justify-content: center;
 }
@@ -77,26 +158,26 @@
 /* Scratch Instructions */
 .scratch-instructions {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .scratch-instructions p {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   color: #666;
   background: rgba(102, 126, 234, 0.1);
-  padding: 15px 25px;
-  border-radius: 30px;
+  padding: 10px 20px;
+  border-radius: 20px;
   display: inline-block;
 }
 
-/* Completion Section */
-.completion-section {
-  margin-top: 30px;
-  padding: 25px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
-  border-radius: 20px;
-  text-align: center;
-  animation: slideUp 0.5s ease-out;
+/* Compact Completion Section */
+.completion-section-compact {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+  animation: slideUp 0.3s ease-out;
 }
 
 @keyframes slideUp {
@@ -110,64 +191,128 @@
   }
 }
 
-.pending-prizes-display {
-  margin-bottom: 25px;
-}
-
-.pending-prizes-display h3 {
-  font-size: 1.6rem;
-  color: #333;
-  margin: 0 0 15px 0;
-}
-
-.prizes-preview {
+.prize-info-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
   display: flex;
+  align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-bottom: 15px;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+  transition: all 0.2s ease;
 }
 
-.prize-icon-large {
-  font-size: 2.5rem;
+.prize-info-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Prize Details Popup */
+.prize-details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 200;
+}
+
+.prize-details-popup {
   background: white;
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  animation: bounceIn 0.5s ease-out;
+  border-radius: 20px;
+  padding: 20px;
+  max-width: 320px;
+  width: 100%;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.2s ease-out;
 }
 
-@keyframes bounceIn {
-  0% {
+@keyframes scaleIn {
+  from {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scale(0.9);
   }
-  70% {
-    transform: scale(1.1);
-  }
-  100% {
+  to {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-.pending-gold {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #b8860b;
-  margin: 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+.prize-details-popup h4 {
+  margin: 0 0 15px 0;
+  font-size: 1.3rem;
+  color: #333;
+  text-align: center;
 }
 
-.no-prizes {
-  font-size: 1.1rem;
-  color: #888;
-  margin: 0;
+.prizes-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.prize-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f5f7fa;
+  border-radius: 10px;
+}
+
+.prize-emoji {
+  font-size: 1.5rem;
+}
+
+.prize-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.prize-value {
+  font-weight: 700;
+  color: #b8860b;
+}
+
+.total-gold {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #b8860b;
+  margin: 0 0 15px 0;
+}
+
+.close-popup-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.close-popup-btn:hover {
+  opacity: 0.9;
 }
 
 .turn-in-btn {
-  padding: 18px 45px;
-  font-size: 1.3rem;
+  padding: 14px 35px;
+  font-size: 1.1rem;
   font-weight: 700;
   background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: white;
@@ -189,41 +334,32 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  .scratcher-selector label {
-    font-size: 0.85rem;
-  }
-
-  .scratcher-selector select {
-    padding: 5px 10px;
-    font-size: 0.85rem;
-  }
-}
-
 @media (max-width: 480px) {
-  .completion-section {
-    padding: 15px 12px;
-    margin-top: 15px;
+  .ticket-wrapper {
+    margin-top: 45px;
   }
-
-  .pending-prizes-display h3 {
+  
+  .floating-back-btn,
+  .floating-scratcher-btn {
+    width: 40px;
+    height: 40px;
     font-size: 1.2rem;
   }
-
-  .prize-icon-large {
-    font-size: 2rem;
-    padding: 12px;
-  }
-
-  .pending-gold {
-    font-size: 1.2rem;
-  }
-
+  
   .turn-in-btn {
-    padding: 15px 35px;
-    font-size: 1.1rem;
-    width: 100%;
-    max-width: 280px;
+    padding: 12px 28px;
+    font-size: 1rem;
+  }
+  
+  .prize-info-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .scratch-instructions p {
+    font-size: 0.85rem;
+    padding: 8px 16px;
   }
 }
 
@@ -237,11 +373,11 @@
     animation: none;
   }
   
-  .prize-icon-large {
+  .completion-section-compact {
     animation: none;
   }
   
-  .completion-section {
+  .prize-details-popup {
     animation: none;
   }
 }
