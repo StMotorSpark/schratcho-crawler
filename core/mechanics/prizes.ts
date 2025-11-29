@@ -1,4 +1,5 @@
 import type { PrizeEffect, StateEffect } from '../user-state/types';
+import {NO_PRIZE_PRIZE} from '../game-logic/prizes/no-prize';
 
 /**
  * Represents a prize that can be won from a scratch ticket.
@@ -150,6 +151,7 @@ const prizes: Prize[] = [
       stateEffects: [createGoldEffect(200)],
     },
   },
+  NO_PRIZE_PRIZE,
 ];
 
 /**
