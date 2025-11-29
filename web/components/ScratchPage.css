@@ -1,0 +1,383 @@
+.scratch-page {
+  animation: fadeIn 0.3s ease-out;
+  position: relative;
+  min-height: calc(100vh - 40px);
+}
+
+/* Floating navigation bar */
+.scratch-floating-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  z-index: 50;
+}
+
+.floating-back-btn,
+.floating-scratcher-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.floating-back-btn {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+}
+
+.floating-back-btn:hover {
+  background: rgba(0, 0, 0, 0.85);
+  transform: scale(1.05);
+}
+
+.floating-scratcher-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.floating-scratcher-btn:hover {
+  transform: scale(1.05);
+}
+
+.floating-scratcher-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Scratcher popup */
+.scratcher-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 60px 10px 10px 10px;
+  z-index: 100;
+}
+
+.scratcher-popup {
+  background: white;
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  min-width: 180px;
+}
+
+.scratcher-popup h4 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #333;
+  text-align: center;
+}
+
+.scratcher-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scratcher-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scratcher-option:hover {
+  background: #e8e8e8;
+}
+
+.scratcher-option.active {
+  background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+  border-color: #667eea;
+}
+
+.scratcher-symbol {
+  font-size: 1.4rem;
+}
+
+.scratcher-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.ticket-wrapper {
+  margin: 50px 0 10px 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-spinner {
+  font-size: 4rem;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Scratch Instructions */
+.scratch-instructions {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.scratch-instructions p {
+  font-size: 0.9rem;
+  color: #666;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 10px 20px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+/* Compact Completion Section */
+.completion-section-compact {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.prize-info-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+  transition: all 0.2s ease;
+}
+
+.prize-info-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Prize Details Popup */
+.prize-details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 200;
+}
+
+.prize-details-popup {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  max-width: 320px;
+  width: 100%;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.prize-details-popup h4 {
+  margin: 0 0 15px 0;
+  font-size: 1.3rem;
+  color: #333;
+  text-align: center;
+}
+
+.prizes-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.prize-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f5f7fa;
+  border-radius: 10px;
+}
+
+.prize-emoji {
+  font-size: 1.5rem;
+}
+
+.prize-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.prize-value {
+  font-weight: 700;
+  color: #b8860b;
+}
+
+.total-gold {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #b8860b;
+  margin: 0 0 15px 0;
+}
+
+.close-popup-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.close-popup-btn:hover {
+  opacity: 0.9;
+}
+
+.turn-in-btn {
+  padding: 14px 35px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 25px rgba(17, 153, 142, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.turn-in-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(17, 153, 142, 0.5);
+}
+
+.turn-in-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .ticket-wrapper {
+    margin-top: 45px;
+  }
+  
+  .floating-back-btn,
+  .floating-scratcher-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  
+  .turn-in-btn {
+    padding: 12px 28px;
+    font-size: 1rem;
+  }
+  
+  .prize-info-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .scratch-instructions p {
+    font-size: 0.85rem;
+    padding: 8px 16px;
+  }
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .turn-in-btn {
+    animation: none;
+  }
+  
+  .loading-spinner {
+    animation: none;
+  }
+  
+  .completion-section-compact {
+    animation: none;
+  }
+  
+  .prize-details-popup {
+    animation: none;
+  }
+}
