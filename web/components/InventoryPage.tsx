@@ -1,12 +1,14 @@
 import type { UserState } from '../../core/user-state';
 import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout } from '../../core/mechanics/ticketLayouts';
-import { getOwnedTicketsForLayout } from '../../core/user-state';
+import { getOwnedTicketsForLayout, isHandFull, hasHand } from '../../core/user-state';
+import FloatingHandButton from './FloatingHandButton';
 import './InventoryPage.css';
 
 interface InventoryPageProps {
   userState: UserState | null;
   onNavigateToStore: () => void;
   onSelectTicket: (layoutId: string) => void;
+  onOpenHandModal: () => void;
 }
 
 interface OwnedTicket {
@@ -21,6 +23,7 @@ interface OwnedTicket {
 export default function InventoryPage({
   onNavigateToStore,
   onSelectTicket,
+  onOpenHandModal,
 }: InventoryPageProps) {
   // Get all owned tickets
   const ownedTickets: OwnedTicket[] = Object.values(TICKET_LAYOUTS)
@@ -32,6 +35,19 @@ export default function InventoryPage({
 
   const totalTickets = ownedTickets.reduce((sum, item) => sum + item.count, 0);
 
+  // Check if hand is full - user must cash out before scratching more
+  const handIsFull = isHandFull();
+  const hasActiveHand = hasHand();
+
+  const handleSelectTicket = (layoutId: string) => {
+    if (handIsFull) {
+      // Prompt user to cash out their hand first
+      onOpenHandModal();
+      return;
+    }
+    onSelectTicket(layoutId);
+  };
+
   return (
     <div className="inventory-page">
       <div className="inventory-header">
@@ -42,6 +58,22 @@ export default function InventoryPage({
             : 'Your inventory is empty. Visit the store to buy tickets!'}
         </p>
       </div>
+
+      {/* Hand full warning banner */}
+      {handIsFull && (
+        <div className="hand-full-banner" onClick={onOpenHandModal}>
+          <span className="banner-icon">✋</span>
+          <span className="banner-text">Your hand is full! Tap here to cash out.</span>
+        </div>
+      )}
+
+      {/* Active hand info banner */}
+      {hasActiveHand && !handIsFull && (
+        <div className="active-hand-banner" onClick={onOpenHandModal}>
+          <span className="banner-icon">🖐</span>
+          <span className="banner-text">You have an active hand. Tap to view.</span>
+        </div>
+      )}
 
       {ownedTickets.length > 0 ? (
         <div className="inventory-grid">
@@ -64,10 +96,11 @@ export default function InventoryPage({
               </div>
 
               <button
-                className="scratch-ticket-btn"
-                onClick={() => onSelectTicket(layout.id)}
+                className={`scratch-ticket-btn ${handIsFull ? 'disabled' : ''}`}
+                onClick={() => handleSelectTicket(layout.id)}
+                disabled={handIsFull}
               >
-                🎫 Scratch This Ticket
+                {handIsFull ? '✋ Hand Full' : '🎫 Scratch This Ticket'}
               </button>
             </div>
           ))}
@@ -89,6 +122,9 @@ export default function InventoryPage({
           </button>
         </div>
       )}
+
+      {/* Floating hand button */}
+      <FloatingHandButton onClick={onOpenHandModal} />
     </div>
   );
 }

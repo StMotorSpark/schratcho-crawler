@@ -14,7 +14,14 @@ import {
   checkAndUnlockAchievements,
   getAchievementDefinition,
   logEvent,
+  hasHand,
+  isHandFull,
+  addTicketToHand,
+  getHandSize,
+  MAX_HAND_SIZE,
+  type HandTicket,
 } from '../../core/user-state';
+import FloatingHandButton from './FloatingHandButton';
 import './ScratchPage.css';
 
 interface ScratchPageProps {
@@ -22,6 +29,7 @@ interface ScratchPageProps {
   onComplete: () => void;
   onCancel: () => void;
   onHasPendingPrizesChange: (hasPending: boolean) => void;
+  onOpenHandModal: () => void;
 }
 
 type ScratchState = 'preparing' | 'scratching' | 'completed';
@@ -35,6 +43,7 @@ export default function ScratchPage({
   onComplete,
   onCancel,
   onHasPendingPrizesChange,
+  onOpenHandModal,
 }: ScratchPageProps) {
   const [layout] = useState<TicketLayout>(() => getTicketLayout(layoutId));
   const [areaPrizes] = useState<Prize[]>(() => generateAreaPrizes(getTicketLayout(layoutId)));
@@ -133,6 +142,42 @@ export default function ScratchPage({
     onComplete();
   };
 
+  const handleAddToHand = () => {
+    // Add each pending prize as a hand ticket
+    // For simplicity, we aggregate all prizes into a single hand ticket
+    const totalGoldValue = pendingPrizes.reduce(
+      (sum, prize) => sum + getPrizeGoldValue(prize),
+      0
+    );
+
+    // Use the first prize's ID for reference (or create a composite ID)
+    const prizeId = pendingPrizes.length > 0 ? pendingPrizes[0].id : 'unknown';
+
+    const handTicket: HandTicket = {
+      layoutId,
+      prizeId,
+      goldValue: totalGoldValue,
+      addedAt: Date.now(),
+    };
+
+    const added = addTicketToHand(handTicket);
+
+    if (added) {
+      // Check for new achievements
+      const unlocked = checkAndUnlockAchievements();
+      if (unlocked.length > 0) {
+        setNewAchievements(unlocked);
+      }
+
+      // Clear pending prizes
+      setPendingPrizes([]);
+      onHasPendingPrizesChange(false);
+
+      // Navigate back to inventory
+      onComplete();
+    }
+  };
+
   const handleBackClick = () => {
     if (pendingPrizes.length > 0 && scratchState === 'completed') {
       const confirmLeave = window.confirm(
@@ -214,13 +259,43 @@ export default function ScratchPage({
         />
       </div>
 
-      {/* Compact completion section - just the turn in button */}
+      {/* Compact completion section - options depend on hand state */}
       {scratchState === 'completed' && (
         <div className="completion-section-compact">
-          <button className="turn-in-btn" onClick={handleTurnInTicket}>
-            ✅ Turn In Ticket
-            {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
-          </button>
+          {/* If hand exists, player MUST add to hand (cannot cash out individually) */}
+          {hasHand() ? (
+            <>
+              {!isHandFull() ? (
+                <button className="add-to-hand-btn" onClick={handleAddToHand}>
+                  🖐 Add to Hand
+                  {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
+                  <span className="hand-count-hint">
+                    ({getHandSize()}/{MAX_HAND_SIZE})
+                  </span>
+                </button>
+              ) : (
+                <div className="hand-full-warning">
+                  <p>✋ Your hand is full!</p>
+                  <p>Cash out your hand to continue.</p>
+                  <button className="view-hand-btn" onClick={onOpenHandModal}>
+                    🖐 View Hand
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* No hand - offer both options */}
+              <button className="turn-in-btn" onClick={handleTurnInTicket}>
+                ✅ Turn In Ticket
+                {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
+              </button>
+              
+              <button className="add-to-hand-btn secondary" onClick={handleAddToHand}>
+                🖐 Add to Hand
+              </button>
+            </>
+          )}
           
           {/* Info icon for prize details */}
           {pendingPrizes.length > 0 && (
@@ -286,6 +361,9 @@ export default function ScratchPage({
           <p className="achievement-dismiss">Tap to dismiss</p>
         </div>
       )}
+
+      {/* Floating hand button */}
+      <FloatingHandButton onClick={onOpenHandModal} />
     </div>
   );
 }

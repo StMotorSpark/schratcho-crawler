@@ -173,11 +173,99 @@
 /* Compact Completion Section */
 .completion-section-compact {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 12px;
   margin-top: 15px;
   animation: slideUp 0.3s ease-out;
+}
+
+.completion-section-compact .turn-in-btn,
+.completion-section-compact .add-to-hand-btn {
+  width: 100%;
+  max-width: 280px;
+}
+
+/* Add to Hand Button */
+.add-to-hand-btn {
+  padding: 14px 35px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f0c040 0%, #d4a030 100%);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 25px rgba(240, 192, 64, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-to-hand-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(240, 192, 64, 0.5);
+}
+
+.add-to-hand-btn:active {
+  transform: translateY(0);
+}
+
+.add-to-hand-btn.secondary {
+  background: linear-gradient(135deg, #3a3a6a 0%, #2a2a5a 100%);
+  color: #f0c040;
+  border: 2px solid #f0c040;
+  box-shadow: none;
+}
+
+.add-to-hand-btn.secondary:hover {
+  background: linear-gradient(135deg, #4a4a7a 0%, #3a3a6a 100%);
+}
+
+.hand-count-hint {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+/* Hand Full Warning */
+.hand-full-warning {
+  text-align: center;
+  background: rgba(240, 192, 64, 0.1);
+  border: 2px solid rgba(240, 192, 64, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 280px;
+}
+
+.hand-full-warning p {
+  margin: 0 0 8px 0;
+  color: #f0c040;
+}
+
+.hand-full-warning p:first-child {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.view-hand-btn {
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f0c040 0%, #d4a030 100%);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+}
+
+.view-hand-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(240, 192, 64, 0.4);
 }
 
 @keyframes slideUp {

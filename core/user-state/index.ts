@@ -46,6 +46,8 @@ export type {
   PrizeEffect,
   AnalyticsEvent,
   AnalyticsEventType,
+  Hand,
+  HandTicket,
 } from './types';
 
 export {
@@ -53,6 +55,7 @@ export {
   USER_DATA_VERSION,
   SESSION_TIMEOUT_MS,
   MAX_SESSION_HISTORY,
+  MAX_HAND_SIZE,
 } from './types';
 
 // Export user state management
@@ -82,6 +85,15 @@ export {
   getCurrentSession,
   getSessionHistory,
   resetUserData,
+  // Hand management
+  getCurrentHand,
+  hasHand,
+  isHandFull,
+  getHandSize,
+  getHandTotalValue,
+  addTicketToHand,
+  cashOutHand,
+  clearHand,
 } from './userState';
 
 // Export storage utilities

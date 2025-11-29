@@ -12,12 +12,15 @@ import type {
   Session,
   StateEffect,
   PrizeEffect,
+  Hand,
+  HandTicket,
 } from './types';
 import {
   DEFAULT_USER_STATE,
   USER_DATA_VERSION,
   SESSION_TIMEOUT_MS,
   MAX_SESSION_HISTORY,
+  MAX_HAND_SIZE,
 } from './types';
 import { loadUserData, saveUserData, clearUserData } from './storage';
 import { logEvent } from './analytics';
@@ -40,6 +43,7 @@ function createInitialUserData(): UserData {
     achievements: {},
     currentSession: null,
     sessionHistory: [],
+    currentHand: null,
     lastActivityTime: now,
     createdAt: now,
   };
@@ -527,4 +531,161 @@ export function useTicketForLayout(layoutId: string): boolean {
  */
 export function hasTicketForLayout(layoutId: string): boolean {
   return getOwnedTicketsForLayout(layoutId) > 0;
+}
+
+// ==========================================
+// Hand Management Functions
+// ==========================================
+
+/**
+ * Get the current hand.
+ * Returns null if no hand exists.
+ */
+export function getCurrentHand(): Hand | null {
+  return getUserData().currentHand;
+}
+
+/**
+ * Check if the user currently has a hand.
+ */
+export function hasHand(): boolean {
+  return getCurrentHand() !== null;
+}
+
+/**
+ * Check if the current hand is full (has MAX_HAND_SIZE tickets).
+ */
+export function isHandFull(): boolean {
+  const hand = getCurrentHand();
+  return hand !== null && hand.tickets.length >= MAX_HAND_SIZE;
+}
+
+/**
+ * Get the number of tickets in the current hand.
+ */
+export function getHandSize(): number {
+  const hand = getCurrentHand();
+  return hand?.tickets.length ?? 0;
+}
+
+/**
+ * Calculate the total gold value of all tickets in the current hand.
+ */
+export function getHandTotalValue(): number {
+  const hand = getCurrentHand();
+  if (!hand) return 0;
+  return hand.tickets.reduce((sum, ticket) => sum + ticket.goldValue, 0);
+}
+
+/**
+ * Create a new hand or add a ticket to the existing hand.
+ * Returns true if successful, false if hand is full or ticket couldn't be added.
+ */
+export function addTicketToHand(ticket: HandTicket): boolean {
+  const data = ensureInitialized();
+  
+  // Create a new hand if none exists
+  if (!data.currentHand) {
+    data.currentHand = {
+      id: generateId(),
+      tickets: [],
+      createdAt: Date.now(),
+    };
+  }
+  
+  // Check if hand is full
+  if (data.currentHand.tickets.length >= MAX_HAND_SIZE) {
+    return false;
+  }
+  
+  // Add ticket to hand
+  data.currentHand.tickets.push(ticket);
+  
+  logEvent('ticket_added_to_hand', {
+    handId: data.currentHand.id,
+    layoutId: ticket.layoutId,
+    prizeId: ticket.prizeId,
+    goldValue: ticket.goldValue,
+    handSize: data.currentHand.tickets.length,
+  });
+  
+  updateActivity();
+  persist();
+  return true;
+}
+
+/**
+ * Cash out the current hand.
+ * Adds the total gold value to the user's balance and clears the hand.
+ * Returns the total gold value cashed out, or 0 if no hand exists.
+ */
+export function cashOutHand(): number {
+  const data = ensureInitialized();
+  
+  if (!data.currentHand || data.currentHand.tickets.length === 0) {
+    return 0;
+  }
+  
+  const totalValue = data.currentHand.tickets.reduce(
+    (sum, ticket) => sum + ticket.goldValue,
+    0
+  );
+  
+  const handId = data.currentHand.id;
+  const ticketCount = data.currentHand.tickets.length;
+  
+  // Add gold to user's balance
+  if (totalValue > 0) {
+    data.state.currentGold += totalValue;
+    data.state.totalGoldEarned += totalValue;
+    
+    // Update highest win if applicable
+    if (totalValue > data.state.highestWin) {
+      data.state.highestWin = totalValue;
+    }
+    
+    // Track in current session
+    if (data.currentSession) {
+      data.currentSession.goldEarned += totalValue;
+    }
+  }
+  
+  // Clear the hand
+  data.currentHand = null;
+  
+  logEvent('hand_cashed_out', {
+    handId,
+    totalValue,
+    ticketCount,
+  });
+  
+  updateActivity();
+  persist();
+  return totalValue;
+}
+
+/**
+ * Clear the current hand without cashing out (discard hand).
+ * Returns the tickets that were in the hand (for potential undo functionality).
+ */
+export function clearHand(): HandTicket[] {
+  const data = ensureInitialized();
+  
+  if (!data.currentHand) {
+    return [];
+  }
+  
+  const tickets = [...data.currentHand.tickets];
+  const handId = data.currentHand.id;
+  
+  data.currentHand = null;
+  
+  logEvent('hand_cleared', {
+    handId,
+    ticketCount: tickets.length,
+  });
+  
+  updateActivity();
+  persist();
+  return tickets;
 }
