@@ -689,3 +689,27 @@ export function clearHand(): HandTicket[] {
   persist();
   return tickets;
 }
+
+// ==========================================
+// Scratcher Preference Functions
+// ==========================================
+
+/**
+ * Get the currently selected scratcher ID.
+ * Returns the persisted preference or 'coin' as default.
+ */
+export function getSelectedScratcherId(): string {
+  const data = ensureInitialized();
+  return data.state.selectedScratcherId ?? 'coin';
+}
+
+/**
+ * Set the selected scratcher ID.
+ * Persists the selection for future sessions.
+ */
+export function setSelectedScratcherId(scratcherId: string): void {
+  const data = ensureInitialized();
+  data.state.selectedScratcherId = scratcherId;
+  updateActivity();
+  persist();
+}

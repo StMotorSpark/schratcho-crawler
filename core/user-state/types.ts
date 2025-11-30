@@ -27,6 +27,8 @@ export interface UserState {
   totalGoldSpent: number;
   /** Highest single ticket win */
   highestWin: number;
+  /** Currently selected scratcher ID */
+  selectedScratcherId: string;
 }
 
 /**
@@ -194,6 +196,7 @@ export const DEFAULT_USER_STATE: UserState = {
   totalGoldEarned: 0,
   totalGoldSpent: 0,
   highestWin: 0,
+  selectedScratcherId: 'coin', // Default selected scratcher
 };
 
 /**

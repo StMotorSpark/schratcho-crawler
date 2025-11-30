@@ -94,6 +94,9 @@ export {
   addTicketToHand,
   cashOutHand,
   clearHand,
+  // Scratcher preference
+  getSelectedScratcherId,
+  setSelectedScratcherId,
 } from './userState';
 
 // Export storage utilities
