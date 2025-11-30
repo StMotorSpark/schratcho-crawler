@@ -19,6 +19,8 @@ import {
   addTicketToHand,
   getHandSize,
   MAX_HAND_SIZE,
+  getSelectedScratcherId,
+  setSelectedScratcherId,
   type HandTicket,
 } from '../../core/user-state';
 import FloatingHandButton from './FloatingHandButton';
@@ -47,8 +49,8 @@ export default function ScratchPage({
 }: ScratchPageProps) {
   const [layout] = useState<TicketLayout>(() => getTicketLayout(layoutId));
   const [areaPrizes] = useState<Prize[]>(() => generateAreaPrizes(getTicketLayout(layoutId)));
-  const [scratcherId, setScratcherId] = useState('coin');
-  const [scratcher, setScratcher] = useState<Scratcher>(() => getScratcher('coin'));
+  const [scratcherId, setScratcherId] = useState(() => getSelectedScratcherId());
+  const [scratcher, setScratcher] = useState<Scratcher>(() => getScratcher(getSelectedScratcherId()));
   const [scratchState, setScratchState] = useState<ScratchState>('preparing');
   const [pendingPrizes, setPendingPrizes] = useState<Prize[]>([]);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
@@ -88,6 +90,7 @@ export default function ScratchPage({
   const handleScratcherChange = (newScratcherId: string) => {
     setScratcherId(newScratcherId);
     setScratcher(getScratcher(newScratcherId));
+    setSelectedScratcherId(newScratcherId);
     setShowScratcherMenu(false);
   };
 

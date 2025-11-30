@@ -21,6 +21,7 @@ import {
   SESSION_TIMEOUT_MS,
   MAX_SESSION_HISTORY,
   MAX_HAND_SIZE,
+  DEFAULT_SCRATCHER_ID,
 } from './types';
 import { loadUserData, saveUserData, clearUserData } from './storage';
 import { logEvent } from './analytics';
@@ -688,4 +689,28 @@ export function clearHand(): HandTicket[] {
   updateActivity();
   persist();
   return tickets;
+}
+
+// ==========================================
+// Scratcher Preference Functions
+// ==========================================
+
+/**
+ * Get the currently selected scratcher ID.
+ * Returns the persisted preference or the default scratcher if not set.
+ */
+export function getSelectedScratcherId(): string {
+  const data = ensureInitialized();
+  return data.state.selectedScratcherId ?? DEFAULT_SCRATCHER_ID;
+}
+
+/**
+ * Set the selected scratcher ID.
+ * Persists the selection for future sessions.
+ */
+export function setSelectedScratcherId(scratcherId: string): void {
+  const data = ensureInitialized();
+  data.state.selectedScratcherId = scratcherId;
+  updateActivity();
+  persist();
 }
