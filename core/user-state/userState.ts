@@ -21,6 +21,7 @@ import {
   SESSION_TIMEOUT_MS,
   MAX_SESSION_HISTORY,
   MAX_HAND_SIZE,
+  DEFAULT_SCRATCHER_ID,
 } from './types';
 import { loadUserData, saveUserData, clearUserData } from './storage';
 import { logEvent } from './analytics';
@@ -696,11 +697,11 @@ export function clearHand(): HandTicket[] {
 
 /**
  * Get the currently selected scratcher ID.
- * Returns the persisted preference or 'coin' as default.
+ * Returns the persisted preference or the default scratcher if not set.
  */
 export function getSelectedScratcherId(): string {
   const data = ensureInitialized();
-  return data.state.selectedScratcherId ?? 'coin';
+  return data.state.selectedScratcherId ?? DEFAULT_SCRATCHER_ID;
 }
 
 /**

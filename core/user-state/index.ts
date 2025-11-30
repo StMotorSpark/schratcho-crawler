@@ -56,6 +56,7 @@ export {
   SESSION_TIMEOUT_MS,
   MAX_SESSION_HISTORY,
   MAX_HAND_SIZE,
+  DEFAULT_SCRATCHER_ID,
 } from './types';
 
 // Export user state management

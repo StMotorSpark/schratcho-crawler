@@ -6,6 +6,11 @@
  */
 
 /**
+ * Default scratcher ID used when no selection has been made.
+ */
+export const DEFAULT_SCRATCHER_ID = 'coin';
+
+/**
  * Represents the core user state values that are tracked and persisted.
  */
 export interface UserState {
@@ -27,8 +32,8 @@ export interface UserState {
   totalGoldSpent: number;
   /** Highest single ticket win */
   highestWin: number;
-  /** Currently selected scratcher ID */
-  selectedScratcherId: string;
+  /** Currently selected scratcher ID (optional for backward compatibility) */
+  selectedScratcherId?: string;
 }
 
 /**
@@ -190,13 +195,13 @@ export const DEFAULT_USER_STATE: UserState = {
   currentGold: 100, // Start with some gold
   availableTickets: 3, // Start with a few tickets (deprecated)
   ownedTickets: {}, // Start with no layout-specific tickets
-  unlockedScratchers: ['coin'], // Default scratcher
+  unlockedScratchers: [DEFAULT_SCRATCHER_ID], // Default scratcher
   unlockedTicketTypes: ['classic'], // Default ticket type
   totalTicketsScratched: 0,
   totalGoldEarned: 0,
   totalGoldSpent: 0,
   highestWin: 0,
-  selectedScratcherId: 'coin', // Default selected scratcher
+  selectedScratcherId: DEFAULT_SCRATCHER_ID, // Default selected scratcher
 };
 
 /**
