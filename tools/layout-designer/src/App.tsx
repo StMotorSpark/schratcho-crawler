@@ -40,6 +40,141 @@ function isValidEmoji(str: string): boolean {
   return emojiRegex.test(str);
 }
 
+/**
+ * Calculate odds information for the designer
+ */
+interface PrizeOddsInfo {
+  prizeId: string;
+  name: string;
+  emoji: string;
+  probability: number;
+  percentageStr: string;
+  oddsStr: string;
+  weight: number;
+}
+
+function calculatePrizeOdds(prizeConfigs: PrizeConfig[]): PrizeOddsInfo[] {
+  const validConfigs = prizeConfigs.filter(c => c.weight > 0);
+  if (validConfigs.length === 0) return [];
+  
+  const totalWeight = validConfigs.reduce((sum, c) => sum + c.weight, 0);
+  
+  return validConfigs.map(config => {
+    const prizeInfo = AVAILABLE_PRIZES.find(p => p.id === config.prizeId);
+    const probability = config.weight / totalWeight;
+    
+    return {
+      prizeId: config.prizeId,
+      name: prizeInfo?.name || 'Unknown',
+      emoji: prizeInfo?.emoji || '?',
+      probability,
+      percentageStr: formatPercentage(probability),
+      oddsStr: formatOdds(probability),
+      weight: config.weight,
+    };
+  });
+}
+
+function formatPercentage(probability: number): string {
+  const percent = probability * 100;
+  if (percent >= 10) {
+    return `${percent.toFixed(1)}%`;
+  } else if (percent >= 1) {
+    return `${percent.toFixed(2)}%`;
+  } else {
+    return `${percent.toFixed(3)}%`;
+  }
+}
+
+function formatOdds(probability: number): string {
+  if (probability <= 0) return 'N/A';
+  const oneIn = 1 / probability;
+  if (oneIn < 2) return '~1 in 1';
+  if (oneIn < 100) return `1 in ${Math.round(oneIn)}`;
+  if (oneIn < 1000) return `1 in ${Math.round(oneIn / 10) * 10}`;
+  return `1 in ${Math.round(oneIn / 100) * 100}`;
+}
+
+function getWinConditionExplanation(winCondition: WinCondition, scratchAreaCount: number): string {
+  switch (winCondition) {
+    case 'no-win-condition':
+      return 'Every ticket is a winner!';
+    case 'match-two':
+      return `Match 2 identical symbols out of ${scratchAreaCount} areas to win.`;
+    case 'match-three':
+      return `Match 3 identical symbols out of ${scratchAreaCount} areas to win.`;
+    case 'match-all':
+      return `All ${scratchAreaCount} areas must show the same symbol.`;
+    case 'find-one':
+      return 'Find the target prize to win.';
+    case 'total-value-threshold':
+      return 'Combined value must exceed threshold.';
+    default:
+      return 'Scratch to reveal prizes!';
+  }
+}
+
+/**
+ * Calculate approximate win probability based on win condition
+ */
+function calculateWinProbability(
+  prizeOdds: PrizeOddsInfo[],
+  winCondition: WinCondition,
+  numAreas: number
+): number {
+  if (prizeOdds.length === 0) return 0;
+  
+  switch (winCondition) {
+    case 'no-win-condition':
+    case 'reveal-any-area':
+    case 'reveal-all-areas':
+    case 'progressive-reveal':
+      return 1;
+    case 'match-two':
+      return calculateMatchProb(prizeOdds, numAreas, 2);
+    case 'match-three':
+      return calculateMatchProb(prizeOdds, numAreas, 3);
+    case 'match-all':
+      return calculateMatchProb(prizeOdds, numAreas, numAreas);
+    case 'find-one':
+    case 'total-value-threshold':
+      return 0.5; // Placeholder
+    default:
+      return 0;
+  }
+}
+
+function calculateMatchProb(prizeOdds: PrizeOddsInfo[], numAreas: number, required: number): number {
+  if (numAreas < required) return 0;
+  if (required <= 1) return 1;
+  
+  let totalProb = 0;
+  for (const prize of prizeOdds) {
+    const p = prize.probability;
+    let prizeWinProb = 0;
+    for (let k = required; k <= numAreas; k++) {
+      prizeWinProb += binomialProb(numAreas, k, p);
+    }
+    totalProb += prizeWinProb;
+  }
+  return Math.min(1, totalProb);
+}
+
+function binomialProb(n: number, k: number, p: number): number {
+  return binomialCoeff(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+}
+
+function binomialCoeff(n: number, k: number): number {
+  if (k < 0 || k > n) return 0;
+  if (k === 0 || k === n) return 1;
+  if (k > n - k) k = n - k;
+  let result = 1;
+  for (let i = 0; i < k; i++) {
+    result = result * (n - i) / (i + 1);
+  }
+  return Math.round(result);
+}
+
 function App() {
   // Active tab state
   const [activeTab, setActiveTab] = useState<DesignerTab>('layouts');
@@ -1412,6 +1547,88 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
                 ⚠️ Some prizes have zero or negative weights and will be skipped.
               </p>
             )}
+          </section>
+
+          <section className="panel">
+            <h2>📊 Odds Information</h2>
+            <p className="instructions" style={{ fontSize: '12px', marginBottom: '10px' }}>
+              Calculated odds based on current prize configuration and win condition.
+            </p>
+            
+            {(() => {
+              const prizeOdds = calculatePrizeOdds(prizeConfigs);
+              const winProb = calculateWinProbability(prizeOdds, winCondition, scratchAreas.length);
+              const winExplanation = getWinConditionExplanation(winCondition, scratchAreas.length);
+              
+              return (
+                <>
+                  {/* Win Probability */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(17, 153, 142, 0.2) 0%, rgba(56, 239, 125, 0.2) 100%)',
+                    padding: '12px 15px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(56, 239, 125, 0.3)',
+                    marginBottom: '15px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ color: '#aaa', fontSize: '0.9rem' }}>Win Probability:</span>
+                      <span style={{ color: '#38ef7d', fontSize: '1.3rem', fontWeight: '700' }}>
+                        {formatPercentage(winProb)}
+                      </span>
+                    </div>
+                    <p style={{ color: '#ccc', fontSize: '0.85rem', margin: 0 }}>{winExplanation}</p>
+                  </div>
+
+                  {/* Prize Odds Table */}
+                  {prizeOdds.length > 0 ? (
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+                            <th style={{ textAlign: 'left', padding: '8px 4px', color: '#8b9dc3' }}>Prize</th>
+                            <th style={{ textAlign: 'right', padding: '8px 4px', color: '#8b9dc3' }}>Chance</th>
+                            <th style={{ textAlign: 'right', padding: '8px 4px', color: '#8b9dc3' }}>Odds</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {prizeOdds.sort((a, b) => b.probability - a.probability).map(prize => (
+                            <tr key={prize.prizeId} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                              <td style={{ padding: '8px 4px' }}>
+                                <span style={{ marginRight: '6px' }}>{prize.emoji}</span>
+                                <span style={{ color: '#fff' }}>{prize.name}</span>
+                              </td>
+                              <td style={{ textAlign: 'right', padding: '8px 4px', color: '#f0c040', fontWeight: '600' }}>
+                                {prize.percentageStr}
+                              </td>
+                              <td style={{ textAlign: 'right', padding: '8px 4px', color: '#aaa' }}>
+                                {prize.oddsStr}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p style={{ color: '#aaa', fontStyle: 'italic', textAlign: 'center', padding: '15px' }}>
+                      No valid prizes configured
+                    </p>
+                  )}
+
+                  {/* Info */}
+                  <div style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    marginTop: '15px'
+                  }}>
+                    <p style={{ color: '#888', fontSize: '0.75rem', margin: 0 }}>
+                      ℹ️ Win probability is an approximation based on independent random prize selection per area.
+                      Actual odds may vary.
+                    </p>
+                  </div>
+                </>
+              );
+            })()}
           </section>
 
           <section className="panel">

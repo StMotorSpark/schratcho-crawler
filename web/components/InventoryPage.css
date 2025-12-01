@@ -99,6 +99,31 @@
   margin: 0;
 }
 
+.inventory-card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inventory-ticket-card .odds-info-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.inventory-ticket-card .odds-info-btn:hover {
+  background: rgba(102, 126, 234, 0.3);
+  transform: scale(1.1);
+}
+
 .ticket-count-badge {
   background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
   color: white;

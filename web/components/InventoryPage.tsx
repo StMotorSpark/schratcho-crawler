@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import type { UserState } from '../../core/user-state';
 import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout } from '../../core/mechanics/ticketLayouts';
 import { getOwnedTicketsForLayout, isHandFull, hasHand } from '../../core/user-state';
 import FloatingHandButton from './FloatingHandButton';
+import OddsInfoModal from './OddsInfoModal';
 import './InventoryPage.css';
 
 interface InventoryPageProps {
@@ -25,6 +27,8 @@ export default function InventoryPage({
   onSelectTicket,
   onOpenHandModal,
 }: InventoryPageProps) {
+  const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
+  
   // Get all owned tickets
   const ownedTickets: OwnedTicket[] = Object.values(TICKET_LAYOUTS)
     .map((layout) => ({
@@ -81,7 +85,17 @@ export default function InventoryPage({
             <div key={layout.id} className="inventory-ticket-card">
               <div className="inventory-card-header">
                 <h3 className="inventory-card-title">{layout.name}</h3>
-                <span className="ticket-count-badge">×{count}</span>
+                <div className="inventory-card-header-actions">
+                  <button
+                    className="odds-info-btn"
+                    onClick={() => setOddsModalLayout(layout)}
+                    aria-label="View odds information"
+                    title="View odds information"
+                  >
+                    ℹ️
+                  </button>
+                  <span className="ticket-count-badge">×{count}</span>
+                </div>
               </div>
 
               <p className="inventory-card-description">{layout.description}</p>
@@ -125,6 +139,14 @@ export default function InventoryPage({
 
       {/* Floating hand button */}
       <FloatingHandButton onClick={onOpenHandModal} />
+
+      {/* Odds Information Modal */}
+      {oddsModalLayout && (
+        <OddsInfoModal
+          layout={oddsModalLayout}
+          onClose={() => setOddsModalLayout(null)}
+        />
+      )}
     </div>
   );
 }
