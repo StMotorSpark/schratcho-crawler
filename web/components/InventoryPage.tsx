@@ -5,7 +5,6 @@ import { getOwnedTicketsForLayout, isHandFull, hasHand } from '../../core/user-s
 import FloatingHandButton from './FloatingHandButton';
 import OddsInfoModal from './OddsInfoModal';
 import './InventoryPage.css';
-import './OddsInfoModal.css';
 
 interface InventoryPageProps {
   userState: UserState | null;
