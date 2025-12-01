@@ -6,12 +6,25 @@ A web and mobile game combining scratch-off tickets with rogue-like progression 
 
 This project is currently in the **demo phase**. The scratch-off ticket demo has been enhanced with improved styling, multiple scratch areas, and sound effects.
 
+## Progressive Web App (PWA)
+
+This game is a Progressive Web App! You can:
+- **Add to Home Screen**: Install the game on your phone or desktop for a native app-like experience
+- **Play Offline**: The game works without an internet connection once installed
+- **Automatic Updates**: The app automatically updates when new versions are available
+
+To install:
+- **iOS Safari**: Tap the share button and select "Add to Home Screen"
+- **Android Chrome**: Tap the menu and select "Install App" or "Add to Home Screen"
+- **Desktop Chrome/Edge**: Click the install icon in the address bar
+
 ## Demo: Scratch-Off Ticket
 
 The current demo showcases an interactive scratch-off ticket experience using CSS Masking:
 
 ### Features
 
+- **Progressive Web App**: Install on your device for offline play and home screen access
 - **Dynamic Scratcher Types**: Choose from multiple scratcher tools with different graphics and behaviors
 - **Scratcher Selector**: Select your preferred scratcher before scratching (Gold Coin, Magic Brush, Finger, Golden Key, Mega Eraser, Fire Sword)
 - **Dynamic Ticket Layouts**: Flexible system for defining custom ticket layouts via configuration
