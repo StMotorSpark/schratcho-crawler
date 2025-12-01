@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { UserState } from '../../core/user-state';
 import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout } from '../../core/mechanics/ticketLayouts';
 import {
@@ -5,7 +6,9 @@ import {
   canAfford,
   getOwnedTicketsForLayout,
 } from '../../core/user-state';
+import OddsInfoModal from './OddsInfoModal';
 import './StorePage.css';
+import './OddsInfoModal.css';
 
 interface StorePageProps {
   userState: UserState | null;
@@ -18,6 +21,7 @@ interface StorePageProps {
  */
 export default function StorePage({ userState, onNavigateToInventory }: StorePageProps) {
   const ticketLayouts = Object.values(TICKET_LAYOUTS);
+  const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
 
   const handlePurchaseSingle = (layout: TicketLayout) => {
     const cost = getTicketGoldCost(layout);
@@ -60,9 +64,19 @@ export default function StorePage({ userState, onNavigateToInventory }: StorePag
             <div key={layout.id} className="ticket-card">
               <div className="ticket-card-header">
                 <h3 className="ticket-card-title">{layout.name}</h3>
-                {ownedCount > 0 && (
-                  <span className="owned-badge">Owned: {ownedCount}</span>
-                )}
+                <div className="ticket-card-header-actions">
+                  <button
+                    className="odds-info-btn"
+                    onClick={() => setOddsModalLayout(layout)}
+                    aria-label="View odds information"
+                    title="View odds information"
+                  >
+                    ℹ️
+                  </button>
+                  {ownedCount > 0 && (
+                    <span className="owned-badge">Owned: {ownedCount}</span>
+                  )}
+                </div>
               </div>
               
               <p className="ticket-card-description">{layout.description}</p>
@@ -112,6 +126,14 @@ export default function StorePage({ userState, onNavigateToInventory }: StorePag
             🎒 Go to Inventory ({getTotalOwnedTickets()} ticket{getTotalOwnedTickets() > 1 ? 's' : ''})
           </button>
         </div>
+      )}
+
+      {/* Odds Information Modal */}
+      {oddsModalLayout && (
+        <OddsInfoModal
+          layout={oddsModalLayout}
+          onClose={() => setOddsModalLayout(null)}
+        />
       )}
     </div>
   );
