@@ -8,6 +8,7 @@ import {
 } from '../../core/user-state';
 import OddsInfoModal from './OddsInfoModal';
 import './StorePage.css';
+import './shared-tabs.css';
 
 interface StorePageProps {
   userState: UserState | null;
