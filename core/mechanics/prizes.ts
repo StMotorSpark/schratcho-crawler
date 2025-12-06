@@ -1,4 +1,4 @@
-import type { PrizeEffect, StateEffect } from '../user-state/types';
+import type { PrizeEffect, StateEffect, HandEffect, HandEffectCondition } from '../user-state/types';
 import {NO_PRIZE_PRIZE} from '../game-logic/prizes/no-prize';
 
 /**
@@ -50,6 +50,45 @@ export function createTicketEffect(amount: number): StateEffect {
     field: 'availableTickets',
     operation: 'add',
     value: amount,
+  };
+}
+
+/**
+ * Helper to create a hand effect that adds gold to hand value.
+ */
+export function createHandAddGoldEffect(amount: number): HandEffect {
+  return {
+    operation: 'add',
+    target: 'hand',
+    amount,
+  };
+}
+
+/**
+ * Helper to create a hand effect that multiplies a target value.
+ */
+export function createHandMultiplyEffect(
+  target: 'prior' | 'next' | 'hand' | 'self',
+  multiplier: number
+): HandEffect {
+  return {
+    operation: 'multiply',
+    target,
+    amount: multiplier,
+  };
+}
+
+/**
+ * Helper to create a hand effect with diff conditional logic.
+ */
+export function createHandDiffEffect(
+  conditions: HandEffectCondition[]
+): HandEffect {
+  return {
+    operation: 'diff',
+    target: 'self', // diff doesn't use target directly
+    amount: 0,
+    conditions,
   };
 }
 
@@ -149,6 +188,56 @@ const prizes: Prize[] = [
     emoji: '👑',
     effects: {
       stateEffects: [createGoldEffect(200)],
+    },
+  },
+  // Hand effect prizes - these modify hand calculations instead of adding gold directly
+  {
+    id: 'hand-gold-boost',
+    name: 'Gold Boost',
+    value: '+100 to Hand',
+    emoji: '💰',
+    effects: {
+      handEffect: createHandAddGoldEffect(100),
+    },
+  },
+  {
+    id: 'hand-prior-multiply',
+    name: 'Prior Boost',
+    value: '×1.5 Prior',
+    emoji: '⚡',
+    effects: {
+      handEffect: createHandMultiplyEffect('prior', 1.5),
+    },
+  },
+  {
+    id: 'hand-diff-conditional',
+    name: 'Risk & Reward',
+    value: 'Diff Effect',
+    emoji: '🎲',
+    effects: {
+      handEffect: createHandDiffEffect([
+        {
+          type: 'greater',
+          target: 'next',
+          operation: 'multiply',
+          amount: 2,
+        },
+        {
+          type: 'less',
+          target: 'hand',
+          operation: 'subtract',
+          amount: 200,
+        },
+      ]),
+    },
+  },
+  {
+    id: 'hand-mega-multiplier',
+    name: 'Mega Multiplier',
+    value: '×10 Hand',
+    emoji: '💎',
+    effects: {
+      handEffect: createHandMultiplyEffect('hand', 10),
     },
   },
   NO_PRIZE_PRIZE,
