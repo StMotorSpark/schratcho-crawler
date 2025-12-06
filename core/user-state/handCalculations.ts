@@ -75,6 +75,11 @@ export function calculateHandValue(
 }
 
 /**
+ * Special index value to represent the entire hand (not a specific ticket).
+ */
+const HAND_TARGET_INDEX = -1;
+
+/**
  * Apply a single hand effect and return the result.
  */
 function applyHandEffect(
@@ -111,7 +116,7 @@ function applyHandEffect(
   }
 
   // Get current value of target
-  const currentValue = targetIndex === -1 
+  const currentValue = targetIndex === HAND_TARGET_INDEX 
     ? ticketValues.reduce((sum, v) => sum + v, 0) // For 'hand' target, sum all values
     : ticketValues[targetIndex];
 
@@ -133,7 +138,8 @@ function applyHandEffect(
   }
 
   // For 'hand' target, we need to apply proportionally to all tickets
-  if (targetIndex === -1) {
+  // Note: This intentionally mutates ticketValues array in-place for performance
+  if (targetIndex === HAND_TARGET_INDEX) {
     const multiplier = newValue / Math.max(currentValue, 1);
     for (let i = 0; i < ticketValues.length; i++) {
       ticketValues[i] = ticketValues[i] * multiplier;
@@ -238,7 +244,7 @@ function applyDiffEffect(
     };
   }
 
-  const targetValue = targetIndex === -1
+  const targetValue = targetIndex === HAND_TARGET_INDEX
     ? ticketValues.reduce((sum, v) => sum + v, 0)
     : ticketValues[targetIndex];
 
@@ -259,7 +265,8 @@ function applyDiffEffect(
   }
 
   // For 'hand' target, apply proportionally
-  if (targetIndex === -1) {
+  // Note: This intentionally mutates ticketValues array in-place for performance
+  if (targetIndex === HAND_TARGET_INDEX) {
     const multiplier = newValue / Math.max(targetValue, 1);
     for (let i = 0; i < ticketValues.length; i++) {
       ticketValues[i] = ticketValues[i] * multiplier;
@@ -289,7 +296,7 @@ function applyDiffEffect(
 /**
  * Resolve target to an array index.
  * Returns undefined if target doesn't exist.
- * Returns -1 for 'hand' target (special case).
+ * Returns HAND_TARGET_INDEX for 'hand' target (special case).
  */
 function resolveTargetIndex(
   target: HandEffectTarget,
@@ -304,7 +311,7 @@ function resolveTargetIndex(
     case 'next':
       return currentIndex < arrayLength - 1 ? currentIndex + 1 : undefined;
     case 'hand':
-      return -1; // Special case for entire hand
+      return HAND_TARGET_INDEX; // Special case for entire hand
     default:
       return undefined;
   }
