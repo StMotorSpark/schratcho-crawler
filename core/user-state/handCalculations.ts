@@ -61,9 +61,9 @@ export function calculateHandValue(
     }
   }
 
-  // Calculate total value (sum of all ticket values, cannot be negative, rounded up)
+  // Calculate total value (sum of all ticket values, rounded up, cannot be negative)
   let totalValue = ticketValues.reduce((sum, value) => sum + value, 0);
-  totalValue = Math.max(0, Math.ceil(totalValue));
+  totalValue = Math.ceil(Math.max(0, totalValue));
 
   // Update each ticket's calculated value (rounded)
   for (let i = 0; i < calculatedTickets.length; i++) {
@@ -122,6 +122,8 @@ function applyHandEffect(
     : ticketValues[targetIndex];
 
   // Apply the operation (round up to avoid decimals)
+  // Note: We round the result of operations rather than operands to ensure
+  // consistent game behavior (e.g., multiply by 1.5 then round, not round then multiply)
   let newValue = currentValue;
   switch (operation) {
     case 'multiply':

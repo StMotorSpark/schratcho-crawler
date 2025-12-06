@@ -204,9 +204,9 @@ export default function ScratchPage({
   };
 
   const handleScratchAgain = () => {
-    // For non-winners with more tickets, stay on scratch page but reset
-    // This will consume another ticket
-    window.location.reload(); // Simple approach - reload to reset state
+    // For non-winners with more tickets, return to inventory and let user select again
+    // This provides a smoother UX flow
+    onComplete();
   };
 
   const totalPendingGold = pendingPrizes.reduce(
