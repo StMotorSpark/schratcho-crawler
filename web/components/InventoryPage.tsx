@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { UserState } from '../../core/user-state';
-import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout } from '../../core/mechanics/ticketLayouts';
+import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout, type TicketType } from '../../core/mechanics/ticketLayouts';
 import { getOwnedTicketsForLayout, isHandFull, hasHand } from '../../core/user-state';
 import FloatingHandButton from './FloatingHandButton';
 import OddsInfoModal from './OddsInfoModal';
@@ -27,17 +27,20 @@ export default function InventoryPage({
   onSelectTicket,
   onOpenHandModal,
 }: InventoryPageProps) {
+  const [activeTab, setActiveTab] = useState<TicketType>('Core');
   const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
   
-  // Get all owned tickets
-  const ownedTickets: OwnedTicket[] = Object.values(TICKET_LAYOUTS)
+  // Get all owned tickets filtered by active tab
+  const allOwnedTickets: OwnedTicket[] = Object.values(TICKET_LAYOUTS)
     .map((layout) => ({
       layout,
       count: getOwnedTicketsForLayout(layout.id),
     }))
     .filter((item) => item.count > 0);
+  
+  const ownedTickets = allOwnedTickets.filter(item => (item.layout.type || 'Core') === activeTab);
 
-  const totalTickets = ownedTickets.reduce((sum, item) => sum + item.count, 0);
+  const totalTickets = allOwnedTickets.reduce((sum, item) => sum + item.count, 0);
 
   // Check if hand is full - user must cash out before scratching more
   const handIsFull = isHandFull();
@@ -61,6 +64,22 @@ export default function InventoryPage({
             ? `You have ${totalTickets} ticket${totalTickets > 1 ? 's' : ''} ready to scratch!`
             : 'Your inventory is empty. Visit the store to buy tickets!'}
         </p>
+      </div>
+
+      {/* Ticket Type Tabs */}
+      <div className="ticket-tabs">
+        <button
+          className={`ticket-tab ${activeTab === 'Core' ? 'active' : ''}`}
+          onClick={() => setActiveTab('Core')}
+        >
+          Core Tickets
+        </button>
+        <button
+          className={`ticket-tab ${activeTab === 'Hand' ? 'active' : ''}`}
+          onClick={() => setActiveTab('Hand')}
+        >
+          Hand Tickets
+        </button>
       </div>
 
       {/* Hand full warning banner */}

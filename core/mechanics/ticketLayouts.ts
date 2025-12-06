@@ -74,6 +74,11 @@ export type WinCondition =
   | 'progressive-reveal';    // @deprecated - Win when final area is revealed
 
 /**
+ * Ticket type for categorization and filtering
+ */
+export type TicketType = 'Core' | 'Hand' | 'Crawl';
+
+/**
  * Complete ticket layout configuration
  */
 export interface TicketLayout {
@@ -83,6 +88,8 @@ export interface TicketLayout {
   name: string;
   /** Description of this ticket type */
   description: string;
+  /** Ticket type for categorization (Core, Hand, or Crawl) */
+  type?: TicketType;
   /** Configuration for each scratch area */
   scratchAreas: ScratchAreaConfig[];
   /** How prizes are revealed across areas */
@@ -123,6 +130,7 @@ export const CLASSIC_TICKET: TicketLayout = {
   id: 'classic',
   name: 'Classic Scratch Ticket',
   description: 'Three horizontal scratch areas - each reveals its own prize',
+  type: 'Core',
   goldCost: 5,
   scratchAreas: [
     {
@@ -183,6 +191,7 @@ export const GRID_TICKET: TicketLayout = {
   id: 'grid',
   name: 'Grid Ticket',
   description: 'Nine areas in a 3x3 grid - match three to win',
+  type: 'Core',
   goldCost: 10,
   scratchAreas: [
     // Row 1
@@ -301,6 +310,7 @@ export const SINGLE_AREA_TICKET: TicketLayout = {
   id: 'single',
   name: 'Single Area Ticket',
   description: 'One large scratch area - reveal your prize',
+  type: 'Core',
   goldCost: 3,
   scratchAreas: [
     {

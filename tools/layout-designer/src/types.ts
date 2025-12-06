@@ -3,6 +3,11 @@
  * These mirror the types from core/mechanics/ticketLayouts.ts and core/mechanics/scratchers.ts
  */
 
+/**
+ * Ticket type for categorization and filtering
+ */
+export type TicketType = 'Core' | 'Hand' | 'Crawl';
+
 export interface ScratchAreaConfig {
   id: string;
   topPercent: number;
@@ -60,6 +65,8 @@ export interface TicketLayout {
   id: string;
   name: string;
   description: string;
+  /** Ticket type for categorization (Core, Hand, or Crawl) */
+  type?: TicketType;
   scratchAreas: ScratchAreaConfig[];
   revealMechanic: RevealMechanic;
   winCondition: WinCondition;

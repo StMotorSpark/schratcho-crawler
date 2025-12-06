@@ -8,7 +8,8 @@ import type {
   Scratcher,
   Prize,
   PrizeConfig,
-  DesignerTab
+  DesignerTab,
+  TicketType
 } from './types';
 import './App.css';
 
@@ -183,6 +184,7 @@ function App() {
   const [layoutId, setLayoutId] = useState('custom-layout');
   const [layoutName, setLayoutName] = useState('My Custom Layout');
   const [layoutDescription, setLayoutDescription] = useState('A custom ticket layout');
+  const [ticketType, setTicketType] = useState<string>('Core');
   const [revealMechanic, setRevealMechanic] = useState<RevealMechanic>('independent');
   const [winCondition, setWinCondition] = useState<WinCondition>('match-three');
   const [ticketWidth, setTicketWidth] = useState(500);
@@ -477,6 +479,7 @@ function App() {
       id: layoutId,
       name: layoutName,
       description: layoutDescription,
+      type: ticketType as TicketType,
       scratchAreas,
       revealMechanic,
       winCondition,
@@ -518,6 +521,7 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
       id: layoutId,
       name: layoutName,
       description: layoutDescription,
+      type: ticketType as TicketType,
       scratchAreas,
       revealMechanic,
       winCondition,
@@ -607,6 +611,7 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
         setLayoutId(layout.id);
         setLayoutName(layout.name);
         setLayoutDescription(layout.description);
+        setTicketType(layout.type || 'Core');
         setRevealMechanic(layout.revealMechanic);
         setWinCondition(layout.winCondition);
         setTicketWidth(layout.ticketWidth);
@@ -1318,6 +1323,20 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
                 onChange={(e) => setLayoutDescription(e.target.value)}
                 rows={3}
               />
+            </div>
+            <div className="form-group">
+              <label>Ticket Type:</label>
+              <select
+                value={ticketType}
+                onChange={(e) => setTicketType(e.target.value)}
+              >
+                <option value="Core">Core</option>
+                <option value="Hand">Hand</option>
+                <option value="Crawl" disabled>Crawl (Coming Soon)</option>
+              </select>
+              <p className="instructions" style={{ fontSize: '12px', marginTop: '4px' }}>
+                Type for categorization. Crawl tickets are not yet available.
+              </p>
             </div>
             <div className="form-group">
               <label>Gold Cost:</label>
