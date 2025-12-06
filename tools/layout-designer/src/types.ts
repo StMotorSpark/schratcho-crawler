@@ -117,6 +117,46 @@ export interface Scratcher {
 }
 
 /**
+ * Hand effect target types
+ */
+export type HandEffectTarget = 'prior' | 'next' | 'hand' | 'self';
+
+/**
+ * Hand effect operation types
+ */
+export type HandEffectOperation = 'multiply' | 'add' | 'subtract' | 'set' | 'diff';
+
+/**
+ * Conditional operation for diff effects
+ */
+export interface HandEffectCondition {
+  type: 'greater' | 'less' | 'equal';
+  target: HandEffectTarget;
+  operation: HandEffectOperation;
+  amount: number;
+}
+
+/**
+ * Hand effect configuration
+ */
+export interface HandEffect {
+  operation: HandEffectOperation;
+  target: HandEffectTarget;
+  amount: number;
+  conditions?: HandEffectCondition[];
+}
+
+/**
+ * Prize effects that can be applied when a ticket is resolved.
+ */
+export interface PrizeEffects {
+  /** Hand effect to apply (modifies hand calculations instead of direct gold) */
+  handEffect?: HandEffect;
+  // Note: State effects and achievement IDs are handled in the core implementation
+  // but not needed in the designer tool
+}
+
+/**
  * Prize configuration - mirrors core/mechanics/prizes.ts
  * Note: Prize interface now includes an 'id' field for explicit association with ticket layouts.
  */
@@ -129,6 +169,8 @@ export interface Prize {
   value: string;
   /** Emoji representing the prize */
   emoji: string;
+  /** Optional effects to apply to user state when this prize is won */
+  effects?: PrizeEffects;
 }
 
 /**

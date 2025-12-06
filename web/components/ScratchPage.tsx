@@ -156,11 +156,15 @@ export default function ScratchPage({
     // Use the first prize's ID for reference (or create a composite ID)
     const prizeId = pendingPrizes.length > 0 ? pendingPrizes[0].id : 'unknown';
 
+    // Check if first prize has a hand effect
+    const handEffect = pendingPrizes.length > 0 ? pendingPrizes[0].effects?.handEffect : undefined;
+
     const handTicket: HandTicket = {
       layoutId,
       prizeId,
       goldValue: totalGoldValue,
       addedAt: Date.now(),
+      handEffect,
     };
 
     const added = addTicketToHand(handTicket);
@@ -319,13 +323,27 @@ export default function ScratchPage({
           <div className="prize-details-popup" onClick={(e) => e.stopPropagation()}>
             <h4>🎉 Your Prizes</h4>
             <div className="prizes-preview">
-              {pendingPrizes.map((prize, index) => (
-                <div key={index} className="prize-detail-item">
-                  <span className="prize-emoji">{prize.emoji}</span>
-                  <span className="prize-name">{prize.name}</span>
-                  <span className="prize-value">+{getPrizeGoldValue(prize)} 🪙</span>
-                </div>
-              ))}
+              {pendingPrizes.map((prize, index) => {
+                const goldValue = getPrizeGoldValue(prize);
+                const hasHandEffect = !!prize.effects?.handEffect;
+                
+                return (
+                  <div key={index} className={`prize-detail-item ${hasHandEffect ? 'has-hand-effect' : ''}`}>
+                    <span className="prize-emoji">{prize.emoji}</span>
+                    <div className="prize-info">
+                      <span className="prize-name">{prize.name}</span>
+                      {hasHandEffect && (
+                        <span className="hand-effect-indicator">
+                          ⚡ Hand Effect: {prize.value}
+                        </span>
+                      )}
+                    </div>
+                    <span className="prize-value">
+                      {hasHandEffect ? '🖐' : `+${goldValue} 🪙`}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
             {totalPendingGold > 0 && (
               <p className="total-gold">Total: +{totalPendingGold} 🪙</p>

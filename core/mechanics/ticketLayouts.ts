@@ -13,6 +13,7 @@ import type { Prize, PrizeConfig } from './prizes';
 import { getRandomPrizeForLayout, getRandomPrize as getLegacyRandomPrize, getPrizeGoldValue } from './prizes';
 import { GOBLIN_GOLD_TICKET } from '../game-logic/tickets/basic-goblinGold/goblinGoldLayout';
 import { TEST_TWO_COLUMN_TICKET } from '../game-logic/tickets/test-two-column';
+import { TEST_HAND_TICKET } from '../game-logic/tickets/test-hand/testHandLayout';
 
 /**
  * Defines the position and size of a scratch area on the ticket
@@ -347,6 +348,7 @@ export const TICKET_LAYOUTS: Record<string, TicketLayout> = {
   single: SINGLE_AREA_TICKET,
   'goblin-gold': GOBLIN_GOLD_TICKET,
   'test-two-column': TEST_TWO_COLUMN_TICKET,
+  'test-hand': TEST_HAND_TICKET,
 };
 
 /**

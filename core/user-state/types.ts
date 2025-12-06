@@ -73,6 +73,70 @@ export interface Session {
 }
 
 /**
+ * Target for hand effect operations.
+ * - 'prior': Previous ticket in the hand
+ * - 'next': Next ticket in the hand
+ * - 'hand': Entire hand value
+ * - 'self': The ticket with this effect
+ */
+export type HandEffectTarget = 'prior' | 'next' | 'hand' | 'self';
+
+/**
+ * Type of hand effect operation.
+ * - 'multiply': Multiply target value by amount
+ * - 'add': Add amount to target value
+ * - 'subtract': Subtract amount from target value
+ * - 'set': Set target value to amount
+ * - 'diff': Calculate difference between prior and next, apply conditional logic
+ */
+export type HandEffectOperation = 'multiply' | 'add' | 'subtract' | 'set' | 'diff';
+
+/**
+ * Conditional operation for diff effects.
+ * Used when comparing prior and next ticket values.
+ */
+export interface HandEffectCondition {
+  /** Comparison type: 'greater' if prior > next, 'less' if prior < next, 'equal' if equal */
+  type: 'greater' | 'less' | 'equal';
+  /** Target to apply effect to when condition is met */
+  target: HandEffectTarget;
+  /** Operation to perform */
+  operation: HandEffectOperation;
+  /** Amount to use in operation */
+  amount: number;
+}
+
+/**
+ * Defines an effect that modifies hand calculations.
+ * Hand effects change how the total hand value is calculated,
+ * rather than directly adding gold to the hand.
+ */
+export interface HandEffect {
+  /** Type of operation to perform */
+  operation: HandEffectOperation;
+  /** Target of the effect (what to modify) */
+  target: HandEffectTarget;
+  /** Amount/multiplier to use in operation */
+  amount: number;
+  /** Conditional logic for diff operations */
+  conditions?: HandEffectCondition[];
+}
+
+/**
+ * Calculation state for a hand ticket showing the effect result.
+ */
+export interface HandTicketCalculation {
+  /** Whether this calculation has been completed */
+  complete: boolean;
+  /** The effect that was applied (if any) */
+  appliedEffect?: HandEffect;
+  /** Current calculated value contribution */
+  calculatedValue: number;
+  /** Any notes about the calculation (e.g., "Prior > Next", "Missing next ticket") */
+  notes?: string;
+}
+
+/**
  * Represents a ticket in a hand with its associated prize information.
  */
 export interface HandTicket {
@@ -80,10 +144,14 @@ export interface HandTicket {
   layoutId: string;
   /** Prize ID won from this ticket */
   prizeId: string;
-  /** Gold value of the prize */
+  /** Gold value of the prize (base value before hand effects) */
   goldValue: number;
   /** Timestamp when ticket was added to hand */
   addedAt: number;
+  /** Hand effect from the prize (if any) - modifies hand calculations */
+  handEffect?: HandEffect;
+  /** Calculation state for this ticket */
+  calculation?: HandTicketCalculation;
 }
 
 /**
@@ -155,6 +223,8 @@ export interface PrizeEffect {
   stateEffects?: StateEffect[];
   /** Achievement ID to unlock (if any) */
   achievementId?: string;
+  /** Hand effect to apply (modifies hand calculations instead of direct gold) */
+  handEffect?: HandEffect;
 }
 
 /**

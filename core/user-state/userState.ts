@@ -25,6 +25,7 @@ import {
 } from './types';
 import { loadUserData, saveUserData, clearUserData } from './storage';
 import { logEvent } from './analytics';
+import { calculateHandValue } from './handCalculations';
 
 /**
  * Generate a unique ID for sessions.
@@ -571,11 +572,29 @@ export function getHandSize(): number {
 
 /**
  * Calculate the total gold value of all tickets in the current hand.
+ * Takes into account hand effects that modify the calculation.
  */
 export function getHandTotalValue(): number {
   const hand = getCurrentHand();
   if (!hand) return 0;
-  return hand.tickets.reduce((sum, ticket) => sum + ticket.goldValue, 0);
+  const { totalValue } = calculateHandValue(hand.tickets);
+  return totalValue;
+}
+
+/**
+ * Get the calculated hand with all effects applied.
+ * Returns the hand with updated calculation states for each ticket.
+ */
+export function getCalculatedHand(): Hand | null {
+  const hand = getCurrentHand();
+  if (!hand) return null;
+  
+  const { calculatedTickets } = calculateHandValue(hand.tickets);
+  
+  return {
+    ...hand,
+    tickets: calculatedTickets,
+  };
 }
 
 /**
@@ -627,10 +646,8 @@ export function cashOutHand(): number {
     return 0;
   }
   
-  const totalValue = data.currentHand.tickets.reduce(
-    (sum, ticket) => sum + ticket.goldValue,
-    0
-  );
+  // Calculate total value including hand effects
+  const { totalValue } = calculateHandValue(data.currentHand.tickets);
   
   const handId = data.currentHand.id;
   const ticketCount = data.currentHand.tickets.length;

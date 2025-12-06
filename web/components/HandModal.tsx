@@ -1,6 +1,7 @@
 import {
   getCurrentHand,
   getHandTotalValue,
+  getCalculatedHand,
   cashOutHand,
   clearHand,
   MAX_HAND_SIZE,
@@ -26,6 +27,7 @@ export default function HandModal({
   onContinueScratch,
 }: HandModalProps) {
   const hand = getCurrentHand();
+  const calculatedHand = getCalculatedHand();
   const totalValue = getHandTotalValue();
 
   const handleCashOut = () => {
@@ -89,17 +91,37 @@ export default function HandModal({
         </div>
 
         <div className="hand-tickets">
-          {hand.tickets.map((ticket, index) => {
+          {(calculatedHand?.tickets || hand.tickets).map((ticket, index) => {
             const layout = getTicketLayout(ticket.layoutId);
             const prize = getPrizeById(ticket.prizeId);
+            const hasEffect = !!ticket.handEffect;
+            const calculation = ticket.calculation;
+            
             return (
-              <div key={index} className="hand-ticket-item">
-                <span className="ticket-index">#{index + 1}</span>
-                <span className="ticket-layout-name">{layout.name}</span>
-                {prize && (
-                  <span className="ticket-prize">
-                    {prize.emoji} +{ticket.goldValue} 🪙
-                  </span>
+              <div key={index} className={`hand-ticket-item ${hasEffect ? 'has-effect' : ''}`}>
+                <div className="ticket-main-info">
+                  <span className="ticket-index">#{index + 1}</span>
+                  <span className="ticket-layout-name">{layout.name}</span>
+                  {prize && (
+                    <span className="ticket-prize">
+                      {prize.emoji} {hasEffect ? '' : `+${ticket.goldValue} 🪙`}
+                    </span>
+                  )}
+                </div>
+                
+                {/* Show effect information if present */}
+                {hasEffect && calculation && (
+                  <div className="ticket-effect-info">
+                    <span className="effect-type">{prize?.value || 'Hand Effect'}</span>
+                    {calculation.notes && (
+                      <span className="effect-notes" title={calculation.notes}>
+                        {calculation.notes}
+                      </span>
+                    )}
+                    <span className={`effect-value ${calculation.complete ? '' : 'incomplete'}`}>
+                      {calculation.complete ? '✅' : '⏳'} {calculation.calculatedValue > 0 ? `+${Math.round(calculation.calculatedValue)}` : Math.round(calculation.calculatedValue)} 🪙
+                    </span>
+                  </div>
                 )}
               </div>
             );

@@ -48,6 +48,11 @@ export type {
   AnalyticsEventType,
   Hand,
   HandTicket,
+  HandEffect,
+  HandEffectTarget,
+  HandEffectOperation,
+  HandEffectCondition,
+  HandTicketCalculation,
 } from './types';
 
 export {
@@ -92,6 +97,7 @@ export {
   isHandFull,
   getHandSize,
   getHandTotalValue,
+  getCalculatedHand,
   addTicketToHand,
   cashOutHand,
   clearHand,

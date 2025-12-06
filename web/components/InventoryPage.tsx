@@ -53,6 +53,15 @@ export default function InventoryPage({
       onOpenHandModal();
       return;
     }
+    
+    // Check if this is a hand ticket
+    const layout = TICKET_LAYOUTS[layoutId];
+    if (layout && layout.type === 'Hand' && !hasActiveHand) {
+      // Hand tickets require an active hand (at least one core ticket)
+      alert('⚠️ Hand tickets can only be scratched when you have an active hand.\n\nScratch a Core ticket first and add it to your hand, then you can scratch Hand tickets!');
+      return;
+    }
+    
     onSelectTicket(layoutId);
   };
 
@@ -130,11 +139,15 @@ export default function InventoryPage({
               </div>
 
               <button
-                className={`scratch-ticket-btn ${handIsFull ? 'disabled' : ''}`}
+                className={`scratch-ticket-btn ${handIsFull || (layout.type === 'Hand' && !hasActiveHand) ? 'disabled' : ''}`}
                 onClick={() => handleSelectTicket(layout.id)}
-                disabled={handIsFull}
+                disabled={handIsFull || (layout.type === 'Hand' && !hasActiveHand)}
               >
-                {handIsFull ? '✋ Hand Full' : '🎫 Scratch This Ticket'}
+                {handIsFull 
+                  ? '✋ Hand Full' 
+                  : layout.type === 'Hand' && !hasActiveHand
+                  ? '🔒 Need Active Hand'
+                  : '🎫 Scratch This Ticket'}
               </button>
             </div>
           ))}
