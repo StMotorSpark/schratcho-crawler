@@ -220,11 +220,18 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
     if (revealedRef.current) return;
 
     const isWinner = evaluateWinCondition(layout, revealedAreaIds, areaPrizes);
+    const allRevealed = revealedAreaIds.size === layout.scratchAreas.length;
 
-    if (isWinner) {
+    // Complete the ticket if it's a winner OR if all areas are revealed (including losing tickets)
+    if (isWinner || allRevealed) {
       revealedRef.current = true;
       setIsRevealed(true);
-      soundManager.playWin();
+      
+      // Only play win sound if actually won
+      if (isWinner) {
+        soundManager.playWin();
+      }
+      
       // Pass revealed prizes to onComplete
       const revealedPrizes = getRevealedPrizes();
       onComplete(revealedPrizes);
