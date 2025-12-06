@@ -20,6 +20,7 @@ export const GOBLIN_GOLD_TICKET: TicketLayout = {
   "id": "goblin-gold",
   "name": "Goblin Gold",
   "description": "Fantasy-themed ticket with 10 scratch areas - match three symbols to win",
+  "type": "Core",
   "backgroundImage": imageAsset,
   "scratchAreas": [
     {

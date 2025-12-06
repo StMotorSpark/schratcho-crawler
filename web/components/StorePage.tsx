@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { UserState } from '../../core/user-state';
-import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout } from '../../core/mechanics/ticketLayouts';
+import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout, type TicketType } from '../../core/mechanics/ticketLayouts';
 import {
   purchaseTicketForLayout,
   canAfford,
@@ -8,6 +8,7 @@ import {
 } from '../../core/user-state';
 import OddsInfoModal from './OddsInfoModal';
 import './StorePage.css';
+import './shared-tabs.css';
 
 interface StorePageProps {
   userState: UserState | null;
@@ -19,7 +20,9 @@ interface StorePageProps {
  * Displays all available ticket layouts with their costs.
  */
 export default function StorePage({ userState, onNavigateToInventory }: StorePageProps) {
-  const ticketLayouts = Object.values(TICKET_LAYOUTS);
+  const [activeTab, setActiveTab] = useState<TicketType>('Core');
+  const allTicketLayouts = Object.values(TICKET_LAYOUTS);
+  const ticketLayouts = allTicketLayouts.filter(layout => (layout.type || 'Core') === activeTab);
   const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
 
   const handlePurchaseSingle = (layout: TicketLayout) => {
@@ -49,6 +52,22 @@ export default function StorePage({ userState, onNavigateToInventory }: StorePag
       <div className="store-header">
         <h2 className="store-title">🏪 Ticket Store</h2>
         <p className="store-subtitle">Purchase scratch tickets to try your luck!</p>
+      </div>
+
+      {/* Ticket Type Tabs */}
+      <div className="ticket-tabs">
+        <button
+          className={`ticket-tab ${activeTab === 'Core' ? 'active' : ''}`}
+          onClick={() => setActiveTab('Core')}
+        >
+          Core Tickets
+        </button>
+        <button
+          className={`ticket-tab ${activeTab === 'Hand' ? 'active' : ''}`}
+          onClick={() => setActiveTab('Hand')}
+        >
+          Hand Tickets
+        </button>
       </div>
 
       <div className="ticket-grid">
