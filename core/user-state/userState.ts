@@ -646,10 +646,8 @@ export function cashOutHand(): number {
     return 0;
   }
   
-  const totalValue = data.currentHand.tickets.reduce(
-    (sum, ticket) => sum + ticket.goldValue,
-    0
-  );
+  // Calculate total value including hand effects
+  const { totalValue } = calculateHandValue(data.currentHand.tickets);
   
   const handId = data.currentHand.id;
   const ticketCount = data.currentHand.tickets.length;
