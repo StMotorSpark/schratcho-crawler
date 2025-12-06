@@ -1328,7 +1328,7 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
               <label>Ticket Type:</label>
               <select
                 value={ticketType}
-                onChange={(e) => setTicketType(e.target.value)}
+                onChange={(e) => setTicketType(e.target.value as TicketType)}
               >
                 <option value="Core">Core</option>
                 <option value="Hand">Hand</option>
