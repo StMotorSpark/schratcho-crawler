@@ -731,3 +731,23 @@ export function setSelectedScratcherId(scratcherId: string): void {
   updateActivity();
   persist();
 }
+
+/**
+ * Get the currently active inventory tab.
+ * Returns the persisted tab or 'Core' as default.
+ */
+export function getActiveInventoryTab(): string {
+  const data = ensureInitialized();
+  return data.state.activeInventoryTab ?? 'Core';
+}
+
+/**
+ * Set the active inventory tab.
+ * Persists the selection for future sessions.
+ */
+export function setActiveInventoryTab(tab: string): void {
+  const data = ensureInitialized();
+  data.state.activeInventoryTab = tab;
+  updateActivity();
+  persist();
+}
