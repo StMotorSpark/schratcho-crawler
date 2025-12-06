@@ -104,6 +104,9 @@ export {
   // Scratcher preference
   getSelectedScratcherId,
   setSelectedScratcherId,
+  // Inventory tab preference
+  getActiveInventoryTab,
+  setActiveInventoryTab,
 } from './userState';
 
 // Export storage utilities

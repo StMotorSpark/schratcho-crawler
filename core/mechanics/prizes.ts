@@ -377,6 +377,7 @@ export function getAllPrizes(): Prize[] {
 
 /**
  * Calculate the gold value from a prize (if any).
+ * Always rounds up to the nearest whole number to avoid decimal gold values.
  */
 export function getPrizeGoldValue(prize: Prize): number {
   if (!prize.effects?.stateEffects) return 0;
@@ -385,5 +386,6 @@ export function getPrizeGoldValue(prize: Prize): number {
     (e) => e.field === 'currentGold' && e.operation === 'add'
   );
   
-  return typeof goldEffect?.value === 'number' ? goldEffect.value : 0;
+  const value = typeof goldEffect?.value === 'number' ? goldEffect.value : 0;
+  return Math.ceil(value);
 }

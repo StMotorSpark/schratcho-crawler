@@ -34,6 +34,8 @@ export interface UserState {
   highestWin: number;
   /** Currently selected scratcher ID (optional for backward compatibility) */
   selectedScratcherId?: string;
+  /** Active inventory tab selection (Core, Hand, Crawl) */
+  activeInventoryTab?: string;
 }
 
 /**
@@ -272,6 +274,7 @@ export const DEFAULT_USER_STATE: UserState = {
   totalGoldSpent: 0,
   highestWin: 0,
   selectedScratcherId: DEFAULT_SCRATCHER_ID, // Default selected scratcher
+  activeInventoryTab: 'Core', // Default to Core tab
 };
 
 /**

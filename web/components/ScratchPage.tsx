@@ -21,6 +21,7 @@ import {
   MAX_HAND_SIZE,
   getSelectedScratcherId,
   setSelectedScratcherId,
+  hasTicketForLayout,
   type HandTicket,
 } from '../../core/user-state';
 import FloatingHandButton from './FloatingHandButton';
@@ -197,10 +198,27 @@ export default function ScratchPage({
     onCancel();
   };
 
+  const handleReturnToInventory = () => {
+    // For non-winners, just return to inventory without claiming
+    onComplete();
+  };
+
+  const handleScratchAgain = () => {
+    // For non-winners with more tickets, stay on scratch page but reset
+    // This will consume another ticket
+    window.location.reload(); // Simple approach - reload to reset state
+  };
+
   const totalPendingGold = pendingPrizes.reduce(
     (sum, prize) => sum + getPrizeGoldValue(prize),
     0
   );
+
+  // Check if this is a winning ticket (has prizes other than no-prize or has gold value)
+  const isWinner = totalPendingGold > 0 || pendingPrizes.some(p => p.effects?.handEffect);
+  
+  // Check if player has more tickets of this layout
+  const hasMoreTickets = hasTicketForLayout(layoutId);
 
   if (scratchState === 'preparing') {
     return (
@@ -215,25 +233,26 @@ export default function ScratchPage({
 
   return (
     <div className="scratch-page">
-      {/* Floating navigation bar */}
-      <div className="scratch-floating-nav">
-        <button 
-          className="floating-back-btn" 
-          onClick={handleBackClick}
-          aria-label="Back to inventory"
-        >
-          ←
-        </button>
-        
-        <button 
-          className="floating-scratcher-btn"
-          onClick={() => setShowScratcherMenu(!showScratcherMenu)}
-          disabled={scratchState === 'completed'}
-          aria-label="Select scratcher"
-        >
-          {SCRATCHER_TYPES[scratcherId].symbol}
-        </button>
-      </div>
+      {/* Floating navigation bar - only show during scratching */}
+      {scratchState === 'scratching' && (
+        <div className="scratch-floating-nav">
+          <button 
+            className="floating-back-btn" 
+            onClick={handleBackClick}
+            aria-label="Back to inventory"
+          >
+            ←
+          </button>
+          
+          <button 
+            className="floating-scratcher-btn"
+            onClick={() => setShowScratcherMenu(!showScratcherMenu)}
+            aria-label="Select scratcher"
+          >
+            {SCRATCHER_TYPES[scratcherId].symbol}
+          </button>
+        </div>
+      )}
 
       {/* Scratcher selection popup */}
       {showScratcherMenu && (
@@ -266,53 +285,72 @@ export default function ScratchPage({
         />
       </div>
 
-      {/* Compact completion section - options depend on hand state */}
+      {/* Compact completion section - options depend on hand state and win status */}
       {scratchState === 'completed' && (
         <div className="completion-section-compact">
-          {/* If hand exists, player MUST add to hand (cannot cash out individually) */}
-          {hasHand() ? (
+          {isWinner ? (
             <>
-              {!isHandFull() ? (
-                <button className="add-to-hand-btn" onClick={handleAddToHand}>
-                  🖐 Add to Hand
-                  {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
-                  <span className="hand-count-hint">
-                    ({getHandSize()}/{MAX_HAND_SIZE})
-                  </span>
-                </button>
+              {/* Winner - show normal prize claiming options */}
+              {hasHand() ? (
+                <>
+                  {!isHandFull() ? (
+                    <button className="add-to-hand-btn" onClick={handleAddToHand}>
+                      🖐 Add to Hand
+                      {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
+                      <span className="hand-count-hint">
+                        ({getHandSize()}/{MAX_HAND_SIZE})
+                      </span>
+                    </button>
+                  ) : (
+                    <div className="hand-full-warning">
+                      <p>✋ Your hand is full!</p>
+                      <p>Cash out your hand to continue.</p>
+                      <button className="view-hand-btn" onClick={onOpenHandModal}>
+                        🖐 View Hand
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
-                <div className="hand-full-warning">
-                  <p>✋ Your hand is full!</p>
-                  <p>Cash out your hand to continue.</p>
-                  <button className="view-hand-btn" onClick={onOpenHandModal}>
-                    🖐 View Hand
+                <>
+                  {/* No hand - offer both options */}
+                  <button className="turn-in-btn" onClick={handleTurnInTicket}>
+                    ✅ Turn In Ticket
+                    {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
                   </button>
-                </div>
+                  
+                  <button className="add-to-hand-btn secondary" onClick={handleAddToHand}>
+                    🖐 Add to Hand
+                  </button>
+                </>
+              )}
+              
+              {/* Info icon for prize details */}
+              {pendingPrizes.length > 0 && (
+                <button 
+                  className="prize-info-btn"
+                  onClick={() => setShowPrizeDetails(true)}
+                  aria-label="View prize details"
+                >
+                  ℹ️
+                </button>
               )}
             </>
           ) : (
             <>
-              {/* No hand - offer both options */}
-              <button className="turn-in-btn" onClick={handleTurnInTicket}>
-                ✅ Turn In Ticket
-                {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
-              </button>
-              
-              <button className="add-to-hand-btn secondary" onClick={handleAddToHand}>
-                🖐 Add to Hand
+              {/* Non-winner - show scratch again or return to inventory */}
+              <div className="non-winner-message">
+                <p>😔 Better luck next time!</p>
+              </div>
+              {hasMoreTickets ? (
+                <button className="scratch-again-btn" onClick={handleScratchAgain}>
+                  🎫 Scratch Again
+                </button>
+              ) : null}
+              <button className="return-to-inventory-btn" onClick={handleReturnToInventory}>
+                📦 Return to Inventory
               </button>
             </>
-          )}
-          
-          {/* Info icon for prize details */}
-          {pendingPrizes.length > 0 && (
-            <button 
-              className="prize-info-btn"
-              onClick={() => setShowPrizeDetails(true)}
-              aria-label="View prize details"
-            >
-              ℹ️
-            </button>
           )}
         </div>
       )}

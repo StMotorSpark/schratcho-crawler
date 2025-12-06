@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { UserState } from '../../core/user-state';
 import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout, type TicketType } from '../../core/mechanics/ticketLayouts';
-import { getOwnedTicketsForLayout, isHandFull, hasHand } from '../../core/user-state';
+import { getOwnedTicketsForLayout, isHandFull, hasHand, getActiveInventoryTab, setActiveInventoryTab } from '../../core/user-state';
 import FloatingHandButton from './FloatingHandButton';
 import OddsInfoModal from './OddsInfoModal';
 import './InventoryPage.css';
@@ -28,7 +28,12 @@ export default function InventoryPage({
   onSelectTicket,
   onOpenHandModal,
 }: InventoryPageProps) {
-  const [activeTab, setActiveTab] = useState<TicketType>('Core');
+  const [activeTab, setActiveTab] = useState<TicketType>(() => getActiveInventoryTab() as TicketType);
+  
+  // Persist tab changes to user state
+  useEffect(() => {
+    setActiveInventoryTab(activeTab);
+  }, [activeTab]);
   const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
   
   // Get all owned tickets filtered by active tab
