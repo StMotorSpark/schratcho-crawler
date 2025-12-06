@@ -221,9 +221,10 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
 
     const isWinner = evaluateWinCondition(layout, revealedAreaIds, areaPrizes);
     const allRevealed = revealedAreaIds.size === layout.scratchAreas.length;
+    const shouldComplete = isWinner || allRevealed;
 
     // Complete the ticket if it's a winner OR if all areas are revealed (including losing tickets)
-    if (isWinner || allRevealed) {
+    if (shouldComplete) {
       revealedRef.current = true;
       setIsRevealed(true);
       
