@@ -1,21 +1,32 @@
 .inventory-page {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.5s ease-out;
+  padding: 20px;
+  padding-bottom: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .inventory-header {
   text-align: center;
   margin-bottom: 30px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 15px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
 }
 
 .inventory-title {
-  font-size: 2rem;
-  color: #333;
-  margin: 0 0 10px 0;
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--color-highlight);
+  margin: 0 0 5px 0;
+  text-shadow: 2px 2px 0px var(--color-bg-primary);
 }
 
 .inventory-subtitle {
+  font-family: var(--font-body);
   font-size: 1.1rem;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -28,31 +39,34 @@
   gap: 12px;
   padding: 12px 20px;
   margin-bottom: 20px;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: var(--font-display);
 }
 
 .hand-full-banner {
-  background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
+  background: var(--color-danger);
+  color: var(--color-bg-primary);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .hand-full-banner:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(233, 69, 96, 0.5);
+  box-shadow: var(--shadow-md);
 }
 
 .active-hand-banner {
-  background: linear-gradient(135deg, #f0c040 0%, #d4a030 100%);
-  color: #1a1a2e;
-  box-shadow: 0 4px 12px rgba(240, 192, 64, 0.4);
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .active-hand-banner:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(240, 192, 64, 0.5);
+  box-shadow: var(--shadow-md);
 }
 
 .banner-icon {
@@ -61,41 +75,44 @@
 
 .banner-text {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .inventory-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
   margin-bottom: 30px;
 }
 
 .inventory-ticket-card {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 15px;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-bg-secondary);
+  border-radius: 4px;
   padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 2px solid transparent;
 }
 
 .inventory-ticket-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-  border-color: #667eea;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .inventory-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed var(--color-text-secondary);
+  padding-bottom: 8px;
 }
 
 .inventory-card-title {
-  font-size: 1.3rem;
-  color: white;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--color-highlight);
   margin: 0;
 }
 
@@ -106,39 +123,43 @@
 }
 
 .inventory-ticket-card .odds-info-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  width: 32px;
-  height: 32px;
+  background: transparent;
+  border: 1px solid var(--color-text-secondary);
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   cursor: pointer;
   font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-text-secondary);
   transition: all 0.2s ease;
 }
 
 .inventory-ticket-card .odds-info-btn:hover {
-  background: rgba(102, 126, 234, 0.3);
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent);
   transform: scale(1.1);
 }
 
 .ticket-count-badge {
-  background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
-  color: white;
-  font-size: 1.1rem;
+  background: var(--color-bg-secondary);
+  color: var(--color-accent);
+  font-size: 1rem;
   font-weight: 700;
-  padding: 6px 15px;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(233, 69, 96, 0.4);
+  padding: 4px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--color-accent);
+  box-shadow: none;
 }
 
 .inventory-card-description {
-  font-size: 0.95rem;
-  color: #aaa;
+  font-size: 1rem;
+  color: var(--color-text-primary);
   margin: 0 0 15px 0;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .inventory-card-info {
@@ -149,30 +170,36 @@
 }
 
 .inventory-card-info .info-item {
-  font-size: 0.85rem;
-  color: #ccc;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
   padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  background: var(--color-bg-primary);
+  border-radius: 4px;
+  border: 1px solid var(--color-bg-secondary);
 }
 
 .scratch-ticket-btn {
   width: 100%;
-  padding: 15px 20px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  color: white;
+  padding: 12px 20px;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 400;
+  background: var(--color-success);
+  color: var(--color-bg-primary);
   border: none;
-  border-radius: 25px;
+  border-radius: 4px;
+  /* blocky button */
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .scratch-ticket-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(17, 153, 142, 0.5);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.1);
 }
 
 .scratch-ticket-btn:active {
@@ -181,29 +208,35 @@
 
 .scratch-ticket-btn.disabled,
 .scratch-ticket-btn:disabled {
-  background: linear-gradient(135deg, #555 0%, #777 100%);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
+  opacity: 0.7;
 }
 
 /* Empty State */
 .empty-inventory {
   text-align: center;
   padding: 50px 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
-  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
   margin-bottom: 30px;
+  backdrop-filter: blur(4px);
+  border: 2px dashed var(--color-text-secondary);
 }
 
 .empty-icon {
   font-size: 4rem;
   margin-bottom: 20px;
+  opacity: 0.7;
 }
 
 .empty-message {
-  font-size: 1.3rem;
-  color: #666;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--color-text-secondary);
   margin: 0 0 25px 0;
 }
 

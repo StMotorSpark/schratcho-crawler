@@ -1,3 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Patrick+Hand&display=swap');
+
+:root {
+  /* Fonts */
+  --font-display: 'Patrick Hand', cursive;
+  --font-body: 'Nunito', sans-serif;
+
+  /* Color Palette - Lofi Coffee Shop */
+  --color-bg-primary: #2C241B;    /* Dark Coffee Bean */
+  --color-bg-secondary: #4A3B2F;  /* Medium Roast */
+  --color-text-primary: #E0D4C3;  /* Creamy Foam */
+  --color-text-secondary: #B0A090; /* Latte Art */
+  --color-accent: #D4A373;        /* Caramel */
+  --color-highlight: #F5E6CA;     /* Vanilla */
+  --color-success: #8BA888;       /* Matcha Green */
+  --color-danger: #C96E6E;        /* Berry Tea */
+  --color-card-bg: rgba(44, 36, 27, 0.95);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 16px rgba(0,0,0,0.5);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -5,13 +29,12 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-body);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
 }
 
 #root {
