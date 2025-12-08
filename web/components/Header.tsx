@@ -40,7 +40,6 @@ export default function Header({
   hasPendingPrizes = false,
 }: HeaderProps) {
   const handleNavigate = (page: PageType) => {
-    // ... confirm leave logic ...
     if (hasPendingPrizes && currentPage === 'scratch' && page !== 'scratch') {
       const confirmLeave = window.confirm(
         '⚠️ Warning: You have pending prizes that haven\'t been claimed!\n\nIf you leave now, you will lose your unclaimed prizes.\n\nAre you sure you want to leave?'
