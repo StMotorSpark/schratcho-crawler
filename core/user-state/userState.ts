@@ -280,24 +280,28 @@ export function applyStateEffect(effect: StateEffect): void {
 
 /**
  * Add gold to the user's balance.
+ * Rounds up to ensure whole numbers.
  */
 export function addGold(amount: number): void {
   const data = ensureInitialized();
+  
+  // Round up to whole number to avoid fractional gold
+  const roundedAmount = Math.ceil(Math.max(0, amount));
 
-  data.state.currentGold += amount;
-  data.state.totalGoldEarned += amount;
+  data.state.currentGold += roundedAmount;
+  data.state.totalGoldEarned += roundedAmount;
 
   // Update highest win if applicable
-  if (amount > data.state.highestWin) {
-    data.state.highestWin = amount;
+  if (roundedAmount > data.state.highestWin) {
+    data.state.highestWin = roundedAmount;
   }
 
   // Track in current session
   if (data.currentSession) {
-    data.currentSession.goldEarned += amount;
+    data.currentSession.goldEarned += roundedAmount;
   }
 
-  logEvent('gold_earned', { amount });
+  logEvent('gold_earned', { amount: roundedAmount });
   updateActivity();
   persist();
 }
@@ -647,7 +651,10 @@ export function cashOutHand(): number {
   }
   
   // Calculate total value including hand effects
-  const { totalValue } = calculateHandValue(data.currentHand.tickets);
+  const { totalValue: calculatedValue } = calculateHandValue(data.currentHand.tickets);
+  
+  // Round up to whole number to avoid fractional gold
+  const totalValue = Math.ceil(Math.max(0, calculatedValue));
   
   const handId = data.currentHand.id;
   const ticketCount = data.currentHand.tickets.length;

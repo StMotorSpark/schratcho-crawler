@@ -13,6 +13,7 @@ import {
   checkAndUnlockAchievements,
   type UserState,
 } from '../core/user-state';
+import type { TicketType } from '../core/mechanics/ticketLayouts';
 import './App.css';
 import './components/Header.css';
 import './components/StorePage.css';
@@ -27,6 +28,7 @@ function App() {
   const [userState, setUserState] = useState<UserState | null>(null);
   const [selectedLayoutId, setSelectedLayoutId] = useState<string | null>(null);
   const [hasPendingPrizes, setHasPendingPrizes] = useState(false);
+  const [inventoryActiveTab, setInventoryActiveTab] = useState<TicketType>('Core');
 
   // Initialize user state on mount and subscribe to changes
   useEffect(() => {
@@ -50,11 +52,17 @@ function App() {
       setSelectedLayoutId(null);
       setHasPendingPrizes(false);
     }
+    
+    // Scroll to top when navigating between pages
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const handleSelectTicket = useCallback((layoutId: string) => {
     setSelectedLayoutId(layoutId);
     setCurrentPage('scratch');
+    
+    // Preserve the active tab for when user returns from scratching
+    // Note: We could detect the ticket type here, but the state is already set by user interaction
   }, []);
 
   const handleScratchComplete = useCallback(() => {
@@ -112,6 +120,8 @@ function App() {
             onNavigateToStore={() => handleNavigate('store')}
             onSelectTicket={handleSelectTicket}
             onOpenHandModal={handleOpenHandModal}
+            activeTab={inventoryActiveTab}
+            onActiveTabChange={setInventoryActiveTab}
           />
         );
       case 'scratch':
