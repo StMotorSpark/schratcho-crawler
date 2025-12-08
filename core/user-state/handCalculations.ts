@@ -64,13 +64,13 @@ export function calculateHandValue(
   // Calculate total value (sum of all ticket values, cannot be negative)
   // Round up to ensure whole numbers (no fractional gold)
   let totalValue = ticketValues.reduce((sum, value) => sum + value, 0);
-  totalValue = Math.max(0, Math.ceil(totalValue));
+  totalValue = Math.ceil(Math.max(0, totalValue));
 
   // Update each ticket's calculated value
-  // Round up to ensure whole numbers (no fractional gold)
+  // Values are already rounded from earlier operations
   for (let i = 0; i < calculatedTickets.length; i++) {
     if (calculatedTickets[i].calculation) {
-      calculatedTickets[i].calculation!.calculatedValue = Math.ceil(ticketValues[i]);
+      calculatedTickets[i].calculation!.calculatedValue = ticketValues[i];
     }
   }
 
