@@ -7,6 +7,20 @@
     animation: fadeIn 0.8s ease-out;
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 
+   We assume the background image is already set on the App container.
+   The Hub just places interactive zones over it.
+}
+
 /* 
    We assume the background image is already set on the App container.
    The Hub just places interactive zones over it.
@@ -28,6 +42,18 @@
     text-shadow: 4px 4px 0 var(--color-bg-primary);
     margin: 0;
     transform: rotate(-3deg);
+    animation: float 6s ease-in-out infinite;
+}
+
+.hub-title span {
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-primary);
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    box-shadow: var(--shadow-sm);
     animation: float 6s ease-in-out infinite;
 }
 
