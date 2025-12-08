@@ -62,7 +62,7 @@ export function calculateHandValue(
 
   // Calculate total value (sum of all ticket values, cannot be negative)
   // Round up each ticket value to ensure whole numbers
-  const roundedTicketValues = ticketValues.map(v => Math.ceil(Math.max(0, v)));
+  const roundedTicketValues = ticketValues.map(v => Math.ceil(v));
   let totalValue = roundedTicketValues.reduce((sum, value) => sum + value, 0);
   totalValue = Math.max(0, totalValue);
 

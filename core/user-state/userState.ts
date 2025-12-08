@@ -651,28 +651,14 @@ export function cashOutHand(): number {
   }
   
   // Calculate total value including hand effects
-  const { totalValue: calculatedValue } = calculateHandValue(data.currentHand.tickets);
-  
-  // Round up to whole number to avoid fractional gold
-  const totalValue = Math.ceil(Math.max(0, calculatedValue));
+  const { totalValue } = calculateHandValue(data.currentHand.tickets);
   
   const handId = data.currentHand.id;
   const ticketCount = data.currentHand.tickets.length;
   
-  // Add gold to user's balance
+  // Add gold to user's balance using addGold (handles rounding automatically)
   if (totalValue > 0) {
-    data.state.currentGold += totalValue;
-    data.state.totalGoldEarned += totalValue;
-    
-    // Update highest win if applicable
-    if (totalValue > data.state.highestWin) {
-      data.state.highestWin = totalValue;
-    }
-    
-    // Track in current session
-    if (data.currentSession) {
-      data.currentSession.goldEarned += totalValue;
-    }
+    addGold(totalValue);
   }
   
   // Clear the hand
