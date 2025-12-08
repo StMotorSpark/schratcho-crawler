@@ -12,6 +12,8 @@ interface InventoryPageProps {
   onNavigateToStore: () => void;
   onSelectTicket: (layoutId: string) => void;
   onOpenHandModal: () => void;
+  activeTab: TicketType;
+  onActiveTabChange: (tab: TicketType) => void;
 }
 
 interface OwnedTicket {
@@ -27,8 +29,9 @@ export default function InventoryPage({
   onNavigateToStore,
   onSelectTicket,
   onOpenHandModal,
+  activeTab,
+  onActiveTabChange,
 }: InventoryPageProps) {
-  const [activeTab, setActiveTab] = useState<TicketType>('Core');
   const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
   
   // Get all owned tickets filtered by active tab
@@ -80,13 +83,13 @@ export default function InventoryPage({
       <div className="ticket-tabs">
         <button
           className={`ticket-tab ${activeTab === 'Core' ? 'active' : ''}`}
-          onClick={() => setActiveTab('Core')}
+          onClick={() => onActiveTabChange('Core')}
         >
           Core Tickets
         </button>
         <button
           className={`ticket-tab ${activeTab === 'Hand' ? 'active' : ''}`}
-          onClick={() => setActiveTab('Hand')}
+          onClick={() => onActiveTabChange('Hand')}
         >
           Hand Tickets
         </button>

@@ -13,6 +13,7 @@ import {
   checkAndUnlockAchievements,
   type UserState,
 } from '../core/user-state';
+import { type TicketType } from '../core/mechanics/ticketLayouts';
 import './App.css';
 import './components/Header.css';
 import './components/StorePage.css';
@@ -27,6 +28,7 @@ function App() {
   const [userState, setUserState] = useState<UserState | null>(null);
   const [selectedLayoutId, setSelectedLayoutId] = useState<string | null>(null);
   const [hasPendingPrizes, setHasPendingPrizes] = useState(false);
+  const [activeInventoryTab, setActiveInventoryTab] = useState<TicketType>('Core');
 
   // Initialize user state on mount and subscribe to changes
   useEffect(() => {
@@ -112,6 +114,8 @@ function App() {
             onNavigateToStore={() => handleNavigate('store')}
             onSelectTicket={handleSelectTicket}
             onOpenHandModal={handleOpenHandModal}
+            activeTab={activeInventoryTab}
+            onActiveTabChange={setActiveInventoryTab}
           />
         );
       case 'scratch':

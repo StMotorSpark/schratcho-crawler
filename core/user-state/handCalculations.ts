@@ -55,19 +55,22 @@ export function calculateHandValue(
     ticket.calculation = result.calculation;
     
     // Apply changes to ticket values array
+    // Round up to ensure whole numbers (no fractional gold)
     if (result.modifiedIndex !== undefined && result.modifiedValue !== undefined) {
-      ticketValues[result.modifiedIndex] = Math.max(0, result.modifiedValue);
+      ticketValues[result.modifiedIndex] = Math.max(0, Math.ceil(result.modifiedValue));
     }
   }
 
   // Calculate total value (sum of all ticket values, cannot be negative)
+  // Round up to ensure whole numbers (no fractional gold)
   let totalValue = ticketValues.reduce((sum, value) => sum + value, 0);
-  totalValue = Math.max(0, totalValue);
+  totalValue = Math.max(0, Math.ceil(totalValue));
 
   // Update each ticket's calculated value
+  // Round up to ensure whole numbers (no fractional gold)
   for (let i = 0; i < calculatedTickets.length; i++) {
     if (calculatedTickets[i].calculation) {
-      calculatedTickets[i].calculation!.calculatedValue = ticketValues[i];
+      calculatedTickets[i].calculation!.calculatedValue = Math.ceil(ticketValues[i]);
     }
   }
 
@@ -139,10 +142,11 @@ function applyHandEffect(
 
   // For 'hand' target, we need to apply proportionally to all tickets
   // Note: This intentionally mutates ticketValues array in-place for performance
+  // Round up to ensure whole numbers (no fractional gold)
   if (targetIndex === HAND_TARGET_INDEX) {
     const multiplier = newValue / Math.max(currentValue, 1);
     for (let i = 0; i < ticketValues.length; i++) {
-      ticketValues[i] = ticketValues[i] * multiplier;
+      ticketValues[i] = Math.ceil(ticketValues[i] * multiplier);
     }
     return {
       calculation: {
@@ -266,10 +270,11 @@ function applyDiffEffect(
 
   // For 'hand' target, apply proportionally
   // Note: This intentionally mutates ticketValues array in-place for performance
+  // Round up to ensure whole numbers (no fractional gold)
   if (targetIndex === HAND_TARGET_INDEX) {
     const multiplier = newValue / Math.max(targetValue, 1);
     for (let i = 0; i < ticketValues.length; i++) {
-      ticketValues[i] = ticketValues[i] * multiplier;
+      ticketValues[i] = Math.ceil(ticketValues[i] * multiplier);
     }
     return {
       calculation: {
