@@ -1,6 +1,6 @@
 import type { UserState } from '../../core/user-state';
 
-export type PageType = 'store' | 'inventory' | 'scratch';
+export type PageType = 'hub' | 'store' | 'inventory' | 'scratch';
 
 interface HeaderProps {
   userState: UserState | null;
@@ -55,6 +55,12 @@ export default function Header({
     <header className="game-header">
       <div className="header-content">
         <nav className="header-nav">
+          <button
+            className={`nav-button ${currentPage === 'hub' ? 'active' : ''}`}
+            onClick={() => handleNavigate('hub')}
+          >
+            🏠 Home
+          </button>
           <button
             className={`nav-button ${currentPage === 'store' ? 'active' : ''}`}
             onClick={() => handleNavigate('store')}

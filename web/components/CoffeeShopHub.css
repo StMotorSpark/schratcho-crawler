@@ -1,0 +1,171 @@
+.coffee-shop-hub {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 
+   We assume the background image is already set on the App container.
+   The Hub just places interactive zones over it.
+}
+
+/* 
+   We assume the background image is already set on the App container.
+   The Hub just places interactive zones over it.
+*/
+
+.hub-title {
+    position: absolute;
+    top: 15%;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.hub-title h1 {
+    font-family: var(--font-display);
+    font-size: 5rem;
+    color: var(--color-highlight);
+    text-shadow: 4px 4px 0 var(--color-bg-primary);
+    margin: 0;
+    transform: rotate(-3deg);
+    animation: float 6s ease-in-out infinite;
+}
+
+.hub-title span {
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-primary);
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    box-shadow: var(--shadow-sm);
+    animation: float 6s ease-in-out infinite;
+}
+
+.hub-title span {
+    display: block;
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-primary);
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    box-shadow: var(--shadow-sm);
+}
+
+.hub-interactive-zone {
+    position: absolute;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    backdrop-filter: blur(2px);
+}
+
+.hub-interactive-zone:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-accent);
+    transform: scale(1.02);
+    box-shadow: 0 0 30px var(--color-accent);
+}
+
+.zone-label {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    margin-top: 10px;
+    text-shadow: 2px 2px 4px black;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.hub-interactive-zone:hover .zone-label {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.zone-icon {
+    font-size: 4rem;
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.5));
+}
+
+/* Zone Placements */
+.zone-counter {
+    bottom: 20%;
+    right: 15%;
+    width: 250px;
+    height: 200px;
+}
+
+.zone-table {
+    bottom: 15%;
+    left: 15%;
+    width: 300px;
+    height: 250px;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: rotate(-3deg) translateY(0);
+    }
+
+    50% {
+        transform: rotate(-3deg) translateY(-10px);
+    }
+}
+
+@media (max-width: 768px) {
+    .hub-title h1 {
+        font-size: 3.5rem;
+    }
+
+    .hub-interactive-zone {
+        width: 90%;
+        left: 5%;
+        right: 5%;
+        height: 150px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.4);
+        opacity: 1;
+    }
+
+    .zone-label {
+        opacity: 1;
+        transform: translateY(0);
+        font-size: 1.5rem;
+    }
+
+    /* Stack them vertically on mobile */
+    .zone-counter {
+        bottom: 50%;
+        margin-bottom: 20px;
+    }
+
+    .zone-table {
+        bottom: 20%;
+    }
+}

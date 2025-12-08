@@ -3,6 +3,7 @@ import Header, { type PageType } from './components/Header';
 import StorePage from './components/StorePage';
 import InventoryPage from './components/InventoryPage';
 import ScratchPage from './components/ScratchPage';
+import CoffeeShopHub from './components/CoffeeShopHub';
 import Settings from './components/Settings';
 import HandModal from './components/HandModal';
 import {
@@ -20,7 +21,7 @@ import './components/ScratchPage.css';
 import './components/HandModal.css';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>('store');
+  const [currentPage, setCurrentPage] = useState<PageType>('hub');
   const [showSettings, setShowSettings] = useState(false);
   const [showHandModal, setShowHandModal] = useState(false);
   const [userState, setUserState] = useState<UserState | null>(null);
@@ -31,12 +32,12 @@ function App() {
   useEffect(() => {
     initializeUserState();
     setUserState(getUserState());
-    
+
     // Subscribe to state changes
     const unsubscribe = subscribeToUserState((newState) => {
       setUserState(newState);
     });
-    
+
     return () => {
       unsubscribe();
     };
@@ -95,6 +96,8 @@ function App() {
 
   const renderPage = () => {
     switch (currentPage) {
+      case 'hub':
+        return <CoffeeShopHub onNavigate={handleNavigate} />;
       case 'store':
         return (
           <StorePage
@@ -134,8 +137,8 @@ function App() {
   return (
     <div className="app">
       <div className="container">
-        {/* Hide header on scratch page for more vertical space */}
-        {currentPage !== 'scratch' && (
+        {/* Hide header on scratch page AND hub page for visual fidelity */}
+        {currentPage !== 'scratch' && currentPage !== 'hub' && (
           <Header
             userState={userState}
             currentPage={currentPage}
@@ -144,12 +147,12 @@ function App() {
             hasPendingPrizes={hasPendingPrizes}
           />
         )}
-        
+
         {renderPage()}
       </div>
 
       {showSettings && <Settings onClose={() => setShowSettings(false)} />}
-      
+
       {showHandModal && (
         <HandModal
           onClose={handleCloseHandModal}

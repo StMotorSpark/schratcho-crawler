@@ -4,53 +4,59 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  backdrop-filter: blur(4px);
 }
 
 .hand-modal {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 16px;
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-text-secondary);
+  border-radius: 12px;
   padding: 24px;
   max-width: 400px;
   width: 100%;
   max-height: 80vh;
   overflow-y: auto;
-  border: 2px solid #4a4a6a;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-body);
 }
 
 .hand-modal-title {
   text-align: center;
   margin: 0 0 20px 0;
-  font-size: 1.5rem;
-  color: #f0c040;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--color-highlight);
+  border-bottom: 1px dashed var(--color-text-secondary);
+  padding-bottom: 10px;
 }
 
 /* Empty hand state */
 .hand-empty {
   text-align: center;
   padding: 20px;
+  color: var(--color-text-secondary);
 }
 
 .empty-hand-icon {
   font-size: 3rem;
   margin-bottom: 16px;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .hand-empty p {
-  color: #aaa;
   margin: 8px 0;
+  color: var(--color-text-primary);
 }
 
 .empty-hint {
   font-size: 0.9rem;
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 /* Progress bar */
@@ -62,21 +68,22 @@
   display: block;
   text-align: center;
   margin-bottom: 8px;
-  color: #ccc;
-  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .hand-progress-bar {
-  height: 8px;
-  background: #2a2a4a;
-  border-radius: 4px;
+  height: 10px;
+  background: var(--color-bg-secondary);
+  border-radius: 5px;
   overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .hand-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4caf50, #8bc34a);
-  border-radius: 4px;
+  background: var(--color-success);
+  border-radius: 5px;
   transition: width 0.3s ease;
 }
 
@@ -85,8 +92,9 @@
   max-height: 200px;
   overflow-y: auto;
   margin-bottom: 16px;
-  border: 1px solid #3a3a5a;
+  border: 1px solid var(--color-bg-secondary);
   border-radius: 8px;
+  background: var(--color-bg-secondary);
 }
 
 .hand-ticket-item {
@@ -94,12 +102,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border-bottom: 1px solid #3a3a5a;
-}
-
-.hand-ticket-item.has-effect {
-  background: rgba(147, 51, 234, 0.1);
-  border-left: 3px solid #9333ea;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .hand-ticket-item:last-child {
@@ -114,19 +117,20 @@
 
 .ticket-index {
   font-size: 0.85rem;
-  color: #888;
-  min-width: 30px;
+  color: var(--color-text-secondary);
+  min-width: 25px;
 }
 
 .ticket-layout-name {
   flex: 1;
-  color: #ddd;
-  font-weight: 500;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-family: var(--font-display);
 }
 
 .ticket-prize {
-  color: #f0c040;
-  font-size: 0.9rem;
+  color: var(--color-highlight);
+  font-weight: 700;
 }
 
 /* Hand effect info */
@@ -134,28 +138,23 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding-left: 42px;
+  padding-left: 37px;
   font-size: 0.85rem;
 }
 
 .effect-type {
-  color: #9333ea;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
 .effect-notes {
-  color: #999;
+  color: var(--color-text-secondary);
   font-style: italic;
-  font-size: 0.8rem;
 }
 
 .effect-value {
-  color: #4caf50;
+  color: var(--color-success);
   font-weight: bold;
-}
-
-.effect-value.incomplete {
-  color: #ff9800;
 }
 
 /* Total value */
@@ -164,21 +163,22 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: rgba(240, 192, 64, 0.1);
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-highlight);
   border-radius: 8px;
   margin-bottom: 20px;
-  border: 1px solid rgba(240, 192, 64, 0.3);
 }
 
 .total-label {
-  font-size: 1rem;
-  color: #ccc;
+  font-size: 1.1rem;
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
 }
 
 .total-value {
-  font-size: 1.25rem;
+  font-size: 1.4rem;
   font-weight: bold;
-  color: #f0c040;
+  color: var(--color-highlight);
 }
 
 /* Actions */
@@ -191,45 +191,47 @@
 
 .cash-out-hand-btn {
   padding: 14px 24px;
-  font-size: 1.1rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
   font-weight: bold;
-  background: linear-gradient(135deg, #4caf50, #2e7d32);
-  color: white;
+  background: var(--color-success);
+  color: var(--color-bg-primary);
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
 }
 
 .cash-out-hand-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .continue-scratching-btn {
   padding: 12px 20px;
   font-size: 1rem;
-  background: linear-gradient(135deg, #3a3a6a, #2a2a5a);
-  color: #ddd;
-  border: 1px solid #5a5a8a;
-  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-text-secondary);
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .continue-scratching-btn:hover {
-  background: linear-gradient(135deg, #4a4a7a, #3a3a6a);
-  border-color: #7a7aaa;
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent);
 }
 
 .hand-full-message {
   text-align: center;
-  color: #f0c040;
-  font-size: 0.9rem;
+  color: var(--color-danger);
+  font-weight: bold;
   padding: 8px;
-  background: rgba(240, 192, 64, 0.1);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 4px;
-  margin: 0;
 }
 
 /* Secondary actions */
@@ -319,9 +321,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 4px 12px rgba(240, 192, 64, 0.4);
   }
+
   50% {
     box-shadow: 0 4px 20px rgba(240, 192, 64, 0.7);
   }
