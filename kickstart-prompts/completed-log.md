@@ -34,6 +34,7 @@ When implementing a prompt from this folder, add an entry to the appropriate sec
 | 018-game-user-flow.md | Multi-page game user flow with Store, Inventory, and Scratch pages including navigation, pending prize tracking, and "Turn In Ticket" functionality | 2025-11-28 |
 | 019-hand-game-mechanic.md | Hand game mechanic allowing users to add scratched tickets to a hand for combined cash out | 2025-11-29 |
 | 020-Ticket-completion-adjustments.md | Non-winning ticket completion flow with user-friendly messaging and quick action buttons (Scratch Another / Return to Inventory) | 2025-12-09 |
+| 021-New-Ticket-Win-Condition.md | Find One (Dynamic Symbol) win condition - player reveals winning symbol from designated area then finds matching symbol in other areas | 2025-12-09 |
 
 ---
 
