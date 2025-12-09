@@ -33,6 +33,7 @@ When implementing a prompt from this folder, add an entry to the appropriate sec
 | 017-ticket-layout-prize-adjustments.md | Independent prizes per scratch area with new win conditions (match-two, match-three, match-all, find-one, total-value-threshold) | 2025-11-27 |
 | 018-game-user-flow.md | Multi-page game user flow with Store, Inventory, and Scratch pages including navigation, pending prize tracking, and "Turn In Ticket" functionality | 2025-11-28 |
 | 019-hand-game-mechanic.md | Hand game mechanic allowing users to add scratched tickets to a hand for combined cash out | 2025-11-29 |
+| 020-Ticket-completion-adjustments.md | Non-winning ticket completion flow with user-friendly messaging and quick action buttons (Scratch Another / Return to Inventory) | 2025-12-09 |
 
 ---
 
