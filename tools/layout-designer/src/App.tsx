@@ -108,6 +108,8 @@ function getWinConditionExplanation(winCondition: WinCondition, scratchAreaCount
       return `All ${scratchAreaCount} areas must show the same symbol.`;
     case 'find-one':
       return 'Find the target prize to win.';
+    case 'find-one-dynamic':
+      return 'Reveal the winning symbol area first, then find that symbol in another area to win.';
     case 'total-value-threshold':
       return 'Combined value must exceed threshold.';
     default:
@@ -140,6 +142,10 @@ function calculateWinProbability(
     case 'find-one':
     case 'total-value-threshold':
       return 0.5; // Placeholder
+    case 'find-one-dynamic':
+      // Similar to match-two but with one designated area
+      if (numAreas < 2) return 0;
+      return calculateMatchProb(prizeOdds, numAreas - 1, 1);
     default:
       return 0;
   }
@@ -194,6 +200,7 @@ function App() {
   const [goldCost, setGoldCost] = useState<number>(5);
   const [targetPrizeId, setTargetPrizeId] = useState<string>('');
   const [valueThreshold, setValueThreshold] = useState<number>(100);
+  const [winningSymbolAreaId, setWinningSymbolAreaId] = useState<string>('');
 
   // Prize configuration state
   const [prizeConfigs, setPrizeConfigs] = useState<PrizeConfig[]>([
@@ -490,6 +497,7 @@ function App() {
       prizeConfigs: prizeConfigs.length > 0 ? prizeConfigs : undefined,
       targetPrizeId: winCondition === 'find-one' && targetPrizeId ? targetPrizeId : undefined,
       valueThreshold: winCondition === 'total-value-threshold' ? valueThreshold : undefined,
+      winningSymbolAreaId: winCondition === 'find-one-dynamic' && winningSymbolAreaId ? winningSymbolAreaId : undefined,
     };
 
     const timestamp = new Date().toISOString();
@@ -532,6 +540,7 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
       prizeConfigs: prizeConfigs.length > 0 ? prizeConfigs : undefined,
       targetPrizeId: winCondition === 'find-one' && targetPrizeId ? targetPrizeId : undefined,
       valueThreshold: winCondition === 'total-value-threshold' ? valueThreshold : undefined,
+      winningSymbolAreaId: winCondition === 'find-one-dynamic' && winningSymbolAreaId ? winningSymbolAreaId : undefined,
     };
 
     return JSON.stringify(layout, null, 2);
@@ -622,6 +631,7 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
         setPrizeConfigs(layout.prizeConfigs || []);
         setTargetPrizeId(layout.targetPrizeId || '');
         setValueThreshold(layout.valueThreshold ?? 100);
+        setWinningSymbolAreaId(layout.winningSymbolAreaId || '');
         setToastMessage('✓ Layout loaded successfully!');
       } catch (error) {
         setToastMessage('✗ Failed to load layout: ' + (error as Error).message);
@@ -659,6 +669,9 @@ export const ${layoutId.toUpperCase().replace(/-/g, '_')}_TICKET: TicketLayout =
       case 'find-one':
         // For testing, simulate as win when any area is revealed
         return revealed.size > 0 && !!targetPrizeId;
+      case 'find-one-dynamic':
+        // For testing, simulate as win when winning symbol area and at least one other area is revealed
+        return revealed.size >= 2 && revealed.has(winningSymbolAreaId);
       case 'total-value-threshold':
         // For testing, simulate as win when enough areas revealed
         return revealed.size >= Math.ceil(scratchAreas.length / 2);
@@ -1427,6 +1440,7 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
                   <option value="match-three">Match Three</option>
                   <option value="match-all">Match All (Jackpot)</option>
                   <option value="find-one">Find One (Specific Prize)</option>
+                  <option value="find-one-dynamic">Find One (Dynamic Symbol)</option>
                   <option value="total-value-threshold">Value Threshold</option>
                 </optgroup>
                 <optgroup label="Legacy (Deprecated)">
@@ -1455,6 +1469,27 @@ export const ${constantName}: Prize = ${JSON.stringify(prize, null, 2)};
                 </select>
                 <p className="instructions" style={{ fontSize: '12px', marginTop: '4px' }}>
                   Player must find this prize to win
+                </p>
+              </div>
+            )}
+
+            {/* Show winningSymbolAreaId field when find-one-dynamic is selected */}
+            {winCondition === 'find-one-dynamic' && (
+              <div className="form-group">
+                <label>Winning Symbol Area:</label>
+                <select
+                  value={winningSymbolAreaId}
+                  onChange={(e) => setWinningSymbolAreaId(e.target.value)}
+                >
+                  <option value="">-- Select Winning Symbol Area --</option>
+                  {scratchAreas.map((area, idx) => (
+                    <option key={area.id} value={area.id}>
+                      Area {idx + 1} ({area.id})
+                    </option>
+                  ))}
+                </select>
+                <p className="instructions" style={{ fontSize: '12px', marginTop: '4px' }}>
+                  This area reveals the symbol players must find in other areas
                 </p>
               </div>
             )}

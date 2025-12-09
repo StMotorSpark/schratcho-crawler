@@ -139,6 +139,8 @@ export function getWinConditionExplanation(winCondition: WinCondition, scratchAr
       return `All ${scratchAreaCount} areas must show the same symbol to win (Jackpot!).`;
     case 'find-one':
       return 'Find the target prize in any scratch area to win.';
+    case 'find-one-dynamic':
+      return 'Reveal the winning symbol area first, then find that symbol in another area to win.';
     case 'total-value-threshold':
       return 'Combined value of revealed prizes must exceed the threshold to win.';
     case 'reveal-all-areas':
@@ -197,6 +199,13 @@ export function calculateWinProbability(
       // For simplicity, assume each area has the same chance
       // This would need the targetPrizeId to be accurate
       return 0.5; // Placeholder - would need targetPrizeId
+
+    case 'find-one-dynamic':
+      // Similar to match-two but with one designated area
+      // Player must match the symbol from one specific area with at least one other area
+      // This is approximately like match-two odds but slightly different
+      if (scratchAreaCount < 2) return 0;
+      return calculateMatchProbability(prizeOdds, scratchAreaCount - 1, 1);
 
     case 'total-value-threshold':
       // This depends on prize values and threshold - complex calculation
