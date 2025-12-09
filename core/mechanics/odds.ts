@@ -201,11 +201,14 @@ export function calculateWinProbability(
       return 0.5; // Placeholder - would need targetPrizeId
 
     case 'find-one-dynamic':
-      // Similar to match-two but with one designated area
-      // Player must match the symbol from one specific area with at least one other area
-      // This is approximately like match-two odds but slightly different
+      // Player must match the symbol from the winning symbol area with at least one other area
+      // For each prize type with probability p:
+      // - Winning symbol area shows this prize: p
+      // - At least one of (N-1) other areas matches: 1 - (1-p)^(N-1)
+      // - Combined: p × [1 - (1-p)^(N-1)]
+      // Sum across all prize types
       if (scratchAreaCount < 2) return 0;
-      return calculateMatchProbability(prizeOdds, scratchAreaCount - 1, 1);
+      return calculateFindOneDynamicProbability(prizeOdds, scratchAreaCount);
 
     case 'total-value-threshold':
       // This depends on prize values and threshold - complex calculation
@@ -219,6 +222,41 @@ export function calculateWinProbability(
     default:
       return 0;
   }
+}
+
+/**
+ * Calculate the probability of winning with find-one-dynamic condition.
+ * 
+ * The winning symbol area reveals a random prize, and the player must find
+ * at least one matching prize in the remaining areas.
+ * 
+ * For each prize type with probability p:
+ * - Probability winning symbol area shows this prize: p
+ * - Probability at least one of (N-1) other areas matches: 1 - (1-p)^(N-1)
+ * - Combined: p × [1 - (1-p)^(N-1)]
+ * 
+ * Sum this across all prize types.
+ */
+function calculateFindOneDynamicProbability(
+  prizeOdds: PrizeOdds[],
+  scratchAreaCount: number
+): number {
+  if (scratchAreaCount < 2) return 0;
+  
+  const otherAreasCount = scratchAreaCount - 1;
+  let totalProbability = 0;
+  
+  for (const prize of prizeOdds) {
+    const p = prize.probability;
+    // Probability that winning symbol area shows this prize
+    const pWinningSymbol = p;
+    // Probability at least one of the other areas also shows this prize
+    const pAtLeastOneMatch = 1 - Math.pow(1 - p, otherAreasCount);
+    // Combined probability of winning with this prize type
+    totalProbability += pWinningSymbol * pAtLeastOneMatch;
+  }
+  
+  return totalProbability;
 }
 
 /**
