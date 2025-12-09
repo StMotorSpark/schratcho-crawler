@@ -14,6 +14,7 @@ import { getRandomPrizeForLayout, getRandomPrize as getLegacyRandomPrize, getPri
 import { GOBLIN_GOLD_TICKET } from '../game-logic/tickets/basic-goblinGold/goblinGoldLayout';
 import { TEST_TWO_COLUMN_TICKET } from '../game-logic/tickets/test-two-column';
 import { TEST_HAND_TICKET } from '../game-logic/tickets/test-hand/testHandLayout';
+import { TEST_DYNAMIC_SYMBOL_TICKET } from '../game-logic/tickets/test-dynamic-symbol';
 
 /**
  * Defines the position and size of a scratch area on the ticket
@@ -356,6 +357,7 @@ export const TICKET_LAYOUTS: Record<string, TicketLayout> = {
   'goblin-gold': GOBLIN_GOLD_TICKET,
   'test-two-column': TEST_TWO_COLUMN_TICKET,
   'test-hand': TEST_HAND_TICKET,
+  'test-dynamic-symbol': TEST_DYNAMIC_SYMBOL_TICKET,
 };
 
 /**
@@ -522,13 +524,17 @@ export function evaluateWinCondition(
       const winningSymbol = areaPrizes[winningAreaIndex].emoji;
       
       // Check if any other revealed area (excluding the winning symbol area) matches the winning symbol
-      const revealed = getRevealedPrizes();
-      const otherRevealedPrizes = revealed.filter((_, idx) => {
-        const areaId = layout.scratchAreas[idx].id;
-        return revealedAreas.has(areaId) && areaId !== layout.winningSymbolAreaId;
-      });
+      for (let i = 0; i < layout.scratchAreas.length; i++) {
+        const areaId = layout.scratchAreas[i].id;
+        // Skip the winning symbol area itself
+        if (areaId === layout.winningSymbolAreaId) continue;
+        // Check if this area is revealed and matches the winning symbol
+        if (revealedAreas.has(areaId) && areaPrizes[i].emoji === winningSymbol) {
+          return true;
+        }
+      }
       
-      return otherRevealedPrizes.some(p => p.emoji === winningSymbol);
+      return false;
     }
     
     case 'total-value-threshold': {
