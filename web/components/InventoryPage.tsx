@@ -12,6 +12,8 @@ interface InventoryPageProps {
   onNavigateToStore: () => void;
   onSelectTicket: (layoutId: string) => void;
   onOpenHandModal: () => void;
+  activeTab?: TicketType;
+  onActiveTabChange?: (tab: TicketType) => void;
 }
 
 interface OwnedTicket {
@@ -27,9 +29,19 @@ export default function InventoryPage({
   onNavigateToStore,
   onSelectTicket,
   onOpenHandModal,
+  activeTab: externalActiveTab,
+  onActiveTabChange,
 }: InventoryPageProps) {
-  const [activeTab, setActiveTab] = useState<TicketType>('Core');
+  const [internalActiveTab, setInternalActiveTab] = useState<TicketType>('Core');
   const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
+  
+  // Use external activeTab if provided, otherwise use internal state
+  const activeTab = externalActiveTab ?? internalActiveTab;
+  
+  const handleTabChange = (tab: TicketType) => {
+    setInternalActiveTab(tab);
+    onActiveTabChange?.(tab);
+  };
   
   // Get all owned tickets filtered by active tab
   const allOwnedTickets: OwnedTicket[] = Object.values(TICKET_LAYOUTS)
@@ -80,13 +92,13 @@ export default function InventoryPage({
       <div className="ticket-tabs">
         <button
           className={`ticket-tab ${activeTab === 'Core' ? 'active' : ''}`}
-          onClick={() => setActiveTab('Core')}
+          onClick={() => handleTabChange('Core')}
         >
           Core Tickets
         </button>
         <button
           className={`ticket-tab ${activeTab === 'Hand' ? 'active' : ''}`}
-          onClick={() => setActiveTab('Hand')}
+          onClick={() => handleTabChange('Hand')}
         >
           Hand Tickets
         </button>
