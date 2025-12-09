@@ -215,6 +215,8 @@ export default function ScratchPage({
   );
 
   // Check if user has more tickets of the same type
+  // Note: This check happens AFTER the current ticket was consumed (in the initialization effect),
+  // so it correctly checks for REMAINING tickets available to scratch
   const hasMoreTickets = getOwnedTicketsForLayout(layoutId) > 0;
   const isNonWinningTicket = scratchState === 'completed' && pendingPrizes.length === 0;
 
