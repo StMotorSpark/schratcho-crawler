@@ -212,7 +212,7 @@ export default function ScratchPage({
       setPendingPrizes([]);
       setNewAchievements([]);
       setKey(prevKey => prevKey + 1); // Force re-render of ScratchTicketCSS
-      ticketInitializedRef.current = true; // Keep initialized to avoid re-initialization
+      ticketInitializedRef.current = true; // Mark as initialized (already true, but explicit for clarity)
       ticketConsumedRef.current = true;
       logEvent('ticket_start', { layoutId, scratcherId });
     } else {
