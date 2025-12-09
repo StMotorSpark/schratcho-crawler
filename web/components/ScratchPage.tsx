@@ -49,13 +49,13 @@ export default function ScratchPage({
   onOpenHandModal,
 }: ScratchPageProps) {
   const [layout] = useState<TicketLayout>(() => getTicketLayout(layoutId));
-  const [areaPrizes] = useState<Prize[]>(() => generateAreaPrizes(getTicketLayout(layoutId)));
+  const [areaPrizes, setAreaPrizes] = useState<Prize[]>(() => generateAreaPrizes(getTicketLayout(layoutId)));
   const [scratcherId, setScratcherId] = useState(() => getSelectedScratcherId());
   const [scratcher, setScratcher] = useState<Scratcher>(() => getScratcher(getSelectedScratcherId()));
   const [scratchState, setScratchState] = useState<ScratchState>('preparing');
   const [pendingPrizes, setPendingPrizes] = useState<Prize[]>([]);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
-  const [key] = useState(0);
+  const [key, setKey] = useState(0);
   const [showScratcherMenu, setShowScratcherMenu] = useState(false);
   const [showPrizeDetails, setShowPrizeDetails] = useState(false);
   
@@ -199,9 +199,26 @@ export default function ScratchPage({
   };
 
   const handleScratchAnother = () => {
-    // Navigate back to inventory, which will allow user to select another ticket
-    // The App component will handle the navigation to scratch page again
-    onComplete();
+    // Check if user has tickets available
+    if (!hasMoreTickets) {
+      return;
+    }
+    
+    // Consume another ticket from inventory
+    if (useTicketForLayout(layoutId)) {
+      // Reset ticket state for new scratch
+      setAreaPrizes(generateAreaPrizes(getTicketLayout(layoutId)));
+      setScratchState('scratching');
+      setPendingPrizes([]);
+      setNewAchievements([]);
+      setKey(prevKey => prevKey + 1); // Force re-render of ScratchTicketCSS
+      ticketInitializedRef.current = true; // Keep initialized to avoid re-initialization
+      ticketConsumedRef.current = true;
+      logEvent('ticket_start', { layoutId, scratcherId });
+    } else {
+      // No more tickets available - go back to inventory
+      onComplete();
+    }
   };
 
   const handleReturnToInventory = () => {

@@ -133,6 +133,7 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
   const scratchAreasRef = useRef<HTMLDivElement>(null);
   const [isScratching, setIsScratching] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [isWinner, setIsWinner] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
   const [revealedAreaIds, setRevealedAreaIds] = useState<Set<string>>(new Set());
   const revealedRef = useRef(false);
@@ -219,12 +220,13 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
   useEffect(() => {
     if (revealedRef.current) return;
 
-    const isWinner = evaluateWinCondition(layout, revealedAreaIds, areaPrizes);
+    const isWinningTicket = evaluateWinCondition(layout, revealedAreaIds, areaPrizes);
     const allAreasRevealed = revealedAreaIds.size === layout.scratchAreas.length;
 
-    if (isWinner) {
+    if (isWinningTicket) {
       revealedRef.current = true;
       setIsRevealed(true);
+      setIsWinner(true);
       soundManager.playWin();
       // Pass revealed prizes to onComplete
       const revealedPrizes = getRevealedPrizes();
@@ -233,6 +235,7 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
       // All areas revealed but no win - this is a non-winning ticket
       revealedRef.current = true;
       setIsRevealed(true);
+      setIsWinner(false);
       // Pass empty array to indicate no prizes won
       onComplete([]);
     }
@@ -489,7 +492,7 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
           {scratcher.symbol}
         </div>
       )}
-      {isRevealed && (
+      {isRevealed && isWinner && (
         <>
           <div className="win-animation">
             <div className="confetti"></div>

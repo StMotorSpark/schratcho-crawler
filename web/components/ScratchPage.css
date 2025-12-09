@@ -468,23 +468,24 @@
 .non-winning-message {
   text-align: center;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(102, 126, 234, 0.3);
   border-radius: 12px;
   margin-bottom: 15px;
   max-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .no-win-text {
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #333;
   margin: 0 0 8px 0;
 }
 
 .better-luck-text {
   font-size: 1rem;
-  color: var(--color-text-secondary);
+  color: #666;
   margin: 0;
 }
 
