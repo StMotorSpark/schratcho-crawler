@@ -21,6 +21,7 @@ import {
   MAX_HAND_SIZE,
   getSelectedScratcherId,
   setSelectedScratcherId,
+  getOwnedTicketsForLayout,
   type HandTicket,
 } from '../../core/user-state';
 import FloatingHandButton from './FloatingHandButton';
@@ -48,13 +49,13 @@ export default function ScratchPage({
   onOpenHandModal,
 }: ScratchPageProps) {
   const [layout] = useState<TicketLayout>(() => getTicketLayout(layoutId));
-  const [areaPrizes] = useState<Prize[]>(() => generateAreaPrizes(getTicketLayout(layoutId)));
+  const [areaPrizes, setAreaPrizes] = useState<Prize[]>(() => generateAreaPrizes(getTicketLayout(layoutId)));
   const [scratcherId, setScratcherId] = useState(() => getSelectedScratcherId());
   const [scratcher, setScratcher] = useState<Scratcher>(() => getScratcher(getSelectedScratcherId()));
   const [scratchState, setScratchState] = useState<ScratchState>('preparing');
   const [pendingPrizes, setPendingPrizes] = useState<Prize[]>([]);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
-  const [key] = useState(0);
+  const [key, setKey] = useState(0);
   const [showScratcherMenu, setShowScratcherMenu] = useState(false);
   const [showPrizeDetails, setShowPrizeDetails] = useState(false);
   
@@ -197,10 +198,44 @@ export default function ScratchPage({
     onCancel();
   };
 
+  const handleScratchAnother = () => {
+    // Check if user has tickets available
+    if (!hasMoreTickets) {
+      return;
+    }
+    
+    // Consume another ticket from inventory
+    if (useTicketForLayout(layoutId)) {
+      // Reset ticket state for new scratch
+      setAreaPrizes(generateAreaPrizes(getTicketLayout(layoutId)));
+      setScratchState('scratching');
+      setPendingPrizes([]);
+      setNewAchievements([]);
+      setKey(prevKey => prevKey + 1); // Force re-render of ScratchTicketCSS
+      ticketInitializedRef.current = true; // Mark as initialized (already true, but explicit for clarity)
+      ticketConsumedRef.current = true;
+      logEvent('ticket_start', { layoutId, scratcherId });
+    } else {
+      // No more tickets available - go back to inventory
+      onComplete();
+    }
+  };
+
+  const handleReturnToInventory = () => {
+    // Simply return to inventory without claiming anything
+    onComplete();
+  };
+
   const totalPendingGold = pendingPrizes.reduce(
     (sum, prize) => sum + getPrizeGoldValue(prize),
     0
   );
+
+  // Check if user has more tickets of the same type
+  // Note: This check happens AFTER the current ticket was consumed (in the initialization effect),
+  // so it correctly checks for REMAINING tickets available to scratch
+  const hasMoreTickets = getOwnedTicketsForLayout(layoutId) > 0;
+  const isNonWinningTicket = scratchState === 'completed' && pendingPrizes.length === 0;
 
   if (scratchState === 'preparing') {
     return (
@@ -266,53 +301,76 @@ export default function ScratchPage({
         />
       </div>
 
-      {/* Compact completion section - options depend on hand state */}
+      {/* Compact completion section - options depend on hand state and win condition */}
       {scratchState === 'completed' && (
         <div className="completion-section-compact">
-          {/* If hand exists, player MUST add to hand (cannot cash out individually) */}
-          {hasHand() ? (
+          {isNonWinningTicket ? (
+            /* Non-winning ticket UI */
             <>
-              {!isHandFull() ? (
-                <button className="add-to-hand-btn" onClick={handleAddToHand}>
-                  🖐 Add to Hand
-                  {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
-                  <span className="hand-count-hint">
-                    ({getHandSize()}/{MAX_HAND_SIZE})
-                  </span>
-                </button>
-              ) : (
-                <div className="hand-full-warning">
-                  <p>✋ Your hand is full!</p>
-                  <p>Cash out your hand to continue.</p>
-                  <button className="view-hand-btn" onClick={onOpenHandModal}>
-                    🖐 View Hand
+              <div className="non-winning-message">
+                <p className="no-win-text">Sorry, this ticket did not win.</p>
+                <p className="better-luck-text">Better luck next time!</p>
+              </div>
+              <div className="non-winning-actions">
+                {hasMoreTickets && (
+                  <button className="scratch-another-btn" onClick={handleScratchAnother}>
+                    🎫 Scratch Another {layout.name}
                   </button>
-                </div>
-              )}
+                )}
+                <button className="return-to-inventory-btn" onClick={handleReturnToInventory}>
+                  🎒 Return to Inventory
+                </button>
+              </div>
             </>
           ) : (
+            /* Winning ticket UI */
             <>
-              {/* No hand - offer both options */}
-              <button className="turn-in-btn" onClick={handleTurnInTicket}>
-                ✅ Turn In Ticket
-                {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
-              </button>
+              {/* If hand exists, player MUST add to hand (cannot cash out individually) */}
+              {hasHand() ? (
+                <>
+                  {!isHandFull() ? (
+                    <button className="add-to-hand-btn" onClick={handleAddToHand}>
+                      🖐 Add to Hand
+                      {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
+                      <span className="hand-count-hint">
+                        ({getHandSize()}/{MAX_HAND_SIZE})
+                      </span>
+                    </button>
+                  ) : (
+                    <div className="hand-full-warning">
+                      <p>✋ Your hand is full!</p>
+                      <p>Cash out your hand to continue.</p>
+                      <button className="view-hand-btn" onClick={onOpenHandModal}>
+                        🖐 View Hand
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* No hand - offer both options */}
+                  <button className="turn-in-btn" onClick={handleTurnInTicket}>
+                    ✅ Turn In Ticket
+                    {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
+                  </button>
+                  
+                  <button className="add-to-hand-btn secondary" onClick={handleAddToHand}>
+                    🖐 Add to Hand
+                  </button>
+                </>
+              )}
               
-              <button className="add-to-hand-btn secondary" onClick={handleAddToHand}>
-                🖐 Add to Hand
-              </button>
+              {/* Info icon for prize details */}
+              {pendingPrizes.length > 0 && (
+                <button 
+                  className="prize-info-btn"
+                  onClick={() => setShowPrizeDetails(true)}
+                  aria-label="View prize details"
+                >
+                  ℹ️
+                </button>
+              )}
             </>
-          )}
-          
-          {/* Info icon for prize details */}
-          {pendingPrizes.length > 0 && (
-            <button 
-              className="prize-info-btn"
-              onClick={() => setShowPrizeDetails(true)}
-              aria-label="View prize details"
-            >
-              ℹ️
-            </button>
           )}
         </div>
       )}
