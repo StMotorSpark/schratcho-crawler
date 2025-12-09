@@ -41,6 +41,7 @@ export type WinCondition =
   | 'match-three'            // Three areas must have matching prizes
   | 'match-all'              // All areas must have matching prizes (jackpot)
   | 'find-one'               // Must find a specific prize (uses targetPrizeId)
+  | 'find-one-dynamic'       // Must find the dynamically revealed symbol (uses winningSymbolAreaId)
   | 'total-value-threshold'  // Combined value exceeds threshold
   | 'reveal-all-areas'       // @deprecated
   | 'reveal-any-area'        // @deprecated
@@ -84,6 +85,8 @@ export interface TicketLayout {
   targetPrizeId?: string;
   /** Value threshold for 'total-value-threshold' win condition */
   valueThreshold?: number;
+  /** Winning symbol area ID for 'find-one-dynamic' win condition */
+  winningSymbolAreaId?: string;
 }
 
 export interface DrawingRect {

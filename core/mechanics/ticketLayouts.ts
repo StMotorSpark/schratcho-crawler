@@ -14,6 +14,7 @@ import { getRandomPrizeForLayout, getRandomPrize as getLegacyRandomPrize, getPri
 import { GOBLIN_GOLD_TICKET } from '../game-logic/tickets/basic-goblinGold/goblinGoldLayout';
 import { TEST_TWO_COLUMN_TICKET } from '../game-logic/tickets/test-two-column';
 import { TEST_HAND_TICKET } from '../game-logic/tickets/test-hand/testHandLayout';
+import { TEST_DYNAMIC_SYMBOL_TICKET } from '../game-logic/tickets/test-dynamic-symbol';
 
 /**
  * Defines the position and size of a scratch area on the ticket
@@ -60,6 +61,7 @@ export type RevealMechanic =
  * - 'match-three': Three areas must have matching prize emojis
  * - 'match-all': All areas must have matching prize emojis (jackpot)
  * - 'find-one': Must find a specific prize (defined by targetPrizeId)
+ * - 'find-one-dynamic': Must find the symbol revealed in the winning symbol area (uses winningSymbolAreaId)
  * - 'total-value-threshold': Combined prize values must exceed a threshold
  */
 export type WinCondition = 
@@ -68,6 +70,7 @@ export type WinCondition =
   | 'match-three'            // Three areas must match
   | 'match-all'              // All areas must match (jackpot)
   | 'find-one'               // Find a specific prize (uses targetPrizeId)
+  | 'find-one-dynamic'       // Find the dynamically revealed symbol (uses winningSymbolAreaId)
   | 'total-value-threshold'  // Combined value exceeds threshold
   | 'reveal-all-areas'       // @deprecated - Must scratch all areas to win
   | 'reveal-any-area'        // @deprecated - Win when any single area is revealed
@@ -121,6 +124,11 @@ export interface TicketLayout {
    * Combined gold value of revealed prizes must exceed this amount to win.
    */
   valueThreshold?: number;
+  /**
+   * Winning symbol area ID for 'find-one-dynamic' win condition.
+   * This scratch area reveals the symbol that players must find in other areas to win.
+   */
+  winningSymbolAreaId?: string;
 }
 
 /**
@@ -349,6 +357,7 @@ export const TICKET_LAYOUTS: Record<string, TicketLayout> = {
   'goblin-gold': GOBLIN_GOLD_TICKET,
   'test-two-column': TEST_TWO_COLUMN_TICKET,
   'test-hand': TEST_HAND_TICKET,
+  'test-dynamic-symbol': TEST_DYNAMIC_SYMBOL_TICKET,
 };
 
 /**
@@ -488,6 +497,46 @@ export function evaluateWinCondition(
       return revealed.some(p => p.id === layout.targetPrizeId);
     }
     
+    case 'find-one-dynamic': {
+      if (!layout.winningSymbolAreaId) {
+        console.warn(`Layout "${layout.id}" uses 'find-one-dynamic' but has no winningSymbolAreaId set.`);
+        return false;
+      }
+      if (!areaPrizes) {
+        console.warn(`Layout "${layout.id}" uses 'find-one-dynamic' but no areaPrizes provided.`);
+        return false;
+      }
+      
+      // Find the winning symbol area index
+      const winningAreaIndex = layout.scratchAreas.findIndex(a => a.id === layout.winningSymbolAreaId);
+      if (winningAreaIndex === -1) {
+        console.warn(`Layout "${layout.id}" has invalid winningSymbolAreaId: ${layout.winningSymbolAreaId}`);
+        return false;
+      }
+      
+      // Check if the winning symbol area has been revealed
+      if (!revealedAreas.has(layout.winningSymbolAreaId)) {
+        // Player hasn't revealed the winning symbol yet
+        return false;
+      }
+      
+      // Get the winning symbol from the designated area
+      const winningSymbol = areaPrizes[winningAreaIndex].emoji;
+      
+      // Check if any other revealed area (excluding the winning symbol area) matches the winning symbol
+      for (let i = 0; i < layout.scratchAreas.length; i++) {
+        const areaId = layout.scratchAreas[i].id;
+        // Skip the winning symbol area itself
+        if (areaId === layout.winningSymbolAreaId) continue;
+        // Check if this area is revealed and matches the winning symbol
+        if (revealedAreas.has(areaId) && areaPrizes[i].emoji === winningSymbol) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+    
     case 'total-value-threshold': {
       if (!layout.valueThreshold) {
         console.warn(`Layout "${layout.id}" uses 'total-value-threshold' but has no valueThreshold set.`);
@@ -558,6 +607,24 @@ export function getPrizeDisplayForArea(
           emoji: prize.emoji,
           name: prize.name,
           value: prize.value,
+        };
+      }
+      // For find-one-dynamic, show full info for winning symbol area, emoji only for others
+      if (layout.winCondition === 'find-one-dynamic') {
+        const areaId = layout.scratchAreas[areaIndex].id;
+        if (areaId === layout.winningSymbolAreaId) {
+          // Winning symbol area shows full prize info
+          return {
+            emoji: prize.emoji,
+            name: prize.name,
+            value: prize.value,
+          };
+        }
+        // Other areas just show emoji for matching
+        return {
+          emoji: prize.emoji,
+          name: '',
+          value: '',
         };
       }
       // For matching games, just show emoji to keep it clean
