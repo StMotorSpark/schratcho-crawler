@@ -220,6 +220,7 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
     if (revealedRef.current) return;
 
     const isWinner = evaluateWinCondition(layout, revealedAreaIds, areaPrizes);
+    const allAreasRevealed = revealedAreaIds.size === layout.scratchAreas.length;
 
     if (isWinner) {
       revealedRef.current = true;
@@ -228,6 +229,12 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
       // Pass revealed prizes to onComplete
       const revealedPrizes = getRevealedPrizes();
       onComplete(revealedPrizes);
+    } else if (allAreasRevealed) {
+      // All areas revealed but no win - this is a non-winning ticket
+      revealedRef.current = true;
+      setIsRevealed(true);
+      // Pass empty array to indicate no prizes won
+      onComplete([]);
     }
   }, [revealedAreaIds, layout, areaPrizes, onComplete, getRevealedPrizes]);
 
