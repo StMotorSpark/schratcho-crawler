@@ -248,12 +248,10 @@ function calculateFindOneDynamicProbability(
   
   for (const prize of prizeOdds) {
     const p = prize.probability;
-    // Probability that winning symbol area shows this prize
-    const pWinningSymbol = p;
-    // Probability at least one of the other areas also shows this prize
+    // Probability at least one of the other areas matches this prize
     const pAtLeastOneMatch = 1 - Math.pow(1 - p, otherAreasCount);
-    // Combined probability of winning with this prize type
-    totalProbability += pWinningSymbol * pAtLeastOneMatch;
+    // Combined probability: P(winning area shows this) × P(match in other areas)
+    totalProbability += p * pAtLeastOneMatch;
   }
   
   return totalProbability;
