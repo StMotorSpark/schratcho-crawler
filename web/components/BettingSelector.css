@@ -248,7 +248,7 @@
   }
 
   .betting-subtitle {
-    font-size: 11px;
+    font-size: 12px;
     margin: 0 0 10px 0;
   }
 
@@ -276,7 +276,7 @@
 
   .bet-badge {
     padding: 3px 10px;
-    font-size: 10px;
+    font-size: 11px;
     top: -8px;
   }
 
@@ -286,7 +286,7 @@
   }
 
   .bet-cost-label {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .bet-cost-value {
@@ -299,7 +299,7 @@
   }
 
   .bet-condition {
-    font-size: 10px;
+    font-size: 11px;
     margin-bottom: 4px;
   }
 
@@ -309,11 +309,11 @@
   }
 
   .bet-refund-notice {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .insufficient-funds-label {
-    font-size: 10px;
+    font-size: 11px;
     margin-top: 5px;
   }
 
