@@ -237,23 +237,95 @@
 /* Responsive Design */
 @media (max-width: 600px) {
   .betting-selector {
-    padding: 20px;
+    padding: 12px;
+    max-height: 95vh;
+    overflow-y: auto;
   }
 
   .betting-title {
-    font-size: 24px;
+    font-size: 20px;
+    margin: 0 0 6px 0;
+  }
+
+  .betting-subtitle {
+    font-size: 11px;
+    margin: 0 0 10px 0;
+  }
+
+  .player-gold-display {
+    padding: 8px 10px;
+    margin-bottom: 10px;
+  }
+
+  .gold-label {
+    font-size: 13px;
+  }
+
+  .gold-amount {
+    font-size: 15px;
+  }
+
+  .bet-options {
+    gap: 8px;
+    margin-bottom: 12px;
   }
 
   .bet-option {
-    padding: 15px;
+    padding: 10px;
+  }
+
+  .bet-badge {
+    padding: 3px 10px;
+    font-size: 10px;
+    top: -8px;
+  }
+
+  .bet-amount {
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+  }
+
+  .bet-cost-label {
+    font-size: 11px;
+  }
+
+  .bet-cost-value {
+    font-size: 15px;
+  }
+
+  .bet-description {
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+
+  .bet-condition {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+
+  .bet-multiplier {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .bet-refund-notice {
+    font-size: 10px;
+  }
+
+  .insufficient-funds-label {
+    font-size: 10px;
+    margin-top: 5px;
   }
 
   .betting-actions {
     flex-direction: column;
+    gap: 8px;
   }
 
   .cancel-bet-button,
   .confirm-bet-button {
     width: 100%;
+    padding: 10px 16px;
+    font-size: 13px;
   }
 }
