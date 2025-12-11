@@ -320,11 +320,12 @@ export default function ScratchPage({
         setScratchState('betting');
       } else {
         setScratchState('scratching');
+        // Only log ticket_start if betting is not enabled
+        logEvent('ticket_start', { layoutId, scratcherId });
       }
       
       ticketInitializedRef.current = true;
       ticketConsumedRef.current = true;
-      logEvent('ticket_start', { layoutId, scratcherId });
     } else {
       // No more tickets available - go back to inventory
       onComplete();
