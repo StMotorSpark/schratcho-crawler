@@ -78,6 +78,7 @@ export {
   useTicket,
   purchaseTicketForLayout,
   useTicketForLayout,
+  refundTicketForLayout,
   getOwnedTicketsForLayout,
   hasTicketForLayout,
   subscribeToUserState,

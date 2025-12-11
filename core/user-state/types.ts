@@ -266,7 +266,7 @@ export const DEFAULT_USER_STATE: UserState = {
   availableTickets: 3, // Start with a few tickets (deprecated)
   ownedTickets: {}, // Start with no layout-specific tickets
   unlockedScratchers: [DEFAULT_SCRATCHER_ID], // Default scratcher
-  unlockedTicketTypes: ['classic'], // Default ticket type
+  unlockedTicketTypes: ['classic', 'betting-example'], // Default ticket types including betting demo
   totalTicketsScratched: 0,
   totalGoldEarned: 0,
   totalGoldSpent: 0,

@@ -15,6 +15,7 @@ import { GOBLIN_GOLD_TICKET } from '../game-logic/tickets/basic-goblinGold/gobli
 import { TEST_TWO_COLUMN_TICKET } from '../game-logic/tickets/test-two-column';
 import { TEST_HAND_TICKET } from '../game-logic/tickets/test-hand/testHandLayout';
 import { TEST_DYNAMIC_SYMBOL_TICKET } from '../game-logic/tickets/test-dynamic-symbol';
+import { BETTING_EXAMPLE_TICKET } from '../game-logic/tickets/betting-example/bettingExampleLayout';
 
 /**
  * Defines the position and size of a scratch area on the ticket
@@ -83,6 +84,40 @@ export type WinCondition =
 export type TicketType = 'Core' | 'Hand' | 'Crawl';
 
 /**
+ * Defines a bet option that can be placed on a ticket.
+ * Each option specifies the bet amount and the effects applied if the bet condition is met.
+ */
+export interface BetOption {
+  /** Display order for UI (1 = first, 2 = second, 3 = third) */
+  order: number;
+  /** Amount of gold required to place this bet */
+  betAmount: number;
+  /** Friendly description of what this bet does */
+  description: string;
+  /** Minimum prize value threshold to activate this bet's bonus (0 = any win) */
+  minPrizeThreshold: number;
+  /** Multiplier applied to winning amount if condition is met */
+  winMultiplier: number;
+  /** Whether this bet is refunded if the ticket doesn't win */
+  isRefundable?: boolean;
+  /** Badge to display for this bet option (e.g., "Safe Bet", "High Risk") */
+  badge?: string;
+}
+
+/**
+ * Betting configuration for a ticket layout.
+ * When enabled, players must select one of the bet options before scratching.
+ */
+export interface BettingConfig {
+  /** Whether betting is enabled for this ticket */
+  enabled: boolean;
+  /** Array of exactly 3 bet options (required when enabled) */
+  betOptions: [BetOption, BetOption, BetOption];
+  /** Message to display when player doesn't have enough gold for any bet */
+  insufficientFundsMessage?: string;
+}
+
+/**
  * Complete ticket layout configuration
  */
 export interface TicketLayout {
@@ -129,6 +164,11 @@ export interface TicketLayout {
    * This scratch area reveals the symbol that players must find in other areas to win.
    */
   winningSymbolAreaId?: string;
+  /**
+   * Optional betting configuration for this ticket.
+   * When present and enabled, players must place a bet before scratching.
+   */
+  bettingConfig?: BettingConfig;
 }
 
 /**
@@ -358,6 +398,7 @@ export const TICKET_LAYOUTS: Record<string, TicketLayout> = {
   'test-two-column': TEST_TWO_COLUMN_TICKET,
   'test-hand': TEST_HAND_TICKET,
   'test-dynamic-symbol': TEST_DYNAMIC_SYMBOL_TICKET,
+  'betting-example': BETTING_EXAMPLE_TICKET,
 };
 
 /**
@@ -678,3 +719,111 @@ export function getPrizeDisplayForArea(
       };
   }
 }
+
+/**
+ * Validate betting configuration for a ticket layout.
+ * Returns an array of validation error messages.
+ * 
+ * @param bettingConfig - Betting configuration to validate
+ * @returns Array of error messages (empty if valid)
+ */
+export function validateBettingConfig(bettingConfig?: BettingConfig): string[] {
+  const errors: string[] = [];
+  
+  if (!bettingConfig) {
+    return errors; // No betting config is valid (betting is optional)
+  }
+  
+  if (!bettingConfig.enabled) {
+    return errors; // Disabled betting config doesn't need validation
+  }
+  
+  // Check that betOptions array exists and has exactly 3 options
+  if (!bettingConfig.betOptions || bettingConfig.betOptions.length !== 3) {
+    errors.push('ERROR: Betting config must have exactly 3 bet options when enabled.');
+    return errors;
+  }
+  
+  // Validate each bet option
+  const orders = new Set<number>();
+  for (const option of bettingConfig.betOptions) {
+    if (option.betAmount <= 0) {
+      errors.push(`ERROR: Bet amount must be positive (found: ${option.betAmount}).`);
+    }
+    if (option.minPrizeThreshold < 0) {
+      errors.push(`ERROR: Min prize threshold must be non-negative (found: ${option.minPrizeThreshold}).`);
+    }
+    if (option.winMultiplier <= 0) {
+      errors.push(`ERROR: Win multiplier must be positive (found: ${option.winMultiplier}).`);
+    }
+    if (option.order < 1 || option.order > 3) {
+      errors.push(`ERROR: Bet option order must be 1, 2, or 3 (found: ${option.order}).`);
+    }
+    if (orders.has(option.order)) {
+      errors.push(`ERROR: Duplicate bet option order: ${option.order}.`);
+    }
+    orders.add(option.order);
+  }
+  
+  // Check that all orders 1, 2, 3 are present
+  if (!orders.has(1) || !orders.has(2) || !orders.has(3)) {
+    errors.push('ERROR: Bet options must have orders 1, 2, and 3.');
+  }
+  
+  return errors;
+}
+
+/**
+ * Calculate the final prize value after applying a bet bonus.
+ * 
+ * @param baseValue - The base prize value before betting bonus
+ * @param betOption - The bet option that was selected
+ * @param isWinner - Whether the ticket is a winning ticket
+ * @returns The final value after applying bet effects
+ */
+export function calculateBettingBonus(
+  baseValue: number,
+  betOption: BetOption,
+  isWinner: boolean
+): { finalValue: number; bonusApplied: boolean; refundAmount: number } {
+  // If not a winner
+  if (!isWinner) {
+    const refundAmount = betOption.isRefundable ? betOption.betAmount : 0;
+    return {
+      finalValue: refundAmount,
+      bonusApplied: false,
+      refundAmount,
+    };
+  }
+  
+  // Check if prize meets the minimum threshold for this bet
+  const meetsThreshold = baseValue >= betOption.minPrizeThreshold;
+  
+  if (meetsThreshold) {
+    // Apply multiplier to the prize value
+    const finalValue = baseValue * betOption.winMultiplier;
+    return {
+      finalValue,
+      bonusApplied: true,
+      refundAmount: 0,
+    };
+  }
+  
+  // Winner but didn't meet threshold - return base value
+  return {
+    finalValue: baseValue,
+    bonusApplied: false,
+    refundAmount: 0,
+  };
+}
+
+/**
+ * Get bet options sorted by their display order.
+ * 
+ * @param bettingConfig - The betting configuration
+ * @returns Array of bet options sorted by order (1, 2, 3)
+ */
+export function getSortedBetOptions(bettingConfig: BettingConfig): BetOption[] {
+  return [...bettingConfig.betOptions].sort((a, b) => a.order - b.order);
+}
+
