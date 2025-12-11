@@ -235,7 +235,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .betting-selector {
     padding: 12px;
     max-height: 95vh;
