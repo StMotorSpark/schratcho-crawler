@@ -27,6 +27,7 @@ import {
   getSelectedScratcherId,
   setSelectedScratcherId,
   getOwnedTicketsForLayout,
+  purchaseTicketForLayout,
   type HandTicket,
 } from '../../core/user-state';
 import FloatingHandButton from './FloatingHandButton';
@@ -105,23 +106,31 @@ export default function ScratchPage({
 
   const handleBetSelected = (betOption: BetOption) => {
     // Deduct bet amount from player's balance
-    if (spendGold(betOption.betAmount)) {
-      setSelectedBet(betOption);
-      setScratchState('scratching');
-      
-      logEvent('ticket_start', {
-        layoutId,
-        scratcherId,
-        betAmount: betOption.betAmount,
-        betMultiplier: betOption.winMultiplier,
-      });
+    const success = spendGold(betOption.betAmount);
+    
+    if (!success) {
+      // This shouldn't happen as the UI prevents selecting unaffordable bets,
+      // but handle it gracefully just in case
+      console.error('Failed to deduct bet amount:', betOption.betAmount);
+      alert('Insufficient funds to place this bet. Please try again.');
+      return;
     }
+    
+    setSelectedBet(betOption);
+    setScratchState('scratching');
+    
+    logEvent('ticket_start', {
+      layoutId,
+      scratcherId,
+      betAmount: betOption.betAmount,
+      betMultiplier: betOption.winMultiplier,
+    });
   };
 
   const handleBetCancelled = () => {
-    // User cancelled betting - return ticket and go back
-    // Note: Ticket was already consumed in initialization, so we need to refund it
-    // This is handled by the back button logic
+    // User cancelled betting - need to refund the ticket that was consumed
+    // We can do this by calling purchaseTicketForLayout with cost 0
+    purchaseTicketForLayout(layoutId, 0);
     onCancel();
   };
 
