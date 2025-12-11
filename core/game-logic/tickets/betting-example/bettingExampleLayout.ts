@@ -1,6 +1,7 @@
 /**
  * Betting Example Ticket
- * A three-area ticket with betting enabled demonstrating the betting mechanic.
+ * A single-area ticket with betting enabled demonstrating the betting mechanic.
+ * Always wins for easy testing.
  * 
  * This ticket showcases three bet options:
  * 1. Safe Bet (5 gold): Refundable if you lose, 2x multiplier on any win
@@ -18,38 +19,18 @@ export const BETTING_EXAMPLE_TICKET: TicketLayout = {
   goldCost: 0, // Free to play, but requires a bet to scratch
   scratchAreas: [
     {
-      id: 'area-1',
+      id: 'single-area',
       topPercent: 0,
       leftPercent: 0,
       widthPercent: 1,
-      heightPercent: 0.333,
+      heightPercent: 1,
       canvasWidth: 400,
-      canvasHeight: 90,
-      revealThreshold: 50,
-    },
-    {
-      id: 'area-2',
-      topPercent: 0.333,
-      leftPercent: 0,
-      widthPercent: 1,
-      heightPercent: 0.333,
-      canvasWidth: 400,
-      canvasHeight: 90,
-      revealThreshold: 50,
-    },
-    {
-      id: 'area-3',
-      topPercent: 0.666,
-      leftPercent: 0,
-      widthPercent: 1,
-      heightPercent: 0.334,
-      canvasWidth: 400,
-      canvasHeight: 90,
+      canvasHeight: 270,
       revealThreshold: 50,
     },
   ],
   revealMechanic: 'independent',
-  winCondition: 'match-three',
+  winCondition: 'no-win-condition',
   ticketWidth: 500,
   ticketHeight: 300,
   // Prize pool with a good mix of values to test betting thresholds
