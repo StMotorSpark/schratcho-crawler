@@ -1,15 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import ScratchTicketCSS from './ScratchTicketCSS';
+import BettingSelector from './BettingSelector';
 import { getPrizeGoldValue, type Prize } from '../../core/mechanics/prizes';
 import {
   getTicketLayout,
   generateAreaPrizes,
+  calculateBettingBonus,
   type TicketLayout,
+  type BetOption,
 } from '../../core/mechanics/ticketLayouts';
 import { getScratcher, SCRATCHER_TYPES, type Scratcher } from '../../core/mechanics/scratchers';
 import {
   useTicketForLayout,
   addGold,
+  spendGold,
+  getUserState,
   recordTicketScratched,
   checkAndUnlockAchievements,
   getAchievementDefinition,
@@ -35,11 +40,12 @@ interface ScratchPageProps {
   onOpenHandModal: () => void;
 }
 
-type ScratchState = 'preparing' | 'scratching' | 'completed';
+type ScratchState = 'preparing' | 'betting' | 'scratching' | 'completed';
 
 /**
  * Scratch page where users interactively scratch their ticket.
  * Prizes are tracked as pending and only added when "Turn In Ticket" is clicked.
+ * If betting is enabled, user must place a bet before scratching.
  */
 export default function ScratchPage({
   layoutId,
@@ -58,6 +64,8 @@ export default function ScratchPage({
   const [key, setKey] = useState(0);
   const [showScratcherMenu, setShowScratcherMenu] = useState(false);
   const [showPrizeDetails, setShowPrizeDetails] = useState(false);
+  const [selectedBet, setSelectedBet] = useState<BetOption | null>(null);
+  const [isWinningTicket, setIsWinningTicket] = useState(false);
   
   // Use a ref to prevent double-initialization in StrictMode
   const ticketInitializedRef = useRef(false);
@@ -74,19 +82,48 @@ export default function ScratchPage({
     // Try to use a ticket from inventory
     if (useTicketForLayout(layoutId)) {
       ticketConsumedRef.current = true;
-      setScratchState('scratching');
+      
+      // Check if betting is enabled for this ticket
+      if (layout.bettingConfig?.enabled) {
+        setScratchState('betting');
+      } else {
+        setScratchState('scratching');
+      }
+      
       logEvent('ticket_start', { layoutId, scratcherId });
     } else {
       // No ticket available - go back
       onCancel();
     }
-  }, [layoutId, scratcherId, onCancel]);
+  }, [layoutId, scratcherId, onCancel, layout.bettingConfig]);
 
   // Update pending prizes state for parent component
   useEffect(() => {
     const hasPending = pendingPrizes.length > 0 && scratchState === 'completed';
     onHasPendingPrizesChange(hasPending);
   }, [pendingPrizes, scratchState, onHasPendingPrizesChange]);
+
+  const handleBetSelected = (betOption: BetOption) => {
+    // Deduct bet amount from player's balance
+    if (spendGold(betOption.betAmount)) {
+      setSelectedBet(betOption);
+      setScratchState('scratching');
+      
+      logEvent('ticket_start', {
+        layoutId,
+        scratcherId,
+        betAmount: betOption.betAmount,
+        betMultiplier: betOption.winMultiplier,
+      });
+    }
+  };
+
+  const handleBetCancelled = () => {
+    // User cancelled betting - return ticket and go back
+    // Note: Ticket was already consumed in initialization, so we need to refund it
+    // This is handled by the back button logic
+    onCancel();
+  };
 
   const handleScratcherChange = (newScratcherId: string) => {
     setScratcherId(newScratcherId);
@@ -97,32 +134,82 @@ export default function ScratchPage({
 
   const handleTicketComplete = (revealedPrizes: Prize[]) => {
     setScratchState('completed');
+    
+    // Check if ticket is a winner (has any prizes)
+    const hasWon = revealedPrizes.length > 0;
+    setIsWinningTicket(hasWon);
+    
+    // If betting is enabled, apply betting bonus
+    if (selectedBet && layout.bettingConfig?.enabled) {
+      const baseValue = revealedPrizes.reduce(
+        (sum, prize) => sum + getPrizeGoldValue(prize),
+        0
+      );
+      
+      const { finalValue, bonusApplied, refundAmount } = calculateBettingBonus(
+        baseValue,
+        selectedBet,
+        hasWon
+      );
+      
+      // Store the final value for display
+      // We'll need to track this separately from the prizes
+      // For now, we'll add/remove gold dynamically in handleTurnInTicket
+      
+      // Log the betting result
+      logEvent('ticket_complete', {
+        layoutId,
+        scratcherId,
+        baseValue,
+        finalValue,
+        betAmount: selectedBet.betAmount,
+        betMultiplier: selectedBet.winMultiplier,
+        bonusApplied,
+        refundAmount,
+        prizeCount: revealedPrizes.length,
+        prizeNames: revealedPrizes.map((p) => p.name).join(', '),
+      });
+    } else {
+      // No betting - standard flow
+      logEvent('ticket_complete', {
+        layoutId,
+        scratcherId,
+        prizeValue: revealedPrizes.reduce((sum, prize) => sum + getPrizeGoldValue(prize), 0),
+        prizeCount: revealedPrizes.length,
+        prizeNames: revealedPrizes.map((p) => p.name).join(', '),
+      });
+    }
+    
     setPendingPrizes(revealedPrizes);
     recordTicketScratched();
-
-    // Log completion but don't add gold yet
-    const totalGoldValue = revealedPrizes.reduce(
-      (sum, prize) => sum + getPrizeGoldValue(prize),
-      0
-    );
-    logEvent('ticket_complete', {
-      layoutId,
-      scratcherId,
-      prizeValue: totalGoldValue,
-      prizeCount: revealedPrizes.length,
-      prizeNames: revealedPrizes.map((p) => p.name).join(', '),
-    });
   };
 
   const handleTurnInTicket = () => {
-    // Apply prize gold effects for all pending prizes
-    const totalGoldValue = pendingPrizes.reduce(
+    // Calculate base gold value from prizes
+    const baseGoldValue = pendingPrizes.reduce(
       (sum, prize) => sum + getPrizeGoldValue(prize),
       0
     );
     
-    if (totalGoldValue > 0) {
-      addGold(totalGoldValue);
+    let finalGoldValue = baseGoldValue;
+    
+    // Apply betting bonus if applicable
+    if (selectedBet && layout.bettingConfig?.enabled) {
+      const { finalValue, refundAmount } = calculateBettingBonus(
+        baseGoldValue,
+        selectedBet,
+        isWinningTicket
+      );
+      finalGoldValue = finalValue;
+      
+      // Add refund if applicable (this includes the bet amount back)
+      if (refundAmount > 0) {
+        addGold(refundAmount);
+      }
+    }
+    
+    if (finalGoldValue > 0) {
+      addGold(finalGoldValue);
     }
 
     // Check for new achievements
@@ -138,8 +225,9 @@ export default function ScratchPage({
     // Log prize claim
     logEvent('ticket_win', {
       layoutId,
-      totalGoldValue,
+      totalGoldValue: finalGoldValue,
       prizeCount: pendingPrizes.length,
+      betApplied: selectedBet !== null,
     });
 
     // Navigate back to inventory
@@ -208,11 +296,20 @@ export default function ScratchPage({
     if (useTicketForLayout(layoutId)) {
       // Reset ticket state for new scratch
       setAreaPrizes(generateAreaPrizes(getTicketLayout(layoutId)));
-      setScratchState('scratching');
       setPendingPrizes([]);
       setNewAchievements([]);
+      setSelectedBet(null);
+      setIsWinningTicket(false);
       setKey(prevKey => prevKey + 1); // Force re-render of ScratchTicketCSS
-      ticketInitializedRef.current = true; // Mark as initialized (already true, but explicit for clarity)
+      
+      // Check if betting is required
+      if (layout.bettingConfig?.enabled) {
+        setScratchState('betting');
+      } else {
+        setScratchState('scratching');
+      }
+      
+      ticketInitializedRef.current = true;
       ticketConsumedRef.current = true;
       logEvent('ticket_start', { layoutId, scratcherId });
     } else {
@@ -230,6 +327,16 @@ export default function ScratchPage({
     (sum, prize) => sum + getPrizeGoldValue(prize),
     0
   );
+  
+  // Calculate final gold with betting bonus
+  let displayGoldValue = totalPendingGold;
+  let bettingBonusInfo: { bonusApplied: boolean; refundAmount: number; finalValue: number } | null = null;
+  
+  if (selectedBet && layout.bettingConfig?.enabled && scratchState === 'completed') {
+    const result = calculateBettingBonus(totalPendingGold, selectedBet, isWinningTicket);
+    displayGoldValue = result.finalValue;
+    bettingBonusInfo = result;
+  }
 
   // Check if user has more tickets of the same type
   // Note: This check happens AFTER the current ticket was consumed (in the initialization effect),
@@ -244,6 +351,20 @@ export default function ScratchPage({
           <div className="loading-spinner">🎫</div>
           <p>Preparing your ticket...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Show betting selector if betting is enabled and not yet selected
+  if (scratchState === 'betting' && layout.bettingConfig?.enabled) {
+    return (
+      <div className="scratch-page">
+        <BettingSelector
+          bettingConfig={layout.bettingConfig}
+          playerGold={getUserState().currentGold}
+          onBetSelected={handleBetSelected}
+          onCancel={handleBetCancelled}
+        />
       </div>
     );
   }
@@ -309,7 +430,11 @@ export default function ScratchPage({
             <>
               <div className="non-winning-message">
                 <p className="no-win-text">Sorry, this ticket did not win.</p>
-                <p className="better-luck-text">Better luck next time!</p>
+                {bettingBonusInfo?.refundAmount && bettingBonusInfo.refundAmount > 0 ? (
+                  <p className="refund-text">✅ Bet refunded: +{bettingBonusInfo.refundAmount} 🪙</p>
+                ) : (
+                  <p className="better-luck-text">Better luck next time!</p>
+                )}
               </div>
               <div className="non-winning-actions">
                 {hasMoreTickets && (
@@ -331,7 +456,15 @@ export default function ScratchPage({
                   {!isHandFull() ? (
                     <button className="add-to-hand-btn" onClick={handleAddToHand}>
                       🖐 Add to Hand
-                      {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
+                      {displayGoldValue > 0 && (
+                        <>
+                          {' (+'}
+                          {displayGoldValue}
+                          {' 🪙'}
+                          {bettingBonusInfo?.bonusApplied && ' ✨'}
+                          {')'}
+                        </>
+                      )}
                       <span className="hand-count-hint">
                         ({getHandSize()}/{MAX_HAND_SIZE})
                       </span>
@@ -351,7 +484,15 @@ export default function ScratchPage({
                   {/* No hand - offer both options */}
                   <button className="turn-in-btn" onClick={handleTurnInTicket}>
                     ✅ Turn In Ticket
-                    {totalPendingGold > 0 && ` (+${totalPendingGold} 🪙)`}
+                    {displayGoldValue > 0 && (
+                      <>
+                        {' (+'}
+                        {displayGoldValue}
+                        {' 🪙'}
+                        {bettingBonusInfo?.bonusApplied && ' ✨'}
+                        {')'}
+                      </>
+                    )}
                   </button>
                   
                   <button className="add-to-hand-btn secondary" onClick={handleAddToHand}>
@@ -403,8 +544,27 @@ export default function ScratchPage({
                 );
               })}
             </div>
-            {totalPendingGold > 0 && (
-              <p className="total-gold">Total: +{totalPendingGold} 🪙</p>
+            {displayGoldValue > 0 && (
+              <div className="total-gold-section">
+                <p className="total-gold">
+                  Total: +{displayGoldValue} 🪙
+                  {bettingBonusInfo?.bonusApplied && (
+                    <span className="betting-bonus-tag">
+                      {' '}✨ {selectedBet?.winMultiplier}x Betting Bonus!
+                    </span>
+                  )}
+                </p>
+                {bettingBonusInfo?.bonusApplied && totalPendingGold > 0 && (
+                  <p className="base-value-note">
+                    (Base: {totalPendingGold} 🪙)
+                  </p>
+                )}
+              </div>
+            )}
+            {bettingBonusInfo?.refundAmount && bettingBonusInfo.refundAmount > 0 && (
+              <p className="refund-notice">
+                ℹ️ Bet refunded: +{bettingBonusInfo.refundAmount} 🪙
+              </p>
             )}
             <button className="close-popup-btn" onClick={() => setShowPrizeDetails(false)}>
               Close
