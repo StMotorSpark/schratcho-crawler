@@ -116,7 +116,7 @@ export default function BettingSelector({
           <button
             className="confirm-bet-button"
             onClick={handleConfirm}
-            disabled={!selectedBet || (selectedBet && playerGold < selectedBet.betAmount)}
+            disabled={!selectedBet || playerGold < selectedBet.betAmount}
           >
             {selectedBet
               ? `Confirm Bet (${selectedBet.betAmount} Gold)`

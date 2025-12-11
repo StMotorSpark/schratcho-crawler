@@ -539,6 +539,21 @@ export function hasTicketForLayout(layoutId: string): boolean {
   return getOwnedTicketsForLayout(layoutId) > 0;
 }
 
+/**
+ * Refund a ticket for a specific layout (adds it back to owned tickets).
+ * Used when a player cancels a ticket without using it.
+ * Returns true if successful.
+ */
+export function refundTicketForLayout(layoutId: string): boolean {
+  const data = ensureInitialized();
+  ensureOwnedTicketsInitialized(data);
+
+  data.state.ownedTickets[layoutId] = (data.state.ownedTickets[layoutId] ?? 0) + 1;
+  updateActivity();
+  persist();
+  return true;
+}
+
 // ==========================================
 // Hand Management Functions
 // ==========================================

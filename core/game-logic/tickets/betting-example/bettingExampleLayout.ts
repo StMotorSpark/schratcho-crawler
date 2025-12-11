@@ -1,7 +1,7 @@
 /**
  * Betting Example Ticket
  * A single-area ticket with betting enabled demonstrating the betting mechanic.
- * Always wins for easy testing.
+ * Uses no-win-condition for easy testing, but includes no-prize in pool to test refund mechanic.
  * 
  * This ticket showcases three bet options:
  * 1. Safe Bet (5 gold): Refundable if you lose, 2x multiplier on any win

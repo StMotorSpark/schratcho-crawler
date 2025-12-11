@@ -27,7 +27,7 @@ import {
   getSelectedScratcherId,
   setSelectedScratcherId,
   getOwnedTicketsForLayout,
-  purchaseTicketForLayout,
+  refundTicketForLayout,
   type HandTicket,
 } from '../../core/user-state';
 import FloatingHandButton from './FloatingHandButton';
@@ -87,11 +87,11 @@ export default function ScratchPage({
       // Check if betting is enabled for this ticket
       if (layout.bettingConfig?.enabled) {
         setScratchState('betting');
+        // Don't log ticket_start yet - wait for bet selection
       } else {
         setScratchState('scratching');
+        logEvent('ticket_start', { layoutId, scratcherId });
       }
-      
-      logEvent('ticket_start', { layoutId, scratcherId });
     } else {
       // No ticket available - go back
       onCancel();
@@ -128,9 +128,8 @@ export default function ScratchPage({
   };
 
   const handleBetCancelled = () => {
-    // User cancelled betting - need to refund the ticket that was consumed
-    // We can do this by calling purchaseTicketForLayout with cost 0
-    purchaseTicketForLayout(layoutId, 0);
+    // User cancelled betting - refund the ticket that was consumed
+    refundTicketForLayout(layoutId);
     onCancel();
   };
 
@@ -208,17 +207,12 @@ export default function ScratchPage({
     
     // Apply betting bonus if applicable
     if (selectedBet && layout.bettingConfig?.enabled) {
-      const { finalValue, refundAmount } = calculateBettingBonus(
+      const { finalValue } = calculateBettingBonus(
         baseGoldValue,
         selectedBet,
         isWinningTicket
       );
       finalGoldValue = finalValue;
-      
-      // Add refund if applicable (this includes the bet amount back)
-      if (refundAmount > 0) {
-        addGold(refundAmount);
-      }
     }
     
     if (finalGoldValue > 0) {
