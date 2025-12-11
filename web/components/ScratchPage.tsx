@@ -96,7 +96,7 @@ export default function ScratchPage({
       // No ticket available - go back
       onCancel();
     }
-  }, [layoutId, scratcherId, onCancel, layout.bettingConfig]);
+  }, [layoutId, scratcherId, onCancel]);
 
   // Update pending prizes state for parent component
   useEffect(() => {
