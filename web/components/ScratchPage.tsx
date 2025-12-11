@@ -144,8 +144,12 @@ export default function ScratchPage({
   const handleTicketComplete = (revealedPrizes: Prize[]) => {
     setScratchState('completed');
     
-    // Check if ticket is a winner (has any prizes)
-    const hasWon = revealedPrizes.length > 0;
+    // Check if ticket is a winner (has any nonzero-value prizes)
+    const totalPrizeValue = revealedPrizes.reduce(
+      (sum, prize) => sum + getPrizeGoldValue(prize),
+      0
+    );
+    const hasWon = totalPrizeValue > 0;
     setIsWinningTicket(hasWon);
     
     // If betting is enabled, apply betting bonus
