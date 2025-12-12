@@ -26,12 +26,13 @@
   border-radius: 12px;
   backdrop-filter: blur(4px);
   position: relative;
+  padding-top: 55px;
 }
 
 .back-to-stores-btn {
   position: absolute;
   left: 15px;
-  top: 15px;
+  top: 10px;
   padding: 0.5rem 1rem;
   background: rgba(255, 255, 255, 0.2);
   color: var(--color-text-primary, #fff);
@@ -41,6 +42,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   backdrop-filter: blur(4px);
+  z-index: 10;
 }
 
 .back-to-stores-btn:hover {

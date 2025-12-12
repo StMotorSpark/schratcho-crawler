@@ -62,8 +62,8 @@ export default function Header({
             🏠 Home
           </button>
           <button
-            className={`nav-button ${currentPage === 'store' ? 'active' : ''}`}
-            onClick={() => handleNavigate('store')}
+            className={`nav-button ${currentPage === 'store' || currentPage === 'store-selection' ? 'active' : ''}`}
+            onClick={() => handleNavigate('store-selection')}
           >
             🏪 Store
           </button>
