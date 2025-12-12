@@ -62,7 +62,7 @@ export function getPriceRangeText(store: Store): string {
 /**
  * Default stores configuration
  * 
- * Option B: Stores organized by cost (from the problem statement)
+ * Stores are organized by the cost/price range of the tickets they offer, from affordable starter tickets to high-stakes premium tickets.
  */
 export const DEFAULT_STORES: Store[] = [
   {
