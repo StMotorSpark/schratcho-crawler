@@ -42,7 +42,8 @@ export default function StoreSelectionPage({ userState, onSelectStore }: StoreSe
               className={`store-card ${unlocked ? 'unlocked' : 'locked'}`}
               onClick={() => handleStoreClick(store)}
               role="button"
-              tabIndex={0}
+              tabIndex={unlocked ? 0 : -1}
+              aria-disabled={!unlocked}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
