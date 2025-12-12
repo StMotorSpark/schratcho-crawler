@@ -228,16 +228,3 @@
   }
 }
 
-/* Animation for unlocking effect */
-@keyframes unlock-pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-.store-card.unlocked.newly-unlocked {
-  animation: unlock-pulse 0.6s ease-in-out;
-}
