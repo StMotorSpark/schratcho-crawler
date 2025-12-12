@@ -36,6 +36,7 @@ When implementing a prompt from this folder, add an entry to the appropriate sec
 | 020-Ticket-completion-adjustments.md | Non-winning ticket completion flow with user-friendly messaging and quick action buttons (Scratch Another / Return to Inventory) | 2025-12-09 |
 | 021-New-Ticket-Win-Condition.md | Find One (Dynamic Symbol) win condition - player reveals winning symbol from designated area then finds matching symbol in other areas | 2025-12-09 |
 | 022-Betting-Ticket-Mechanic.md | Betting ticket mechanic with 3 configurable bet options (bet amounts, thresholds, multipliers, refunds), BettingSelector UI component, and full integration into scratch flow | 2025-12-11 |
+| 023-Multi-Store-Concept.md | Multi-store concept with store selection page, unlocking based on total gold earned, store-specific ticket filtering, and complete navigation flow | 2025-12-12 |
 
 ---
 

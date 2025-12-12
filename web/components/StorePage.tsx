@@ -6,6 +6,7 @@ import {
   canAfford,
   getOwnedTicketsForLayout,
 } from '../../core/user-state';
+import { getStoreById, getStoreTickets } from '../../core/mechanics/stores';
 import OddsInfoModal from './OddsInfoModal';
 import './StorePage.css';
 import './shared-tabs.css';
@@ -13,18 +14,37 @@ import './shared-tabs.css';
 interface StorePageProps {
   userState: UserState | null;
   onNavigateToInventory: () => void;
+  onNavigateBack?: () => void;
+  storeId?: string;
 }
 
 /**
  * Store page where users can purchase scratch tickets.
- * Displays all available ticket layouts with their costs.
+ * Displays tickets filtered by selected store (if storeId provided) or all tickets.
  */
-export default function StorePage({ userState, onNavigateToInventory }: StorePageProps) {
+export default function StorePage({ userState, onNavigateToInventory, onNavigateBack, storeId }: StorePageProps) {
   const [activeTab, setActiveTab] = useState<TicketType>('Core');
-  const allTicketLayouts = Object.values(TICKET_LAYOUTS);
-  const ticketLayouts = allTicketLayouts.filter(layout => (layout.type || 'Core') === activeTab);
   const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
+  
+  // Get tickets based on store selection or show all
+  const store = storeId ? getStoreById(storeId) : null;
+  const allTicketLayouts = storeId ? getStoreTickets(storeId) : Object.values(TICKET_LAYOUTS);
+  const ticketLayouts = allTicketLayouts.filter(layout => (layout.type || 'Core') === activeTab);
 
+  // If a storeId was provided but the store was not found, show an error message
+  if (storeId && !store) {
+    return (
+      <div className="store-page store-page--error">
+        <h2>Store not found</h2>
+        <p>The store you are looking for does not exist or is unavailable.</p>
+        {onNavigateBack && (
+          <button className="back-button" onClick={onNavigateBack}>
+            Back
+          </button>
+        )}
+      </div>
+    );
+  }
   const handlePurchaseSingle = (layout: TicketLayout) => {
     const cost = getTicketGoldCost(layout);
     if (purchaseTicketForLayout(layout.id, cost)) {
@@ -50,8 +70,17 @@ export default function StorePage({ userState, onNavigateToInventory }: StorePag
   return (
     <div className="store-page">
       <div className="store-header">
-        <h2 className="store-title">🏪 Ticket Store</h2>
-        <p className="store-subtitle">Purchase scratch tickets to try your luck!</p>
+        {onNavigateBack && (
+          <button className="back-to-stores-btn" onClick={onNavigateBack}>
+            ← Back to Stores
+          </button>
+        )}
+        <h2 className="store-title">
+          {store ? `${store.icon} ${store.name}` : '🏪 Ticket Store'}
+        </h2>
+        <p className="store-subtitle">
+          {store ? store.description : 'Purchase scratch tickets to try your luck!'}
+        </p>
       </div>
 
       {/* Ticket Type Tabs */}

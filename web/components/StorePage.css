@@ -25,6 +25,28 @@
   padding: 15px;
   border-radius: 12px;
   backdrop-filter: blur(4px);
+  position: relative;
+}
+
+.back-to-stores-btn {
+  position: absolute;
+  left: 15px;
+  top: 15px;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--color-text-primary, #fff);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.back-to-stores-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(-2px);
 }
 
 .store-title {
