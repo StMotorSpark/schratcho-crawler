@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Header, { type PageType } from './components/Header';
 import StorePage from './components/StorePage';
+import StoreSelectionPage from './components/StoreSelectionPage';
 import InventoryPage from './components/InventoryPage';
 import ScratchPage from './components/ScratchPage';
 import CoffeeShopHub from './components/CoffeeShopHub';
@@ -17,6 +18,7 @@ import type { TicketType } from '../core/mechanics/ticketLayouts';
 import './App.css';
 import './components/Header.css';
 import './components/StorePage.css';
+import './components/StoreSelectionPage.css';
 import './components/InventoryPage.css';
 import './components/ScratchPage.css';
 import './components/HandModal.css';
@@ -27,6 +29,7 @@ function App() {
   const [showHandModal, setShowHandModal] = useState(false);
   const [userState, setUserState] = useState<UserState | null>(null);
   const [selectedLayoutId, setSelectedLayoutId] = useState<string | null>(null);
+  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const [hasPendingPrizes, setHasPendingPrizes] = useState(false);
   const [inventoryActiveTab, setInventoryActiveTab] = useState<TicketType>('Core');
 
@@ -51,6 +54,10 @@ function App() {
     if (page !== 'scratch') {
       setSelectedLayoutId(null);
       setHasPendingPrizes(false);
+    }
+    // Reset store selection when going back to store selection
+    if (page === 'store-selection') {
+      setSelectedStoreId(null);
     }
     
     // Scroll to top when navigating between pages
@@ -102,22 +109,41 @@ function App() {
     }
   }, [currentPage, handleNavigate]);
 
+  const handleSelectStore = useCallback((storeId: string) => {
+    setSelectedStoreId(storeId);
+    setCurrentPage('store');
+  }, []);
+
+  const handleBackToStoreSelection = useCallback(() => {
+    setSelectedStoreId(null);
+    setCurrentPage('store-selection');
+  }, []);
+
   const renderPage = () => {
     switch (currentPage) {
       case 'hub':
         return <CoffeeShopHub onNavigate={handleNavigate} />;
+      case 'store-selection':
+        return (
+          <StoreSelectionPage
+            userState={userState}
+            onSelectStore={handleSelectStore}
+          />
+        );
       case 'store':
         return (
           <StorePage
             userState={userState}
             onNavigateToInventory={() => handleNavigate('inventory')}
+            onNavigateBack={handleBackToStoreSelection}
+            storeId={selectedStoreId || undefined}
           />
         );
       case 'inventory':
         return (
           <InventoryPage
             userState={userState}
-            onNavigateToStore={() => handleNavigate('store')}
+            onNavigateToStore={() => handleNavigate('store-selection')}
             onSelectTicket={handleSelectTicket}
             onOpenHandModal={handleOpenHandModal}
             activeTab={inventoryActiveTab}

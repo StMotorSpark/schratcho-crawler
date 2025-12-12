@@ -1,6 +1,6 @@
 import type { UserState } from '../../core/user-state';
 
-export type PageType = 'hub' | 'store' | 'inventory' | 'scratch';
+export type PageType = 'hub' | 'store' | 'store-selection' | 'inventory' | 'scratch';
 
 interface HeaderProps {
   userState: UserState | null;

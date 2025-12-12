@@ -1,0 +1,243 @@
+/* Store Selection Page Styles */
+
+.store-selection-page {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+}
+
+.store-selection-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.store-selection-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary, #2c1810);
+}
+
+.store-selection-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary, #8b7355);
+  margin: 0;
+}
+
+.stores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.store-card {
+  background: linear-gradient(135deg, #f8f4ef 0%, #ede4d8 100%);
+  border: 2px solid #d4c4b0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.store-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(139, 115, 85, 0.05) 100%);
+  pointer-events: none;
+}
+
+.store-card.unlocked:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  border-color: #b89968;
+}
+
+.store-card.locked {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #e8e4df 0%, #d4cbc0 100%);
+}
+
+.store-card.locked::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0, 0, 0, 0.02) 10px,
+    rgba(0, 0, 0, 0.02) 20px
+  );
+  pointer-events: none;
+}
+
+.store-card-icon {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.store-card.locked .store-card-icon {
+  filter: grayscale(100%) opacity(0.5);
+}
+
+.store-card-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary, #2c1810);
+}
+
+.store-card-description {
+  text-align: center;
+  color: var(--text-secondary, #8b7355);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+  min-height: 3em;
+}
+
+.store-card-info {
+  position: relative;
+  z-index: 1;
+}
+
+.store-price-range {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.price-label {
+  font-weight: 600;
+  color: var(--text-secondary, #8b7355);
+}
+
+.price-value {
+  font-weight: bold;
+  color: var(--gold-color, #d4a853);
+  font-size: 1.1rem;
+}
+
+.store-enter-btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #d4a853 0%, #b89968 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.store-enter-btn:hover {
+  background: linear-gradient(135deg, #e0b864 0%, #c9a779 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+.store-locked-info {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  border: 1px dashed #a89378;
+}
+
+.lock-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.6;
+}
+
+.unlock-requirement,
+.unlock-progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.requirement-label,
+.progress-label {
+  font-weight: 600;
+  color: var(--text-secondary, #8b7355);
+  font-size: 0.9rem;
+}
+
+.requirement-value {
+  font-weight: bold;
+  color: var(--text-primary, #2c1810);
+}
+
+.progress-value {
+  font-weight: bold;
+  color: var(--gold-color, #d4a853);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .store-selection-page {
+    padding: 1rem;
+  }
+
+  .stores-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .store-selection-title {
+    font-size: 1.5rem;
+  }
+
+  .store-card {
+    padding: 1.25rem;
+  }
+
+  .store-card-icon {
+    font-size: 2.5rem;
+  }
+
+  .store-card-name {
+    font-size: 1.25rem;
+  }
+}
+
+/* Animation for unlocking effect */
+@keyframes unlock-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.store-card.unlocked.newly-unlocked {
+  animation: unlock-pulse 0.6s ease-in-out;
+}

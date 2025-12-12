@@ -1,7 +1,7 @@
 import './CoffeeShopHub.css';
 
 interface CoffeeShopHubProps {
-    onNavigate: (page: 'store' | 'inventory') => void;
+    onNavigate: (page: 'store' | 'inventory' | 'store-selection') => void;
 }
 
 export default function CoffeeShopHub({ onNavigate }: CoffeeShopHubProps) {
@@ -14,12 +14,12 @@ export default function CoffeeShopHub({ onNavigate }: CoffeeShopHubProps) {
 
             <div
                 className="hub-interactive-zone zone-counter"
-                onClick={() => onNavigate('store')}
+                onClick={() => onNavigate('store-selection')}
                 role="button"
                 tabIndex={0}
             >
                 <div className="zone-icon">🏪</div>
-                <div className="zone-label">The Market</div>
+                <div className="zone-label">The Markets</div>
             </div>
 
             <div
