@@ -31,6 +31,20 @@ export default function StorePage({ userState, onNavigateToInventory, onNavigate
   const allTicketLayouts = storeId ? getStoreTickets(storeId) : Object.values(TICKET_LAYOUTS);
   const ticketLayouts = allTicketLayouts.filter(layout => (layout.type || 'Core') === activeTab);
 
+  // If a storeId was provided but the store was not found, show an error message
+  if (storeId && !store) {
+    return (
+      <div className="store-page store-page--error">
+        <h2>Store not found</h2>
+        <p>The store you are looking for does not exist or is unavailable.</p>
+        {onNavigateBack && (
+          <button className="back-button" onClick={onNavigateBack}>
+            Back
+          </button>
+        )}
+      </div>
+    );
+  }
   const handlePurchaseSingle = (layout: TicketLayout) => {
     const cost = getTicketGoldCost(layout);
     if (purchaseTicketForLayout(layout.id, cost)) {
