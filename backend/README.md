@@ -184,9 +184,9 @@ The workflow will:
 
 ## Authentication
 
-**Current Status:** The API Gateway includes a **placeholder authorizer** that allows all requests.
+**Current Status:** Authentication is not yet implemented. All API endpoints are currently open.
 
-**TODO:** The authentication is currently a placeholder and needs to be replaced with proper authentication:
+**TODO:** Authentication needs to be implemented before production use.
 
 Options for future implementation:
 - **AWS Cognito** - User pool for authentication
@@ -194,7 +194,7 @@ Options for future implementation:
 - **Custom Authorizer** - JWT or OAuth-based authentication
 - **IAM** - AWS IAM-based authentication
 
-The placeholder authorizer is defined in `infrastructure/lib/backend-stack.ts` and should be replaced when implementing real authentication.
+The CDK stack (`infrastructure/lib/backend-stack.ts`) includes TODO comments indicating where authentication should be added when implemented.
 
 ## Infrastructure Details
 
@@ -202,7 +202,7 @@ The placeholder authorizer is defined in `infrastructure/lib/backend-stack.ts` a
 
 - **Runtime:** Node.js 20.x
 - **Memory:** 256 MB
-- **Timeout:** 30 seconds
+- **Timeout:** 10 seconds
 - **Handler:** `lambda.handler`
 
 ### API Gateway

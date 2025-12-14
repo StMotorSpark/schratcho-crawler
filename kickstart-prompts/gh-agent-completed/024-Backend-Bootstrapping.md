@@ -15,8 +15,8 @@ The backend project should be deployable to AWS using infrastructure as code (Ia
 1. **Choose Backend Framework**: Select a suitable backend framework and set up the initial project structure.
 2. **Implement Health Check Endpoint**: Create the `/health` API endpoint that returns a simple status message.
 3. **Set Up AWS Infrastructure**: Define the necessary AWS resources using infrastructure as code and configure them for deployment.
-5. **Provide Documentation**: Write comprehensive documentation covering setup, deployment, and testing procedures.
-6. **Set up Backend Deployment GH actions workflow**: Create a GitHub Actions workflow to automate the deployment of the backend to AWS as a manual action.
+4. **Provide Documentation**: Write comprehensive documentation covering setup, deployment, and testing procedures.
+5. **Set up Backend Deployment GH actions workflow**: Create a GitHub Actions workflow to automate the deployment of the backend to AWS as a manual action.
 
 # Out of scope
 - Advanced backend features such as user authentication, game state management, or analytics.

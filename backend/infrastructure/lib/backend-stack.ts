@@ -14,7 +14,7 @@ export class BackendStack extends cdk.Stack {
       handler: 'lambda.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../../dist')),
       memorySize: 256,
-      timeout: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.seconds(10),
       environment: {
         NODE_ENV: 'production'
       },
@@ -37,34 +37,13 @@ export class BackendStack extends cdk.Stack {
       }
     });
 
-    // Placeholder for authentication
-    // TODO: Implement proper authentication (e.g., Cognito, API Keys, or custom authorizer)
-    // For now, the API is open and uses placeholder authentication
-    const authPlaceholder = new apigateway.RequestAuthorizer(this, 'AuthPlaceholder', {
-      handler: new lambda.Function(this, 'AuthPlaceholderFunction', {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        handler: 'index.handler',
-        code: lambda.Code.fromInline(`
-          exports.handler = async (event) => {
-            // Placeholder authorizer - always allows requests
-            // TODO: Implement real authentication logic
-            return {
-              principalId: 'anonymous',
-              policyDocument: {
-                Version: '2012-10-17',
-                Statement: [{
-                  Action: 'execute-api:Invoke',
-                  Effect: 'Allow',
-                  Resource: event.methodArn
-                }]
-              }
-            };
-          };
-        `),
-        description: 'Placeholder authorizer for API Gateway (to be replaced with real auth)'
-      }),
-      identitySources: [apigateway.IdentitySource.header('Authorization')]
-    });
+    // TODO: Authentication Placeholder
+    // When implementing authentication, uncomment and configure one of these options:
+    // 1. AWS Cognito User Pool
+    // 2. API Keys
+    // 3. Custom Lambda Authorizer
+    // 4. IAM Authentication
+    // For now, endpoints are open (no authorizer applied)
 
     // Integration with Lambda
     const lambdaIntegration = new apigateway.LambdaIntegration(apiLambda, {
