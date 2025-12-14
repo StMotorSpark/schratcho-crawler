@@ -210,8 +210,19 @@ The CDK stack (`infrastructure/lib/backend-stack.ts`) includes TODO comments ind
 - **Type:** REST API
 - **Stage:** prod
 - **Throttling:** 50 requests/second, burst of 100
-- **CORS:** Enabled for all origins (configure for production)
+- **CORS:** Enabled for all origins (**not secure for production**)
+  - **For production, restrict CORS to trusted origins.**  
+    In your CDK stack (`infrastructure/lib/backend-stack.ts`), configure the API Gateway to allow only specific origins. For example:
 
+    ```typescript
+    // Example: Restrict CORS to a specific origin in API Gateway
+    api.root.addCorsPreflight({
+      allowOrigins: ['https://yourdomain.com'], // Replace with your production domain(s)
+      allowMethods: ['GET', 'POST', 'OPTIONS'],
+      allowHeaders: ['Content-Type', 'Authorization'],
+    });
+    ```
+    > **Tip:** Never use `allowOrigins: ['*']` in production. Always specify trusted domains.
 ### CDK Stack
 
 The infrastructure is defined in `infrastructure/lib/backend-stack.ts` and includes:
