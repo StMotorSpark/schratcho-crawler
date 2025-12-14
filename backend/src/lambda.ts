@@ -1,5 +1,4 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import app from './index.js';
 
 // Simple Lambda handler that converts API Gateway events to Express-compatible format
 export const handler = async (
