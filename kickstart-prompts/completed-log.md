@@ -38,6 +38,7 @@ When implementing a prompt from this folder, add an entry to the appropriate sec
 | 022-Betting-Ticket-Mechanic.md | Betting ticket mechanic with 3 configurable bet options (bet amounts, thresholds, multipliers, refunds), BettingSelector UI component, and full integration into scratch flow | 2025-12-11 |
 | 023-Multi-Store-Concept.md | Multi-store concept with store selection page, unlocking based on total gold earned, store-specific ticket filtering, and complete navigation flow | 2025-12-12 |
 | 024-Backend-Bootstrapping.md | Backend infrastructure with Express, Lambda, API Gateway, CDK, and GitHub Actions deployment workflow | 2025-12-14 |
+| 025-Backend-Storage-Buildout.md | DynamoDB single-table storage with data models for Prizes, Scratchers, Tickets, Stores; shared type definitions with core/mechanics; data seeding script for initial deployment | 2025-12-21 |
 
 ---
 
