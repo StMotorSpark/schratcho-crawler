@@ -7,6 +7,7 @@ This is the backend API for the Schratcho Crawler game. It provides RESTful endp
 The backend uses the following AWS services:
 - **AWS Lambda** - Serverless compute for API endpoints
 - **API Gateway** - REST API management and routing
+- **DynamoDB** - NoSQL database for game data storage
 - **CloudFormation** - Infrastructure as Code (via AWS CDK)
 
 ## Technology Stack
@@ -23,7 +24,15 @@ The backend uses the following AWS services:
 backend/
 ├── src/
 │   ├── index.ts        # Express app with API endpoints
-│   └── lambda.ts       # Lambda handler wrapper
+│   ├── lambda.ts       # Lambda handler wrapper
+│   └── types/          # Shared type definitions for DynamoDB
+│       ├── index.ts    # Exports all types
+│       ├── prize.ts    # Prize data model
+│       ├── scratcher.ts # Scratcher data model
+│       ├── ticket.ts   # Ticket layout data model
+│       └── store.ts    # Store data model
+├── scripts/
+│   └── seed-data.ts    # Data seeding script for DynamoDB
 ├── infrastructure/
 │   ├── bin/
 │   │   └── app.ts      # CDK app entry point
@@ -32,7 +41,8 @@ backend/
 │   └── cdk.json        # CDK configuration
 ├── package.json
 ├── tsconfig.json
-└── README.md
+├── README.md
+└── STORAGE.md          # DynamoDB storage documentation
 ```
 
 ## Getting Started
@@ -293,13 +303,38 @@ aws logs tail /aws/lambda/SchratchoBackendFunction --follow
 ## Future Enhancements
 
 - [ ] Implement proper authentication (Cognito/JWT)
-- [ ] Add database integration (DynamoDB)
+- [x] Add database integration (DynamoDB) - **COMPLETED**
+- [ ] Add CRUD endpoints for game data (Prizes, Scratchers, Tickets, Stores)
 - [ ] Add more game-specific endpoints
 - [ ] Implement monitoring and alerting
 - [ ] Add automated tests
 - [ ] Add API documentation (OpenAPI/Swagger)
 - [ ] Implement rate limiting per user
 - [ ] Add logging and error tracking
+
+## Storage
+
+The backend now includes DynamoDB storage for game data. See [STORAGE.md](./STORAGE.md) for detailed documentation on:
+- DynamoDB table structure
+- Data models for Prizes, Scratchers, Tickets, and Stores
+- Data seeding process
+- Type definitions shared with core mechanics
+
+### Quick Start with Storage
+
+1. **Deploy the CDK stack** (includes DynamoDB table):
+   ```bash
+   cd backend
+   npm run build
+   npm run deploy
+   ```
+
+2. **Seed initial data** (one-time operation):
+   ```bash
+   npm run seed-data
+   ```
+
+See [STORAGE.md](./STORAGE.md) for complete documentation.
 
 ## Development Workflow
 
