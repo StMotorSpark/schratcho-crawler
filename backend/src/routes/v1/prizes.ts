@@ -20,14 +20,14 @@ router.get('/', async (_req: Request, res: Response) => {
   try {
     const items = await getItemsByEntityType('Prize');
     const prizes = items.map((item) => dbItemToPrize(item as PrizeDynamoDBItem));
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: prizes,
       count: prizes.length
     });
   } catch (error: any) {
     console.error('Error fetching prizes:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Failed to fetch prizes',
       message: error.message
