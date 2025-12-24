@@ -79,7 +79,9 @@ Build the TypeScript code:
 npm run build
 ```
 
-This compiles TypeScript to JavaScript in the `dist/` directory.
+This compiles TypeScript to JavaScript in the `dist/` directory for local testing.
+
+> **Note:** The CDK stack now bundles the Lambda handler directly from `src/lambda.ts` using `esbuild`, so running `npm install` (to ensure `esbuild` is available) is the only prerequisite before deploying.
 
 ### Linting
 
@@ -213,7 +215,8 @@ The CDK stack (`infrastructure/lib/backend-stack.ts`) includes TODO comments ind
 - **Runtime:** Node.js 20.x
 - **Memory:** 256 MB
 - **Timeout:** 10 seconds
-- **Handler:** `lambda.handler`
+- **Entry:** `src/lambda.ts` (bundled with `esbuild` during `cdk deploy`)
+- **Handler:** `handler`
 
 ### API Gateway
 

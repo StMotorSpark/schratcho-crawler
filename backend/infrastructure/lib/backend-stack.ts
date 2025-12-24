@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
@@ -51,17 +52,22 @@ export class BackendStack extends cdk.Stack {
     });
 
     // Lambda function for the backend API
-    const apiLambda = new lambda.Function(this, 'SchratchoBackendFunction', {
+    const apiLambda = new lambdaNodejs.NodejsFunction(this, 'SchratchoBackendFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'lambda.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../dist')),
+      entry: path.join(__dirname, '../../src/lambda.ts'),
+      handler: 'handler',
       memorySize: 256,
       timeout: cdk.Duration.seconds(10),
       environment: {
         NODE_ENV: 'production',
         GAME_DATA_TABLE_NAME: gameDataTable.tableName,
       },
-      description: 'Schratcho Crawler Backend API Lambda Function'
+      description: 'Schratcho Crawler Backend API Lambda Function',
+      bundling: {
+        target: 'node20',
+        format: lambdaNodejs.OutputFormat.CJS,
+        sourcesContent: false
+      }
     });
 
     // Grant Lambda read/write permissions to the DynamoDB table
