@@ -14,14 +14,13 @@
  */
 
 import type { TicketLayout } from '../../../mechanics/ticketLayouts';
-import imageAsset from './basic-goblinGold-ticketAsset.png';
 
 export const GOBLIN_GOLD_TICKET: TicketLayout = {
   "id": "goblin-gold",
   "name": "Goblin Gold",
   "description": "Fantasy-themed ticket with 10 scratch areas - match three symbols to win",
   "type": "Core",
-  "backgroundImage": imageAsset,
+  "backgroundImageKey": "goblin-gold",
   "scratchAreas": [
     {
       "id": "area-1",

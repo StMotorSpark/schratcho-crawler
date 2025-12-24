@@ -4,6 +4,7 @@ import { soundManager } from '../../core/mechanics/sounds';
 import type { TicketLayout, ScratchAreaConfig } from '../../core/mechanics/ticketLayouts';
 import { evaluateWinCondition, getPrizeDisplayForArea } from '../../core/mechanics/ticketLayouts';
 import type { Scratcher } from '../../core/mechanics/scratchers';
+import goblinGoldBackground from '../../core/game-logic/tickets/basic-goblinGold/basic-goblinGold-ticketAsset.png';
 
 interface ScratchTicketCSSProps {
   /** Array of prizes, one for each scratch area */
@@ -93,6 +94,10 @@ const PIXEL_CHECK_STRIDE = 40;
  * Throttles the expensive getImageData() call during rapid scratching.
  */
 const REVEAL_CHECK_THROTTLE_MS = 100;
+
+const LAYOUT_BACKGROUND_MAP: Record<string, string> = {
+  'goblin-gold': goblinGoldBackground,
+};
 
 /**
  * Calculate what percentage of the canvas has been scratched (erased).
@@ -393,7 +398,8 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
 
   // Calculate aspect ratio and height for the ticket
   const aspectRatio = layout.ticketHeight / layout.ticketWidth;
-  const hasBackgroundImage = !!layout.backgroundImage;
+  const resolvedBackgroundImage = layout.backgroundImage ?? (layout.backgroundImageKey ? LAYOUT_BACKGROUND_MAP[layout.backgroundImageKey] : undefined);
+  const hasBackgroundImage = !!resolvedBackgroundImage;
 
   return (
     <div className="scratch-ticket-css">
@@ -432,7 +438,7 @@ export default function ScratchTicketCSS({ areaPrizes, onComplete, layout, scrat
             style={{
               height: hasBackgroundImage ? `${aspectRatio * 100}%` : '300px',
               paddingBottom: hasBackgroundImage ? `${aspectRatio * 100}%` : '0',
-              backgroundImage: hasBackgroundImage ? `url(${layout.backgroundImage})` : undefined,
+              backgroundImage: hasBackgroundImage ? `url(${resolvedBackgroundImage})` : undefined,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               position: 'relative',

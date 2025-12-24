@@ -141,6 +141,8 @@ export interface TicketLayout {
   ticketHeight: number;
   /** Optional background image path for the ticket */
   backgroundImage?: string;
+  /** Optional key used by frontends to resolve bundled assets */
+  backgroundImageKey?: string;
   /** Gold cost to purchase this ticket type (default: 5, 0 = free) */
   goldCost?: number;
   /** 
