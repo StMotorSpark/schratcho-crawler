@@ -93,6 +93,10 @@ npm run lint
 
 ## API Endpoints
 
+All API endpoints follow RESTful conventions and return JSON responses with a consistent structure:
+- Success responses include `success: true` and a `data` field
+- Error responses include `success: false`, `error`, and `message` fields
+
 ### Health Check
 
 **GET** `/health`
@@ -120,10 +124,373 @@ Returns basic API information.
   "message": "Schratcho Crawler Backend API",
   "version": "1.0.0",
   "endpoints": {
-    "health": "/health"
+    "health": "/health",
+    "v1": "/v1"
   }
 }
 ```
+
+### API v1
+
+All v1 endpoints are prefixed with `/v1`.
+
+**GET** `/v1`
+
+Returns v1 API information.
+
+**Response:**
+```json
+{
+  "version": "v1",
+  "message": "Schratcho Crawler Backend API v1",
+  "endpoints": {
+    "prizes": "/v1/prizes",
+    "scratchers": "/v1/scratchers",
+    "tickets": "/v1/tickets",
+    "stores": "/v1/stores"
+  }
+}
+```
+
+---
+
+### Prize Endpoints
+
+Prizes represent rewards that players can win from scratch tickets.
+
+#### List All Prizes
+
+**GET** `/v1/prizes`
+
+Retrieves all prizes from the database.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "grand-prize",
+      "name": "Grand Prize",
+      "value": "1000 Gold",
+      "emoji": "🏆",
+      "effects": { ... }
+    }
+  ],
+  "count": 1
+}
+```
+
+#### Get Prize by ID
+
+**GET** `/v1/prizes/:id`
+
+Retrieves a specific prize by its ID.
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "grand-prize",
+    "name": "Grand Prize",
+    "value": "1000 Gold",
+    "emoji": "🏆"
+  }
+}
+```
+
+**Response (404):**
+```json
+{
+  "success": false,
+  "error": "Prize not found",
+  "message": "No prize found with id: grand-prize"
+}
+```
+
+#### Create Prize
+
+**POST** `/v1/prizes`
+
+Creates a new prize.
+
+**Request Body:**
+```json
+{
+  "id": "lucky-coin",
+  "name": "Lucky Coin",
+  "value": "50 Gold",
+  "emoji": "🪙"
+}
+```
+
+**Response (201):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "lucky-coin",
+    "name": "Lucky Coin",
+    "value": "50 Gold",
+    "emoji": "🪙"
+  },
+  "message": "Prize created successfully"
+}
+```
+
+**Response (409):**
+```json
+{
+  "success": false,
+  "error": "Prize already exists",
+  "message": "A prize with id 'lucky-coin' already exists"
+}
+```
+
+#### Update Prize
+
+**PUT** `/v1/prizes/:id`
+
+Updates an existing prize. Only the fields provided in the request body will be updated.
+
+**Request Body:**
+```json
+{
+  "value": "100 Gold"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "lucky-coin",
+    "name": "Lucky Coin",
+    "value": "100 Gold",
+    "emoji": "🪙"
+  },
+  "message": "Prize updated successfully"
+}
+```
+
+**Response (404):**
+```json
+{
+  "success": false,
+  "error": "Prize not found",
+  "message": "No prize found with id: lucky-coin"
+}
+```
+
+#### Delete Prize
+
+**DELETE** `/v1/prizes/:id`
+
+Deletes a prize.
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Prize deleted successfully"
+}
+```
+
+---
+
+### Scratcher Endpoints
+
+Scratchers represent tools that players use to scratch tickets.
+
+#### List All Scratchers
+
+**GET** `/v1/scratchers`
+
+Retrieves all scratchers from the database.
+
+#### Get Scratcher by ID
+
+**GET** `/v1/scratchers/:id`
+
+Retrieves a specific scratcher by its ID.
+
+#### Create Scratcher
+
+**POST** `/v1/scratchers`
+
+Creates a new scratcher.
+
+**Request Body:**
+```json
+{
+  "id": "gold-coin",
+  "name": "Gold Coin",
+  "description": "A shiny gold coin",
+  "texture": "gold-metallic",
+  "sound": "coin-scratch",
+  "capabilities": []
+}
+```
+
+#### Update Scratcher
+
+**PUT** `/v1/scratchers/:id`
+
+Updates an existing scratcher.
+
+#### Delete Scratcher
+
+**DELETE** `/v1/scratchers/:id`
+
+Deletes a scratcher.
+
+---
+
+### Ticket Endpoints
+
+Tickets represent scratch-off tickets that players can purchase and scratch.
+
+#### List All Tickets
+
+**GET** `/v1/tickets`
+
+Retrieves all ticket layouts from the database.
+
+#### Get Ticket by ID
+
+**GET** `/v1/tickets/:id`
+
+Retrieves a specific ticket layout by its ID.
+
+#### Create Ticket
+
+**POST** `/v1/tickets`
+
+Creates a new ticket layout.
+
+**Request Body:**
+```json
+{
+  "id": "classic-ticket",
+  "name": "Classic Scratcher",
+  "description": "A classic scratch ticket",
+  "goldCost": 10,
+  "scratchAreas": [
+    {
+      "id": "area-1",
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": 100, "height": 100 }
+    }
+  ]
+}
+```
+
+#### Update Ticket
+
+**PUT** `/v1/tickets/:id`
+
+Updates an existing ticket layout.
+
+#### Delete Ticket
+
+**DELETE** `/v1/tickets/:id`
+
+Deletes a ticket layout.
+
+---
+
+### Store Endpoints
+
+Stores represent in-game shops where players can purchase tickets.
+
+#### List All Stores
+
+**GET** `/v1/stores`
+
+Retrieves all stores from the database.
+
+#### Get Store by ID
+
+**GET** `/v1/stores/:id`
+
+Retrieves a specific store by its ID.
+
+#### Create Store
+
+**POST** `/v1/stores`
+
+Creates a new store.
+
+**Request Body:**
+```json
+{
+  "id": "starter-shop",
+  "name": "Starter Shop",
+  "description": "Your first shop",
+  "availableTickets": ["classic-ticket"],
+  "unlockThreshold": 0,
+  "unlocked": true,
+  "theme": "cozy-corner"
+}
+```
+
+#### Update Store
+
+**PUT** `/v1/stores/:id`
+
+Updates an existing store.
+
+#### Delete Store
+
+**DELETE** `/v1/stores/:id`
+
+Deletes a store.
+
+---
+
+### Error Responses
+
+All endpoints may return the following error responses:
+
+**400 Bad Request** - Validation error
+```json
+{
+  "success": false,
+  "error": "Validation error",
+  "message": "Prize must have a valid id (string)"
+}
+```
+
+**404 Not Found** - Resource not found
+```json
+{
+  "success": false,
+  "error": "Prize not found",
+  "message": "No prize found with id: invalid-id"
+}
+```
+
+**409 Conflict** - Resource already exists or version conflict
+```json
+{
+  "success": false,
+  "error": "Prize already exists",
+  "message": "A prize with id 'lucky-coin' already exists"
+}
+```
+
+**500 Internal Server Error** - Server error
+```json
+{
+  "success": false,
+  "error": "Failed to fetch prize",
+  "message": "Internal server error details"
+}
+```
+
+
 
 ## Deployment
 
@@ -307,13 +674,15 @@ aws logs tail /aws/lambda/SchratchoBackendFunction --follow
 
 - [ ] Implement proper authentication (Cognito/JWT)
 - [x] Add database integration (DynamoDB) - **COMPLETED**
-- [ ] Add CRUD endpoints for game data (Prizes, Scratchers, Tickets, Stores)
+- [x] Add CRUD endpoints for game data (Prizes, Scratchers, Tickets, Stores) - **COMPLETED**
+- [x] Add API versioning (v1) - **COMPLETED**
 - [ ] Add more game-specific endpoints
 - [ ] Implement monitoring and alerting
 - [ ] Add automated tests
 - [ ] Add API documentation (OpenAPI/Swagger)
 - [ ] Implement rate limiting per user
 - [ ] Add logging and error tracking
+- [ ] Add pagination for list endpoints
 
 ## Storage
 
