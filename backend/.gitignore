@@ -6,6 +6,7 @@ node_modules/
 dist/
 *.js
 *.d.ts
+!src/types/assets.d.ts
 !infrastructure/bin/*.js
 !infrastructure/lib/*.js
 
