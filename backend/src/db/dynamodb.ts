@@ -121,6 +121,11 @@ export async function updateItem(
     }
   });
 
+  // If no non-protected fields are being updated, avoid making a pointless DB call
+  // and signal a validation error to the caller.
+  if (updateExpressions.length === 2) {
+    throw new Error('No updatable fields provided: only protected fields were specified.');
+  }
   const params: UpdateCommandInput = {
     TableName: TABLE_NAME,
     Key: { PK: pk, SK: sk },
