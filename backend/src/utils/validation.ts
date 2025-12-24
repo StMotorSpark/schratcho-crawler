@@ -27,20 +27,20 @@ export function validatePrize(data: any): asserts data is Prize {
     throw new ValidationError('Prize data must be an object');
   }
 
-  if (!data.id || typeof data.id !== 'string') {
-    throw new ValidationError('Prize must have a valid id (string)');
+  if (!data.id || typeof data.id !== 'string' || data.id.trim() === '') {
+    throw new ValidationError('Prize must have a valid id (non-empty string)');
   }
 
-  if (!data.name || typeof data.name !== 'string') {
-    throw new ValidationError('Prize must have a valid name (string)');
+  if (!data.name || typeof data.name !== 'string' || data.name.trim() === '') {
+    throw new ValidationError('Prize must have a valid name (non-empty string)');
   }
 
-  if (!data.value || typeof data.value !== 'string') {
-    throw new ValidationError('Prize must have a valid value (string)');
+  if (!data.value || typeof data.value !== 'string' || data.value.trim() === '') {
+    throw new ValidationError('Prize must have a valid value (non-empty string)');
   }
 
-  if (!data.emoji || typeof data.emoji !== 'string') {
-    throw new ValidationError('Prize must have a valid emoji (string)');
+  if (!data.emoji || typeof data.emoji !== 'string' || data.emoji.trim() === '') {
+    throw new ValidationError('Prize must have a valid emoji (non-empty string)');
   }
 
   // effects is optional, but if provided must be an object
@@ -57,24 +57,24 @@ export function validateScratcher(data: any): asserts data is Scratcher {
     throw new ValidationError('Scratcher data must be an object');
   }
 
-  if (!data.id || typeof data.id !== 'string') {
-    throw new ValidationError('Scratcher must have a valid id (string)');
+  if (!data.id || typeof data.id !== 'string' || data.id.trim() === '') {
+    throw new ValidationError('Scratcher must have a valid id (non-empty string)');
   }
 
-  if (!data.name || typeof data.name !== 'string') {
-    throw new ValidationError('Scratcher must have a valid name (string)');
+  if (!data.name || typeof data.name !== 'string' || data.name.trim() === '') {
+    throw new ValidationError('Scratcher must have a valid name (non-empty string)');
   }
 
-  if (!data.description || typeof data.description !== 'string') {
-    throw new ValidationError('Scratcher must have a valid description (string)');
+  if (!data.description || typeof data.description !== 'string' || data.description.trim() === '') {
+    throw new ValidationError('Scratcher must have a valid description (non-empty string)');
   }
 
-  if (!data.texture || typeof data.texture !== 'string') {
-    throw new ValidationError('Scratcher must have a valid texture (string)');
+  if (!data.texture || typeof data.texture !== 'string' || data.texture.trim() === '') {
+    throw new ValidationError('Scratcher must have a valid texture (non-empty string)');
   }
 
-  if (!data.sound || typeof data.sound !== 'string') {
-    throw new ValidationError('Scratcher must have a valid sound (string)');
+  if (!data.sound || typeof data.sound !== 'string' || data.sound.trim() === '') {
+    throw new ValidationError('Scratcher must have a valid sound (non-empty string)');
   }
 
   // Check capabilities if provided
@@ -93,16 +93,16 @@ export function validateTicket(data: any): asserts data is TicketLayout {
     throw new ValidationError('Ticket data must be an object');
   }
 
-  if (!data.id || typeof data.id !== 'string') {
-    throw new ValidationError('Ticket must have a valid id (string)');
+  if (!data.id || typeof data.id !== 'string' || data.id.trim() === '') {
+    throw new ValidationError('Ticket must have a valid id (non-empty string)');
   }
 
-  if (!data.name || typeof data.name !== 'string') {
-    throw new ValidationError('Ticket must have a valid name (string)');
+  if (!data.name || typeof data.name !== 'string' || data.name.trim() === '') {
+    throw new ValidationError('Ticket must have a valid name (non-empty string)');
   }
 
-  if (!data.description || typeof data.description !== 'string') {
-    throw new ValidationError('Ticket must have a valid description (string)');
+  if (!data.description || typeof data.description !== 'string' || data.description.trim() === '') {
+    throw new ValidationError('Ticket must have a valid description (non-empty string)');
   }
 
   if (typeof data.goldCost !== 'number' || data.goldCost < 0) {
@@ -132,16 +132,16 @@ export function validateStore(data: any): asserts data is Store {
     throw new ValidationError('Store data must be an object');
   }
 
-  if (!data.id || typeof data.id !== 'string') {
-    throw new ValidationError('Store must have a valid id (string)');
+  if (!data.id || typeof data.id !== 'string' || data.id.trim() === '') {
+    throw new ValidationError('Store must have a valid id (non-empty string)');
   }
 
-  if (!data.name || typeof data.name !== 'string') {
-    throw new ValidationError('Store must have a valid name (string)');
+  if (!data.name || typeof data.name !== 'string' || data.name.trim() === '') {
+    throw new ValidationError('Store must have a valid name (non-empty string)');
   }
 
-  if (!data.description || typeof data.description !== 'string') {
-    throw new ValidationError('Store must have a valid description (string)');
+  if (!data.description || typeof data.description !== 'string' || data.description.trim() === '') {
+    throw new ValidationError('Store must have a valid description (non-empty string)');
   }
 
   if (!Array.isArray(data.availableTickets)) {
@@ -156,14 +156,27 @@ export function validateStore(data: any): asserts data is Store {
     throw new ValidationError('Store must have a valid unlocked boolean value');
   }
 
-  if (!data.theme || typeof data.theme !== 'string') {
-    throw new ValidationError('Store must have a valid theme (string)');
+  if (!data.theme || typeof data.theme !== 'string' || data.theme.trim() === '') {
+    throw new ValidationError('Store must have a valid theme (non-empty string)');
   }
 }
 
 /**
  * Validate partial update data
- * This allows updating only specific fields without requiring all fields
+ * This allows updating only specific fields without requiring all fields.
+ * 
+ * **IMPORTANT LIMITATION**: This function only validates that disallowed fields 
+ * (PK, SK, entityType, createdAt) are not being updated. It does NOT validate the 
+ * actual values of the fields being updated. This means invalid data could be 
+ * written to the database if the caller provides malformed values.
+ * 
+ * For production use, consider implementing field-level validation for partial updates
+ * by checking each provided field against the entity's validation rules.
+ * 
+ * @param data - The partial update data to validate
+ * @param _validatorFn - The full validator function (currently unused, but reserved for future enhancement)
+ * @returns The partial data, cast to the appropriate type
+ * @throws ValidationError if disallowed fields are present
  */
 export function validatePartialUpdate<T>(
   data: any,
