@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { UserState } from '../../core/user-state';
 import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout, type TicketType } from '../../core/mechanics/ticketLayouts';
 import { getOwnedTicketsForLayout, isHandFull, hasHand } from '../../core/user-state';
+import { useGameData } from '../contexts/GameDataContext';
 import FloatingHandButton from './FloatingHandButton';
 import OddsInfoModal from './OddsInfoModal';
 import './InventoryPage.css';
@@ -34,6 +35,12 @@ export default function InventoryPage({
 }: InventoryPageProps) {
   const [internalActiveTab, setInternalActiveTab] = useState<TicketType>('Core');
   const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
+  const { data: gameData } = useGameData();
+  
+  // Use API data if available, fall back to hardcoded data
+  const ticketsById = useMemo(() => {
+    return gameData?.ticketsById || TICKET_LAYOUTS;
+  }, [gameData]);
   
   // Use external activeTab if provided, otherwise use internal state
   const activeTab = externalActiveTab ?? internalActiveTab;
@@ -44,7 +51,7 @@ export default function InventoryPage({
   };
   
   // Get all owned tickets filtered by active tab
-  const allOwnedTickets: OwnedTicket[] = Object.values(TICKET_LAYOUTS)
+  const allOwnedTickets: OwnedTicket[] = Object.values(ticketsById)
     .map((layout) => ({
       layout,
       count: getOwnedTicketsForLayout(layout.id),
@@ -67,7 +74,7 @@ export default function InventoryPage({
     }
     
     // Check if this is a hand ticket
-    const layout = TICKET_LAYOUTS[layoutId];
+    const layout = ticketsById[layoutId];
     if (layout && layout.type === 'Hand' && !hasActiveHand) {
       // Hand tickets require an active hand (at least one core ticket)
       alert('⚠️ Hand tickets can only be scratched when you have an active hand.\n\nScratch a Core ticket first and add it to your hand, then you can scratch Hand tickets!');

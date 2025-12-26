@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { UserState } from '../../core/user-state';
 import { TICKET_LAYOUTS, getTicketGoldCost, type TicketLayout, type TicketType } from '../../core/mechanics/ticketLayouts';
 import {
@@ -7,6 +7,7 @@ import {
   getOwnedTicketsForLayout,
 } from '../../core/user-state';
 import { getStoreById, getStoreTickets } from '../../core/mechanics/stores';
+import { useGameData } from '../contexts/GameDataContext';
 import OddsInfoModal from './OddsInfoModal';
 import './StorePage.css';
 import './shared-tabs.css';
@@ -25,11 +26,42 @@ interface StorePageProps {
 export default function StorePage({ userState, onNavigateToInventory, onNavigateBack, storeId }: StorePageProps) {
   const [activeTab, setActiveTab] = useState<TicketType>('Core');
   const [oddsModalLayout, setOddsModalLayout] = useState<TicketLayout | null>(null);
+  const { data: gameData } = useGameData();
+  
+  // Use API data if available, fall back to hardcoded data
+  const ticketsById = useMemo(() => {
+    return gameData?.ticketsById || TICKET_LAYOUTS;
+  }, [gameData]);
+  
+  const storesById = useMemo(() => {
+    return gameData?.storesById || {};
+  }, [gameData]);
   
   // Get tickets based on store selection or show all
-  const store = storeId ? getStoreById(storeId) : null;
-  const allTicketLayouts = storeId ? getStoreTickets(storeId) : Object.values(TICKET_LAYOUTS);
+  const store = storeId ? (storesById[storeId] || getStoreById(storeId)) : null;
+  
+  // Get tickets for this store
+  const allTicketLayouts = useMemo(() => {
+    if (storeId) {
+      if (store && store.ticketIds) {
+        // Use API data if available
+        return store.ticketIds.map(id => ticketsById[id]).filter(Boolean);
+      }
+      // Fall back to hardcoded store tickets
+      return getStoreTickets(storeId);
+    }
+    // Show all tickets
+    return Object.values(ticketsById);
+  }, [storeId, store, ticketsById]);
+  
   const ticketLayouts = allTicketLayouts.filter(layout => (layout.type || 'Core') === activeTab);
+
+  // Calculate total owned tickets using the tickets from context or fallback
+  const getTotalOwnedTickets = (): number => {
+    return Object.keys(ticketsById).reduce((total, layoutId) => {
+      return total + getOwnedTicketsForLayout(layoutId);
+    }, 0);
+  };
 
   // If a storeId was provided but the store was not found, show an error message
   if (storeId && !store) {
@@ -45,6 +77,7 @@ export default function StorePage({ userState, onNavigateToInventory, onNavigate
       </div>
     );
   }
+  
   const handlePurchaseSingle = (layout: TicketLayout) => {
     const cost = getTicketGoldCost(layout);
     if (purchaseTicketForLayout(layout.id, cost)) {
@@ -184,12 +217,6 @@ export default function StorePage({ userState, onNavigateToInventory, onNavigate
       )}
     </div>
   );
-}
-
-function getTotalOwnedTickets(): number {
-  return Object.keys(TICKET_LAYOUTS).reduce((total, layoutId) => {
-    return total + getOwnedTicketsForLayout(layoutId);
-  }, 0);
 }
 
 function formatWinCondition(winCondition: string): string {

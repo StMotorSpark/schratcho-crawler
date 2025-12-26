@@ -13,13 +13,17 @@ import type { Store } from '../../core/mechanics/stores';
 import { fetchAllGameData, checkHealth, ApiError } from '../utils/apiClient';
 
 /**
- * Game data structure
+ * Game data structure with indexed maps for easy lookup
  */
 interface GameData {
   tickets: TicketLayout[];
+  ticketsById: Record<string, TicketLayout>;
   scratchers: Scratcher[];
+  scratchersById: Record<string, Scratcher>;
   prizes: Prize[];
+  prizesById: Record<string, Prize>;
   stores: Store[];
+  storesById: Record<string, Store>;
 }
 
 /**
@@ -132,12 +136,21 @@ export function GameDataProvider({ children }: GameDataProviderProps) {
       // Fetch fresh data from API
       const gameData = await fetchAllGameData();
       
-      // Transform the data to match our expected structure
+      // Transform the data to match our expected structure with indexed maps
+      const tickets = Array.isArray(gameData.tickets) ? gameData.tickets : [];
+      const scratchers = Array.isArray(gameData.scratchers) ? gameData.scratchers : [];
+      const prizes = Array.isArray(gameData.prizes) ? gameData.prizes : [];
+      const stores = Array.isArray(gameData.stores) ? gameData.stores : [];
+      
       const transformedData: GameData = {
-        tickets: Array.isArray(gameData.tickets) ? gameData.tickets : [],
-        scratchers: Array.isArray(gameData.scratchers) ? gameData.scratchers : [],
-        prizes: Array.isArray(gameData.prizes) ? gameData.prizes : [],
-        stores: Array.isArray(gameData.stores) ? gameData.stores : [],
+        tickets,
+        ticketsById: Object.fromEntries(tickets.map(t => [t.id, t])),
+        scratchers,
+        scratchersById: Object.fromEntries(scratchers.map(s => [s.id, s])),
+        prizes,
+        prizesById: Object.fromEntries(prizes.map(p => [p.id, p])),
+        stores,
+        storesById: Object.fromEntries(stores.map(s => [s.id, s])),
       };
       
       setData(transformedData);
