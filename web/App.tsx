@@ -52,16 +52,6 @@ function AppContent() {
     };
   }, []);
 
-  // Show loading screen while fetching data
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
-  // Show error screen if data fetch failed and no cached data
-  if (error && !error.includes('cached data')) {
-    return <ErrorScreen error={error} onRetry={refetch} />;
-  }
-
   const handleNavigate = useCallback((page: PageType) => {
     setCurrentPage(page);
     // Reset scratch-related state when leaving scratch page
@@ -183,6 +173,16 @@ function AppContent() {
         return null;
     }
   };
+
+  // Show loading screen while fetching data
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  // Show error screen if data fetch failed and no cached data
+  if (error && !error.includes('cached data')) {
+    return <ErrorScreen error={error} onRetry={refetch} />;
+  }
 
   return (
     <div className="app">
