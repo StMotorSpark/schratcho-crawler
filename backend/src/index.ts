@@ -1,4 +1,5 @@
 import express, { type Request, type Response } from 'express';
+import v1Router from './routes/v1';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,13 +16,17 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// Mount v1 routes
+app.use('/v1', v1Router);
+
 // Root endpoint
 app.get('/', (_req: Request, res: Response) => {
   res.status(200).json({
     message: 'Schratcho Crawler Backend API',
     version: '1.0.0',
     endpoints: {
-      health: '/health'
+      health: '/health',
+      v1: '/v1'
     }
   });
 });
