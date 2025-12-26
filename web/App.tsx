@@ -7,6 +7,9 @@ import ScratchPage from './components/ScratchPage';
 import CoffeeShopHub from './components/CoffeeShopHub';
 import Settings from './components/Settings';
 import HandModal from './components/HandModal';
+import LoadingScreen from './components/LoadingScreen';
+import ErrorScreen from './components/ErrorScreen';
+import { GameDataProvider, useGameData } from './contexts/GameDataContext';
 import {
   initializeUserState,
   getUserState,
@@ -23,7 +26,8 @@ import './components/InventoryPage.css';
 import './components/ScratchPage.css';
 import './components/HandModal.css';
 
-function App() {
+function AppContent() {
+  const { loading, error, refetch } = useGameData();
   const [currentPage, setCurrentPage] = useState<PageType>('hub');
   const [showSettings, setShowSettings] = useState(false);
   const [showHandModal, setShowHandModal] = useState(false);
@@ -47,6 +51,16 @@ function App() {
       unsubscribe();
     };
   }, []);
+
+  // Show loading screen while fetching data
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  // Show error screen if data fetch failed and no cached data
+  if (error && !error.includes('cached data')) {
+    return <ErrorScreen error={error} onRetry={refetch} />;
+  }
 
   const handleNavigate = useCallback((page: PageType) => {
     setCurrentPage(page);
@@ -200,4 +214,13 @@ function App() {
   );
 }
 
-export default App;
+/**
+ * Main App component with GameDataProvider wrapper
+ */
+export default function App() {
+  return (
+    <GameDataProvider>
+      <AppContent />
+    </GameDataProvider>
+  );
+}
