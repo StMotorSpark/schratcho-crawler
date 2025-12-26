@@ -112,43 +112,14 @@ export class BackendStack extends cdk.Stack {
 
     // v1 API routes
     const v1Resource = api.root.addResource('v1');
-    v1Resource.addMethod('GET', lambdaIntegration); // v1 root
-    
-    // v1 Prize endpoints
-    const prizesResource = v1Resource.addResource('prizes');
-    prizesResource.addMethod('GET', lambdaIntegration); // List all prizes
-    prizesResource.addMethod('POST', lambdaIntegration); // Create prize
-    const prizeResource = prizesResource.addResource('{id}');
-    prizeResource.addMethod('GET', lambdaIntegration); // Get prize by ID
-    prizeResource.addMethod('PUT', lambdaIntegration); // Update prize
-    prizeResource.addMethod('DELETE', lambdaIntegration); // Delete prize
+    v1Resource.addMethod('ANY', lambdaIntegration); // v1 root handler
 
-    // v1 Scratcher endpoints
-    const scratchersResource = v1Resource.addResource('scratchers');
-    scratchersResource.addMethod('GET', lambdaIntegration); // List all scratchers
-    scratchersResource.addMethod('POST', lambdaIntegration); // Create scratcher
-    const scratcherResource = scratchersResource.addResource('{id}');
-    scratcherResource.addMethod('GET', lambdaIntegration); // Get scratcher by ID
-    scratcherResource.addMethod('PUT', lambdaIntegration); // Update scratcher
-    scratcherResource.addMethod('DELETE', lambdaIntegration); // Delete scratcher
-
-    // v1 Ticket endpoints
-    const ticketsResource = v1Resource.addResource('tickets');
-    ticketsResource.addMethod('GET', lambdaIntegration); // List all tickets
-    ticketsResource.addMethod('POST', lambdaIntegration); // Create ticket
-    const ticketResource = ticketsResource.addResource('{id}');
-    ticketResource.addMethod('GET', lambdaIntegration); // Get ticket by ID
-    ticketResource.addMethod('PUT', lambdaIntegration); // Update ticket
-    ticketResource.addMethod('DELETE', lambdaIntegration); // Delete ticket
-
-    // v1 Store endpoints
-    const storesResource = v1Resource.addResource('stores');
-    storesResource.addMethod('GET', lambdaIntegration); // List all stores
-    storesResource.addMethod('POST', lambdaIntegration); // Create store
-    const storeResource = storesResource.addResource('{id}');
-    storeResource.addMethod('GET', lambdaIntegration); // Get store by ID
-    storeResource.addMethod('PUT', lambdaIntegration); // Update store
-    storeResource.addMethod('DELETE', lambdaIntegration); // Delete store
+    // Proxy resource keeps the AWS::Lambda::Permission policy small while
+    // allowing the Lambda handler to route requests for every nested path
+    v1Resource.addProxy({
+      defaultIntegration: lambdaIntegration,
+      anyMethod: true
+    });
 
     // Output the API URL
     new cdk.CfnOutput(this, 'ApiUrl', {
