@@ -179,8 +179,14 @@ function AppContent() {
     return <LoadingScreen />;
   }
 
-  // Show error screen if data fetch failed and no cached data
-  if (error && !error.includes('cached data')) {
+  // Show error screen only if it's a critical error that prevents app from working
+  // Allow the app to continue with null gameData so components can fall back to hardcoded data
+  // Only block if the error explicitly indicates the app cannot continue
+  const isCriticalError = error && !error.includes('cached data') && !error.includes('no cached data is available');
+  
+  // For now, never block - always allow fallback to hardcoded data in components
+  // This ensures the app always works even without a backend
+  if (false && isCriticalError) {
     return <ErrorScreen error={error} onRetry={refetch} />;
   }
 
