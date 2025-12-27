@@ -187,7 +187,7 @@ function AppContent() {
   // For now, never block - always allow fallback to hardcoded data in components
   // This ensures the app always works even without a backend
   if (false && isCriticalError) {
-    return <ErrorScreen error={error} onRetry={refetch} />;
+    return <ErrorScreen error={error || 'Unknown error'} onRetry={refetch} />;
   }
 
   return (
