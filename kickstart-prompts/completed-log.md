@@ -41,6 +41,7 @@ When implementing a prompt from this folder, add an entry to the appropriate sec
 | 025-Backend-Storage-Buildout.md | DynamoDB single-table storage with data models for Prizes, Scratchers, Tickets, Stores; shared type definitions with core/mechanics; data seeding script for initial deployment | 2025-12-21 |
 | 026-Backend-Api-Buildout.md | RESTful API v1 with CRUD endpoints for Prizes, Scratchers, Tickets, and Stores; versioned routes; data validation; error handling; DynamoDB service layer; comprehensive API documentation | 2025-12-24 |
 | 027-Frontend-Api-Integration.md | Frontend API integration with automatic data fetching, 24hr cache TTL, localStorage offline support, health monitoring, graceful fallback to hardcoded data, loading/error screens, and context-based data management | 2025-12-26 |
+| 028-Continue-Tuning-Web-API-Integration.md | Refactored core/mechanics helper functions to accept dynamic data parameters; updated all frontend components to pass API/cached/fallback data; seamless three-mode operation (backend/cache/fallback); comprehensive documentation | 2025-12-27 |
 
 ---
 
