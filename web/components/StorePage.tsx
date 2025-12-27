@@ -37,8 +37,12 @@ export default function StorePage({ userState, onNavigateToInventory, onNavigate
     return gameData?.storesById || {};
   }, [gameData]);
   
+  const storesArray = useMemo(() => {
+    return gameData?.stores;
+  }, [gameData]);
+  
   // Get tickets based on store selection or show all
-  const store = storeId ? (storesById[storeId] || getStoreById(storeId)) : null;
+  const store = storeId ? (storesById[storeId] || getStoreById(storeId, storesArray)) : null;
   
   // Get tickets for this store
   const allTicketLayouts = useMemo(() => {
@@ -48,11 +52,11 @@ export default function StorePage({ userState, onNavigateToInventory, onNavigate
         return store.ticketIds.map(id => ticketsById[id]).filter(Boolean);
       }
       // Fall back to hardcoded store tickets
-      return getStoreTickets(storeId);
+      return getStoreTickets(storeId, storesArray, ticketsById);
     }
     // Show all tickets
     return Object.values(ticketsById);
-  }, [storeId, store, ticketsById]);
+  }, [storeId, store, ticketsById, storesArray]);
   
   const ticketLayouts = allTicketLayouts.filter(layout => (layout.type || 'Core') === activeTab);
 
