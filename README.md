@@ -103,6 +103,44 @@ Each scratcher has unique visual styles with different gradient overlays for a v
 npm install
 ```
 
+### API Integration
+
+The frontend now integrates with a backend API to fetch game data (tickets, scratchers, prizes, stores) dynamically. This provides:
+
+- **Automatic Data Fetching**: Game data is fetched from the backend API on startup
+- **Offline Support**: Data is cached locally for 24 hours, enabling offline play
+- **Graceful Fallback**: If the backend is unavailable, the app falls back to cached data or hardcoded defaults
+- **Health Monitoring**: Regular health checks ensure the backend is available
+
+#### Configuration
+
+To configure the backend API URL, create a `.env` file in the project root:
+
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit the .env file to set your backend URL
+# VITE_API_URL=http://localhost:3000
+```
+
+If no `.env` file is provided, the app defaults to `http://localhost:3000`.
+
+#### Running with Backend
+
+For full functionality, start both the frontend and backend:
+
+```bash
+# Terminal 1: Start the backend (from backend directory)
+cd backend
+npm run dev
+
+# Terminal 2: Start the frontend (from project root)
+npm run dev
+```
+
+The frontend will automatically fetch data from the backend. If the backend is not running, the app will use cached or hardcoded data as a fallback.
+
 ### Development
 
 ```bash

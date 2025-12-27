@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import ScratchTicketCSS from './ScratchTicketCSS';
 import BettingSelector from './BettingSelector';
 import { getPrizeGoldValue, type Prize } from '../../core/mechanics/prizes';
@@ -30,6 +30,7 @@ import {
   refundTicketForLayout,
   type HandTicket,
 } from '../../core/user-state';
+import { useGameData } from '../contexts/GameDataContext';
 import FloatingHandButton from './FloatingHandButton';
 import './ScratchPage.css';
 
@@ -55,10 +56,20 @@ export default function ScratchPage({
   onHasPendingPrizesChange,
   onOpenHandModal,
 }: ScratchPageProps) {
+  const { data: gameData } = useGameData();
+  
+  // Use API data if available, fall back to hardcoded data
+  const scratchersById = useMemo(() => {
+    return gameData?.scratchersById || SCRATCHER_TYPES;
+  }, [gameData]);
+  
   const [layout] = useState<TicketLayout>(() => getTicketLayout(layoutId));
   const [areaPrizes, setAreaPrizes] = useState<Prize[]>(() => generateAreaPrizes(getTicketLayout(layoutId)));
   const [scratcherId, setScratcherId] = useState(() => getSelectedScratcherId());
-  const [scratcher, setScratcher] = useState<Scratcher>(() => getScratcher(getSelectedScratcherId()));
+  const [scratcher, setScratcher] = useState<Scratcher>(() => {
+    const id = getSelectedScratcherId();
+    return scratchersById[id] || getScratcher(id);
+  });
   const [scratchState, setScratchState] = useState<ScratchState>('preparing');
   const [pendingPrizes, setPendingPrizes] = useState<Prize[]>([]);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
@@ -96,7 +107,7 @@ export default function ScratchPage({
       // No ticket available - go back
       onCancel();
     }
-  }, [layoutId, scratcherId, onCancel]);
+  }, [layoutId, scratcherId, onCancel, layout]);
 
   // Update pending prizes state for parent component
   useEffect(() => {
@@ -135,7 +146,7 @@ export default function ScratchPage({
 
   const handleScratcherChange = (newScratcherId: string) => {
     setScratcherId(newScratcherId);
-    setScratcher(getScratcher(newScratcherId));
+    setScratcher(scratchersById[newScratcherId] || getScratcher(newScratcherId));
     setSelectedScratcherId(newScratcherId);
     setShowScratcherMenu(false);
   };
@@ -395,7 +406,7 @@ export default function ScratchPage({
           disabled={scratchState === 'completed'}
           aria-label="Select scratcher"
         >
-          {SCRATCHER_TYPES[scratcherId].symbol}
+          {scratchersById[scratcherId]?.symbol || '🪙'}
         </button>
       </div>
 
@@ -405,14 +416,14 @@ export default function ScratchPage({
           <div className="scratcher-popup" onClick={(e) => e.stopPropagation()}>
             <h4>Select Scratcher</h4>
             <div className="scratcher-options">
-              {Object.keys(SCRATCHER_TYPES).map((id) => (
+              {Object.keys(scratchersById).map((id) => (
                 <button
                   key={id}
                   className={`scratcher-option ${id === scratcherId ? 'active' : ''}`}
                   onClick={() => handleScratcherChange(id)}
                 >
-                  <span className="scratcher-symbol">{SCRATCHER_TYPES[id].symbol}</span>
-                  <span className="scratcher-name">{SCRATCHER_TYPES[id].name}</span>
+                  <span className="scratcher-symbol">{scratchersById[id].symbol}</span>
+                  <span className="scratcher-name">{scratchersById[id].name}</span>
                 </button>
               ))}
             </div>

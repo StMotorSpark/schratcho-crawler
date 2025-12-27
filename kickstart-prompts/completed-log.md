@@ -40,6 +40,7 @@ When implementing a prompt from this folder, add an entry to the appropriate sec
 | 024-Backend-Bootstrapping.md | Backend infrastructure with Express, Lambda, API Gateway, CDK, and GitHub Actions deployment workflow | 2025-12-14 |
 | 025-Backend-Storage-Buildout.md | DynamoDB single-table storage with data models for Prizes, Scratchers, Tickets, Stores; shared type definitions with core/mechanics; data seeding script for initial deployment | 2025-12-21 |
 | 026-Backend-Api-Buildout.md | RESTful API v1 with CRUD endpoints for Prizes, Scratchers, Tickets, and Stores; versioned routes; data validation; error handling; DynamoDB service layer; comprehensive API documentation | 2025-12-24 |
+| 027-Frontend-Api-Integration.md | Frontend API integration with automatic data fetching, 24hr cache TTL, localStorage offline support, health monitoring, graceful fallback to hardcoded data, loading/error screens, and context-based data management | 2025-12-26 |
 
 ---
 

@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import type { UserState } from '../../core/user-state';
 import { DEFAULT_STORES, getStorePriceRange, isStoreUnlocked, type Store } from '../../core/mechanics/stores';
+import { useGameData } from '../contexts/GameDataContext';
 import './StoreSelectionPage.css';
 
 interface StoreSelectionPageProps {
@@ -13,6 +15,12 @@ interface StoreSelectionPageProps {
  */
 export default function StoreSelectionPage({ userState, onSelectStore }: StoreSelectionPageProps) {
   const totalGoldEarned = userState?.totalGoldEarned || 0;
+  const { data: gameData } = useGameData();
+  
+  // Use API stores if available, fall back to hardcoded stores
+  const stores = useMemo(() => {
+    return gameData?.stores && gameData.stores.length > 0 ? gameData.stores : DEFAULT_STORES;
+  }, [gameData]);
 
   const handleStoreClick = (store: Store) => {
     const unlocked = isStoreUnlocked(store, totalGoldEarned);
@@ -29,7 +37,7 @@ export default function StoreSelectionPage({ userState, onSelectStore }: StoreSe
       </div>
 
       <div className="stores-grid">
-        {DEFAULT_STORES.map((store) => {
+        {stores.map((store) => {
           const unlocked = isStoreUnlocked(store, totalGoldEarned);
           const priceRange = getStorePriceRange(store);
           const priceText = priceRange.min === priceRange.max 
