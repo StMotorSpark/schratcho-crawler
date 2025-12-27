@@ -1,10 +1,17 @@
 import express, { type Request, type Response } from 'express';
+import cors from 'cors';
 import v1Router from './routes/v1';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+app.use(cors({
+  origin: '*', // Allow all origins in development. Tighten this for production.
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
+}));
 app.use(express.json());
 
 // Health check endpoint
