@@ -29,10 +29,13 @@ export interface Store {
 
 /**
  * Get price range for a store's tickets
+ * @param store - The store to get price range for
+ * @param ticketsData - Optional record of tickets to search. If not provided, uses hardcoded tickets as fallback.
  */
-export function getStorePriceRange(store: Store): { min: number; max: number } {
+export function getStorePriceRange(store: Store, ticketsData?: Record<string, TicketLayout>): { min: number; max: number } {
+  const searchTickets = ticketsData || TICKET_LAYOUTS;
   const prices = store.ticketIds
-    .map(id => TICKET_LAYOUTS[id])
+    .map(id => searchTickets[id])
     .filter(Boolean)
     .map(layout => getTicketGoldCost(layout));
   
@@ -48,9 +51,11 @@ export function getStorePriceRange(store: Store): { min: number; max: number } {
 
 /**
  * Get display text for price range
+ * @param store - The store to get price range text for
+ * @param ticketsData - Optional record of tickets to search. If not provided, uses hardcoded tickets as fallback.
  */
-export function getPriceRangeText(store: Store): string {
-  const { min, max } = getStorePriceRange(store);
+export function getPriceRangeText(store: Store, ticketsData?: Record<string, TicketLayout>): string {
+  const { min, max } = getStorePriceRange(store, ticketsData);
   
   if (min === max) {
     return `${min} gold`;
@@ -93,22 +98,29 @@ export const DEFAULT_STORES: Store[] = [
 
 /**
  * Get a store by ID
+ * @param storeId - The store ID to look up
+ * @param storesData - Optional array of stores to search. If not provided, uses hardcoded stores as fallback.
  */
-export function getStoreById(storeId: string): Store | undefined {
-  return DEFAULT_STORES.find(store => store.id === storeId);
+export function getStoreById(storeId: string, storesData?: Store[]): Store | undefined {
+  const searchStores = storesData || DEFAULT_STORES;
+  return searchStores.find(store => store.id === storeId);
 }
 
 /**
  * Get all tickets for a store
+ * @param storeId - The store ID to get tickets for
+ * @param storesData - Optional array of stores to search. If not provided, uses hardcoded stores as fallback.
+ * @param ticketsData - Optional record of tickets to search. If not provided, uses hardcoded tickets as fallback.
  */
-export function getStoreTickets(storeId: string): TicketLayout[] {
-  const store = getStoreById(storeId);
+export function getStoreTickets(storeId: string, storesData?: Store[], ticketsData?: Record<string, TicketLayout>): TicketLayout[] {
+  const store = getStoreById(storeId, storesData);
   if (!store) {
     return [];
   }
   
+  const searchTickets = ticketsData || TICKET_LAYOUTS;
   return store.ticketIds
-    .map(id => TICKET_LAYOUTS[id])
+    .map(id => searchTickets[id])
     .filter(Boolean);
 }
 
@@ -121,14 +133,20 @@ export function isStoreUnlocked(store: Store, totalGoldEarned: number): boolean 
 
 /**
  * Get all unlocked stores based on total gold earned
+ * @param totalGoldEarned - Total gold earned by the player
+ * @param storesData - Optional array of stores to search. If not provided, uses hardcoded stores as fallback.
  */
-export function getUnlockedStores(totalGoldEarned: number): Store[] {
-  return DEFAULT_STORES.filter(store => isStoreUnlocked(store, totalGoldEarned));
+export function getUnlockedStores(totalGoldEarned: number, storesData?: Store[]): Store[] {
+  const searchStores = storesData || DEFAULT_STORES;
+  return searchStores.filter(store => isStoreUnlocked(store, totalGoldEarned));
 }
 
 /**
  * Get all locked stores based on total gold earned
+ * @param totalGoldEarned - Total gold earned by the player
+ * @param storesData - Optional array of stores to search. If not provided, uses hardcoded stores as fallback.
  */
-export function getLockedStores(totalGoldEarned: number): Store[] {
-  return DEFAULT_STORES.filter(store => !isStoreUnlocked(store, totalGoldEarned));
+export function getLockedStores(totalGoldEarned: number, storesData?: Store[]): Store[] {
+  const searchStores = storesData || DEFAULT_STORES;
+  return searchStores.filter(store => !isStoreUnlocked(store, totalGoldEarned));
 }

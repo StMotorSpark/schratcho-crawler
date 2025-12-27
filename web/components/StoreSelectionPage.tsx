@@ -21,6 +21,11 @@ export default function StoreSelectionPage({ userState, onSelectStore }: StoreSe
   const stores = useMemo(() => {
     return gameData?.stores && gameData.stores.length > 0 ? gameData.stores : DEFAULT_STORES;
   }, [gameData]);
+  
+  // Get tickets data for price range calculations
+  const ticketsById = useMemo(() => {
+    return gameData?.ticketsById;
+  }, [gameData]);
 
   const handleStoreClick = (store: Store) => {
     const unlocked = isStoreUnlocked(store, totalGoldEarned);
@@ -39,7 +44,7 @@ export default function StoreSelectionPage({ userState, onSelectStore }: StoreSe
       <div className="stores-grid">
         {stores.map((store) => {
           const unlocked = isStoreUnlocked(store, totalGoldEarned);
-          const priceRange = getStorePriceRange(store);
+          const priceRange = getStorePriceRange(store, ticketsById);
           const priceText = priceRange.min === priceRange.max 
             ? `${priceRange.min} gold`
             : `${priceRange.min}-${priceRange.max} gold`;

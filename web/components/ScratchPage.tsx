@@ -63,12 +63,20 @@ export default function ScratchPage({
     return gameData?.scratchersById || SCRATCHER_TYPES;
   }, [gameData]);
   
-  const [layout] = useState<TicketLayout>(() => getTicketLayout(layoutId));
-  const [areaPrizes, setAreaPrizes] = useState<Prize[]>(() => generateAreaPrizes(getTicketLayout(layoutId)));
+  const ticketsById = useMemo(() => {
+    return gameData?.ticketsById;
+  }, [gameData]);
+  
+  const prizesArray = useMemo(() => {
+    return gameData?.prizes;
+  }, [gameData]);
+  
+  const [layout] = useState<TicketLayout>(() => getTicketLayout(layoutId, ticketsById));
+  const [areaPrizes, setAreaPrizes] = useState<Prize[]>(() => generateAreaPrizes(getTicketLayout(layoutId, ticketsById), prizesArray));
   const [scratcherId, setScratcherId] = useState(() => getSelectedScratcherId());
   const [scratcher, setScratcher] = useState<Scratcher>(() => {
     const id = getSelectedScratcherId();
-    return scratchersById[id] || getScratcher(id);
+    return scratchersById[id] || getScratcher(id, scratchersById);
   });
   const [scratchState, setScratchState] = useState<ScratchState>('preparing');
   const [pendingPrizes, setPendingPrizes] = useState<Prize[]>([]);
@@ -146,7 +154,7 @@ export default function ScratchPage({
 
   const handleScratcherChange = (newScratcherId: string) => {
     setScratcherId(newScratcherId);
-    setScratcher(scratchersById[newScratcherId] || getScratcher(newScratcherId));
+    setScratcher(scratchersById[newScratcherId] || getScratcher(newScratcherId, scratchersById));
     setSelectedScratcherId(newScratcherId);
     setShowScratcherMenu(false);
   };
@@ -313,7 +321,7 @@ export default function ScratchPage({
     // Consume another ticket from inventory
     if (useTicketForLayout(layoutId)) {
       // Reset ticket state for new scratch
-      setAreaPrizes(generateAreaPrizes(getTicketLayout(layoutId)));
+      setAreaPrizes(generateAreaPrizes(getTicketLayout(layoutId, ticketsById), prizesArray));
       setPendingPrizes([]);
       setNewAchievements([]);
       setSelectedBet(null);

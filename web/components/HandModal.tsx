@@ -8,6 +8,7 @@ import {
 } from '../../core/user-state';
 import { getTicketLayout } from '../../core/mechanics/ticketLayouts';
 import { getPrizeById } from '../../core/mechanics/prizes';
+import { useGameData } from '../contexts/GameDataContext';
 import './HandModal.css';
 
 interface HandModalProps {
@@ -26,6 +27,7 @@ export default function HandModal({
   onHandCashedOut,
   onContinueScratch,
 }: HandModalProps) {
+  const { data: gameData } = useGameData();
   const hand = getCurrentHand();
   const calculatedHand = getCalculatedHand();
   const totalValue = getHandTotalValue();
@@ -92,8 +94,8 @@ export default function HandModal({
 
         <div className="hand-tickets">
           {(calculatedHand?.tickets || hand.tickets).map((ticket, index) => {
-            const layout = getTicketLayout(ticket.layoutId);
-            const prize = getPrizeById(ticket.prizeId);
+            const layout = getTicketLayout(ticket.layoutId, gameData?.ticketsById);
+            const prize = getPrizeById(ticket.prizeId, gameData?.prizes);
             const hasEffect = !!ticket.handEffect;
             const calculation = ticket.calculation;
             

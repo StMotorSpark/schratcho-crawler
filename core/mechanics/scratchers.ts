@@ -132,14 +132,19 @@ export const SCRATCHER_TYPES: Record<string, Scratcher> = {
 
 /**
  * Get a scratcher by ID
+ * @param id - The scratcher ID to look up
+ * @param scratchersData - Optional record of scratchers to search. If not provided, uses hardcoded scratchers as fallback.
  */
-export function getScratcher(id: string): Scratcher {
-  return SCRATCHER_TYPES[id] || COIN_SCRATCHER;
+export function getScratcher(id: string, scratchersData?: Record<string, Scratcher>): Scratcher {
+  const searchScratchers = scratchersData || SCRATCHER_TYPES;
+  return searchScratchers[id] || COIN_SCRATCHER;
 }
 
 /**
  * Get all scratcher IDs
+ * @param scratchersData - Optional record of scratchers to return. If not provided, uses hardcoded scratchers as fallback.
  */
-export function getScratchers(): Scratcher[] {
-  return Object.values(SCRATCHER_TYPES);
+export function getScratchers(scratchersData?: Record<string, Scratcher>): Scratcher[] {
+  const searchScratchers = scratchersData || SCRATCHER_TYPES;
+  return Object.values(searchScratchers);
 }

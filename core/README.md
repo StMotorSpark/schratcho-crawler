@@ -27,18 +27,48 @@ The `/core` directory serves as a shared codebase that both web and mobile appli
 
 ## Mechanics (`/core/mechanics`)
 
-Contains platform-agnostic implementations of game mechanics:
+Contains platform-agnostic implementations of game mechanics. All helper functions support dynamic data from the backend API while maintaining backward compatibility with hardcoded fallback data.
+
+### Dynamic Data Support
+
+All helper functions in the mechanics package now accept optional data parameters, enabling three modes of operation:
+
+1. **Backend API Mode**: Pass data fetched from the backend API
+2. **Cached Mode**: Pass data loaded from localStorage cache
+3. **Fallback Mode**: Omit data parameter to use hardcoded defaults
+
+This design ensures the game works seamlessly whether the backend is available, offline with cache, or completely offline.
+
+**Example:**
+```typescript
+import { useGameData } from '@/contexts/GameDataContext';
+import { getPrizeById } from '@/core/mechanics/prizes';
+
+// In component
+const { data: gameData } = useGameData();
+
+// Works with backend data, cached data, or hardcoded fallback
+const prize = getPrizeById('grand-prize', gameData?.prizes);
+```
 
 ### `prizes.ts`
 - Prize type definitions
 - Prize randomization logic
 - Prize display formatting
+- All functions accept optional `prizesData` parameter
 
 **Example Usage:**
 ```typescript
-import { getRandomPrize, type Prize } from '@/core/mechanics/prizes';
+import { getRandomPrize, getPrizeById, type Prize } from '@/core/mechanics/prizes';
 
+// Without backend data (uses hardcoded prizes)
 const prize: Prize = getRandomPrize();
+
+// With backend data
+const apiPrizes = await fetchPrizes();
+const prize2 = getRandomPrize(apiPrizes);
+const specificPrize = getPrizeById('diamond', apiPrizes);
+
 console.log(`You won: ${prize.emoji} ${prize.name} - ${prize.value}`);
 ```
 
@@ -47,12 +77,21 @@ console.log(`You won: ${prize.emoji} ${prize.name} - ${prize.value}`);
 - Scratch area positioning
 - Win condition evaluation
 - Prize reveal mechanics
+- All functions accept optional `ticketsData` and `prizesData` parameters
 
 **Example Usage:**
 ```typescript
-import { getTicketLayout, TICKET_LAYOUTS } from '@/core/mechanics/ticketLayouts';
+import { getTicketLayout, generateAreaPrizes } from '@/core/mechanics/ticketLayouts';
 
+// Without backend data (uses TICKET_LAYOUTS constant)
 const layout = getTicketLayout('classic');
+
+// With backend data
+const apiTickets = await fetchTickets();
+const apiPrizes = await fetchPrizes();
+const layout2 = getTicketLayout('classic', apiTickets);
+const prizes = generateAreaPrizes(layout2, apiPrizes);
+
 console.log(`Layout: ${layout.name} with ${layout.scratchAreas.length} areas`);
 ```
 
@@ -60,13 +99,43 @@ console.log(`Layout: ${layout.name} with ${layout.scratchAreas.length} areas`);
 - Scratcher tool definitions
 - Visual properties (symbol, colors, gradients)
 - Behavior properties (scratch radius)
+- All functions accept optional `scratchersData` parameter
 
 **Example Usage:**
 ```typescript
-import { getScratcher, SCRATCHER_TYPES } from '@/core/mechanics/scratchers';
+import { getScratcher, getScratchers } from '@/core/mechanics/scratchers';
 
+// Without backend data (uses SCRATCHER_TYPES constant)
 const scratcher = getScratcher('coin');
+
+// With backend data
+const apiScratchers = await fetchScratchers();
+const scratcher2 = getScratcher('coin', apiScratchers);
+const allScratchers = getScratchers(apiScratchers);
+
 console.log(`Using: ${scratcher.symbol} ${scratcher.name}`);
+```
+
+### `stores.ts`
+- Store configuration and management
+- Store unlock requirements
+- Ticket availability per store
+- All functions accept optional `storesData` and `ticketsData` parameters
+
+**Example Usage:**
+```typescript
+import { getStoreById, getStoreTickets, getUnlockedStores } from '@/core/mechanics/stores';
+
+// Without backend data (uses DEFAULT_STORES constant)
+const store = getStoreById('starter-market');
+const tickets = getStoreTickets('starter-market');
+
+// With backend data
+const apiStores = await fetchStores();
+const apiTickets = await fetchTickets();
+const store2 = getStoreById('starter-market', apiStores);
+const tickets2 = getStoreTickets('starter-market', apiStores, apiTickets);
+const unlockedStores = getUnlockedStores(totalGold, apiStores);
 ```
 
 ### `sounds.ts`

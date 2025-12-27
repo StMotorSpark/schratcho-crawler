@@ -405,9 +405,12 @@ export const TICKET_LAYOUTS: Record<string, TicketLayout> = {
 
 /**
  * Get a ticket layout by ID
+ * @param id - The ticket ID to look up
+ * @param ticketsData - Optional record of tickets to search. If not provided, uses hardcoded tickets as fallback.
  */
-export function getTicketLayout(id: string): TicketLayout {
-  return TICKET_LAYOUTS[id] || CLASSIC_TICKET;
+export function getTicketLayout(id: string, ticketsData?: Record<string, TicketLayout>): TicketLayout {
+  const searchTickets = ticketsData || TICKET_LAYOUTS;
+  return searchTickets[id] || CLASSIC_TICKET;
 }
 
 /**
@@ -427,16 +430,17 @@ export function getTicketGoldCost(layout: TicketLayout): number {
  * Uses the layout's prize configuration if available, otherwise falls back to legacy behavior.
  * 
  * @param layout - The ticket layout to get a prize for
+ * @param prizesData - Optional array of prizes to search. If not provided, uses hardcoded prizes as fallback.
  * @returns A randomly selected prize based on the layout's configuration
  */
-export function getRandomPrizeForTicket(layout: TicketLayout): Prize {
+export function getRandomPrizeForTicket(layout: TicketLayout, prizesData?: Prize[]): Prize {
   if (layout.prizeConfigs && layout.prizeConfigs.length > 0) {
-    return getRandomPrizeForLayout(layout.prizeConfigs);
+    return getRandomPrizeForLayout(layout.prizeConfigs, prizesData);
   }
   
   // Fallback to legacy behavior for layouts without prize configs
   console.warn(`Layout "${layout.id}" does not have prize configurations. Using legacy global prize pool.`);
-  return getLegacyRandomPrize();
+  return getLegacyRandomPrize(prizesData);
 }
 
 /**
@@ -444,10 +448,11 @@ export function getRandomPrizeForTicket(layout: TicketLayout): Prize {
  * This is used for the new 'independent' reveal mechanic where each area has its own prize.
  * 
  * @param layout - The ticket layout to generate prizes for
+ * @param prizesData - Optional array of prizes to search. If not provided, uses hardcoded prizes as fallback.
  * @returns An array of prizes, one for each scratch area
  */
-export function generateAreaPrizes(layout: TicketLayout): Prize[] {
-  return layout.scratchAreas.map(() => getRandomPrizeForTicket(layout));
+export function generateAreaPrizes(layout: TicketLayout, prizesData?: Prize[]): Prize[] {
+  return layout.scratchAreas.map(() => getRandomPrizeForTicket(layout, prizesData));
 }
 
 /**

@@ -246,18 +246,22 @@ const prizes: Prize[] = [
 /**
  * Get a prize by its ID.
  * @param id - The prize ID to look up
+ * @param prizesData - Optional array of prizes to search. If not provided, uses hardcoded prizes as fallback.
  * @returns The prize if found, undefined otherwise
  */
-export function getPrizeById(id: string): Prize | undefined {
-  return prizes.find((p) => p.id === id);
+export function getPrizeById(id: string, prizesData?: Prize[]): Prize | undefined {
+  const searchPrizes = prizesData || prizes;
+  return searchPrizes.find((p) => p.id === id);
 }
 
 /**
  * Get a random prize from the global pool (legacy behavior).
+ * @param prizesData - Optional array of prizes to search. If not provided, uses hardcoded prizes as fallback.
  * @deprecated Use getRandomPrizeForLayout for layout-specific prize selection.
  */
-export function getRandomPrize(): Prize {
-  return prizes[Math.floor(Math.random() * prizes.length)];
+export function getRandomPrize(prizesData?: Prize[]): Prize {
+  const searchPrizes = prizesData || prizes;
+  return searchPrizes[Math.floor(Math.random() * searchPrizes.length)];
 }
 
 /**
@@ -265,6 +269,7 @@ export function getRandomPrize(): Prize {
  * Uses weighted random selection based on prize weights.
  * 
  * @param prizeConfigs - Array of prize configurations with weights
+ * @param prizesData - Optional array of prizes to search. If not provided, uses hardcoded prizes as fallback.
  * @returns A randomly selected prize based on weights
  * @throws Error if no valid prizes are configured or all prizes have zero weight
  * 
@@ -283,7 +288,7 @@ export function getRandomPrize(): Prize {
  * const prize = getRandomPrizeForLayout(prizes);
  * ```
  */
-export function getRandomPrizeForLayout(prizeConfigs: PrizeConfig[]): Prize {
+export function getRandomPrizeForLayout(prizeConfigs: PrizeConfig[], prizesData?: Prize[]): Prize {
   // Validate prize configurations
   if (!prizeConfigs || prizeConfigs.length === 0) {
     throw new Error('No prize configurations provided for layout. Each ticket layout must have explicit prize associations.');
@@ -293,7 +298,7 @@ export function getRandomPrizeForLayout(prizeConfigs: PrizeConfig[]): Prize {
   const validConfigs: Array<{ prize: Prize; weight: number }> = [];
   
   for (const config of prizeConfigs) {
-    const prize = getPrizeById(config.prizeId);
+    const prize = getPrizeById(config.prizeId, prizesData);
     
     if (!prize) {
       console.warn(`Prize with ID "${config.prizeId}" not found. Skipping this prize configuration.`);
@@ -334,9 +339,10 @@ export function getRandomPrizeForLayout(prizeConfigs: PrizeConfig[]): Prize {
  * Returns an array of warning/error messages.
  * 
  * @param prizeConfigs - Array of prize configurations to validate
+ * @param prizesData - Optional array of prizes to search. If not provided, uses hardcoded prizes as fallback.
  * @returns Array of validation messages (empty if all valid)
  */
-export function validatePrizeConfigs(prizeConfigs: PrizeConfig[]): string[] {
+export function validatePrizeConfigs(prizeConfigs: PrizeConfig[], prizesData?: Prize[]): string[] {
   const messages: string[] = [];
 
   if (!prizeConfigs || prizeConfigs.length === 0) {
@@ -347,7 +353,7 @@ export function validatePrizeConfigs(prizeConfigs: PrizeConfig[]): string[] {
   let hasValidPrize = false;
 
   for (const config of prizeConfigs) {
-    const prize = getPrizeById(config.prizeId);
+    const prize = getPrizeById(config.prizeId, prizesData);
     
     if (!prize) {
       messages.push(`ERROR: Prize with ID "${config.prizeId}" does not exist.`);
@@ -370,9 +376,10 @@ export function validatePrizeConfigs(prizeConfigs: PrizeConfig[]): string[] {
 
 /**
  * Get all available prizes.
+ * @param prizesData - Optional array of prizes to return. If not provided, uses hardcoded prizes as fallback.
  */
-export function getAllPrizes(): Prize[] {
-  return [...prizes];
+export function getAllPrizes(prizesData?: Prize[]): Prize[] {
+  return [...(prizesData || prizes)];
 }
 
 /**
